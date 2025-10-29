@@ -1,8 +1,8 @@
 # ForenChain: Blockchain-Based Chain of Custody Management System for Digital Forensics
-A secure, tamper-proof, and transparent web-based system for managing digital evidence, designed to comply with **Malaysian forensic SOPs** and **legal standards** (Evidence Act 1950).
+- A secure, tamper-proof, and transparent web-based system for managing digital evidence, designed to comply with **Malaysian forensic SOPs** and **legal standards** (Evidence Act 1950).
 ---
 ## 💡 Project Vision
-Digital evidence must have a strong **Chain of Custody (CoC)** in order to be admissible in court. Existing approaches frequently use spreadsheets or paper forms, which are vulnerable to data loss, tampering, and human error.
+- Digital evidence must have a strong **Chain of Custody (CoC)** in order to be admissible in court. Existing approaches frequently use spreadsheets or paper forms, which are vulnerable to data loss, tampering, and human error.
 
 The vision of ForenChain is to minimize these vulnerabilities by using **SHA-256 hash-chaining** and **Blockchain technology** to develop an unalterable, auditable, and verifiable record of evidence handling. This will ensure that the forensic lifecycle complies to the principles of **Confidentiality, Integrity, and Availability (CIA)**.
 ---
