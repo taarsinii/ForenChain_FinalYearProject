@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forensic Chain System - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f3f6fa;
+        }
+
+        .login-container {
+            margin-top: 7%;
+        }
+
+        .login-card {
+            border-radius: 15px;
+            padding: 40px;
+            background: white;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .sys-title {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #0d2a53;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container login-container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="login-card">
+                    <h3 class="text-center sys-title">Forensic Chain System</h3>
+                    <p class="text-center text-muted">Secure Login</p>
+
+                    <form action="/login" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
