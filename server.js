@@ -4,29 +4,31 @@ const path = require("path");
 
 const app = express();
 
-// Parse form data
+// Body parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Sessions
-app.use(
-    session({
-        secret: "yourSecretKey123",
-        resave: false,
-        saveUninitialized: false
-    })
-);
+app.use(session({
+    secret: "yourSecretKey123",
+    resave: false,
+    saveUninitialized: false
+}));
 
-// Static public files
+// Serve public files
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-// VIEW ENGINE (for now serve HTML files directly)
-app.use(express.static(path.join(__dirname, "views")));
-
-// ROUTES
+// Routes
 const authRoutes = require("./routes/authRoutes");
 app.use("/", authRoutes);
 
+// Default route
+app.get("/", (req, res) => res.redirect("/login"));
+
+app.get("/admin/dashboard", (req, res) => {
+    res.sendFile(path.join(__dirname, "views/administrator/dashboard.html"));
+});
+
 // Start server
 const PORT = 3000;
-app.listen(PORT, () => console.log("Server running on port " + PORT));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,58 +1,61 @@
 const db = require("../config/db");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
+const path = require("path");
 
+// Show login page
 exports.showLogin = (req, res) => {
-    res.sendFile("login.html", { root: "views" });
+    res.sendFile(path.join(__dirname, "../views/login.html"));
 };
 
+// Handle login
 exports.login = async (req, res) => {
     const { username, password } = req.body;
 
-    const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);
+    try {
+        const [rows] = await db.execute(
+            "SELECT * FROM users WHERE username = ?",
+            [username]
+        );
 
-    if (rows.length === 0) {
-        return res.send("User not found");
-    }
+        if (rows.length === 0) return res.send("User not found");
 
-    const user = rows[0];
+        const user = rows[0];
 
-    // Check password
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) {
-        return res.send("Incorrect password");
-    }
+        const match = await bcrypt.compare(password, user.password_hash);
+        if (!match) return res.send("Incorrect password");
 
-    // Store session
-    req.session.user = {
-        id: user.user_id,
-        role: user.role,
-        name: user.full_name
-    };
+        // Optional: store session info
+        req.session.user = {
+            id: user.user_id,
+            username: user.username,
+            role: user.role
+        };
 
-    // Redirect by role
-    switch (user.role) {
-        case "admin":
-            res.redirect("/admin/dashboard");
-            break;
-        case "investigator":
-            res.redirect("/investigator/dashboard");
-            break;
-        case "supervisor":
-            res.redirect("/supervisor/dashboard");
-            break;
-        case "analyst":
-            res.redirect("/analyst/dashboard");
-            break;
-        case "prosecutor":
-            res.redirect("/prosecutor/dashboard");
-            break;
-        default:
-            res.send("Role not recognized");
+        // Role-based redirect
+        switch (user.role) {
+            case "administrator":
+                return res.redirect("/admin/dashboard");
+            case "investigator":
+                return res.redirect("/investigator/dashboard");
+            case "supervisor":
+                return res.redirect("/supervisor/dashboard");
+            case "analyst":
+                return res.redirect("/analyst/dashboard");
+            case "prosecutor":
+                return res.redirect("/prosecutor/dashboard");
+            default:
+                return res.send("Unknown role");
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Login error");
     }
 };
 
+// Logout
 exports.logout = (req, res) => {
-    req.session.destroy(() => {
+    req.session.destroy(err => {
+        if (err) return res.send("Error logging out");
         res.redirect("/login");
     });
 };
