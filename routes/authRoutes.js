@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const authController = require("../controllers/authController");
 
-const { registerUser, loginUser } = require("../controllers/authController");
+// Show login page
+router.get("/login", authController.showLogin);
 
-// Admin creates users
-router.post("/register", registerUser);
+// Handle login
+router.post("/login", authController.login);
 
-// Login (all roles)
-router.post("/login", loginUser);
+// Logout
+router.get("/logout", authController.logout);
 
 module.exports = router;

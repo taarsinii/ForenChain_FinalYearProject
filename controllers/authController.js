@@ -1,44 +1,58 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const db = require("../config/db");
+const bcrypt = require("bcryptjs");
 
-// Admin registers users
-exports.registerUser = (req, res) => {
-    const { username, password, role } = req.body;
-
-    const hashed = bcrypt.hashSync(password, 10);
-
-    const sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-    db.query(sql, [username, hashed, role], (err) => {
-        if (err) return res.status(500).json({ message: "Error creating user" });
-
-        res.json({ message: "User created successfully" });
-    });
+exports.showLogin = (req, res) => {
+    res.sendFile("login.html", { root: "views" });
 };
 
-// Login
-exports.loginUser = (req, res) => {
+exports.login = async (req, res) => {
     const { username, password } = req.body;
 
-    db.query("SELECT * FROM users WHERE username = ?", [username], (err, data) => {
-        if (err || data.length === 0)
-            return res.status(400).json({ message: "Invalid username" });
+    const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);
 
-        const user = data[0];
+    if (rows.length === 0) {
+        return res.send("User not found");
+    }
 
-        const match = bcrypt.compareSync(password, user.password);
-        if (!match) return res.status(400).json({ message: "Wrong password" });
+    const user = rows[0];
 
-        const token = jwt.sign(
-            { id: user.user_id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "24h" }
-        );
+    // Check password
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+        return res.send("Incorrect password");
+    }
 
-        res.json({
-            message: "Login success",
-            token,
-            role: user.role
-        });
+    // Store session
+    req.session.user = {
+        id: user.user_id,
+        role: user.role,
+        name: user.full_name
+    };
+
+    // Redirect by role
+    switch (user.role) {
+        case "admin":
+            res.redirect("/admin/dashboard");
+            break;
+        case "investigator":
+            res.redirect("/investigator/dashboard");
+            break;
+        case "supervisor":
+            res.redirect("/supervisor/dashboard");
+            break;
+        case "analyst":
+            res.redirect("/analyst/dashboard");
+            break;
+        case "prosecutor":
+            res.redirect("/prosecutor/dashboard");
+            break;
+        default:
+            res.send("Role not recognized");
+    }
+};
+
+exports.logout = (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/login");
     });
 };

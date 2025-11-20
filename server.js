@@ -1,21 +1,32 @@
-require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
-
-const authRoutes = require("./routes/authRoutes");
+const session = require("express-session");
+const path = require("path");
 
 const app = express();
-app.use(cors());
+
+// Parse form data
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Basic route
-app.get("/", (req, res) => {
-    res.send("Chain of Custody Backend Running...");
-});
+// Sessions
+app.use(
+    session({
+        secret: "yourSecretKey123",
+        resave: false,
+        saveUninitialized: false
+    })
+);
 
-// Load all routes here
-app.use("/api/auth", authRoutes);
+// Static public files
+app.use("/public", express.static(path.join(__dirname, "public")));
 
-app.listen(5000, () => {
-    console.log("Server running on port 5000");
-});
+// VIEW ENGINE (for now serve HTML files directly)
+app.use(express.static(path.join(__dirname, "views")));
+
+// ROUTES
+const authRoutes = require("./routes/authRoutes");
+app.use("/", authRoutes);
+
+// Start server
+const PORT = 3000;
+app.listen(PORT, () => console.log("Server running on port " + PORT));
