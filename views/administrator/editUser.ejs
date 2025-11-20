@@ -1,0 +1,16 @@
+<h2>Edit User</h2>
+<form action="/admin/users/edit/<%= user.user_id %>" method="POST">
+    <input type="text" name="username" value="<%= user.username %>" required>
+    <input type="text" name="full_name" value="<%= user.full_name %>" required>
+    <input type="password" name="password" placeholder="New Password (leave blank to keep current)">
+    <select name="role">
+        <option value="administrator" <%=user.role==="administrator" ? "selected" : "" %>>Admin</option>
+        <option value="investigator" <%=user.role==="investigator" ? "selected" : "" %>>Investigator</option>
+        <option value="supervisor" <%=user.role==="supervisor" ? "selected" : "" %>>Supervisor</option>
+        <option value="analyst" <%=user.role==="analyst" ? "selected" : "" %>>Analyst</option>
+        <option value="prosecutor" <%=user.role==="prosecutor" ? "selected" : "" %>>Prosecutor</option>
+    </select>
+    <button type="submit">Update User</button>
+</form>
+<br>
+<a href="/admin/users">Back to Manage Users</a>

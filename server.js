@@ -15,6 +15,10 @@ app.use(session({
     saveUninitialized: false
 }));
 
+// Set EJS as template engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
 // Serve public files
 app.use("/public", express.static(path.join(__dirname, "public")));
 
@@ -22,12 +26,11 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 const authRoutes = require("./routes/authRoutes");
 app.use("/", authRoutes);
 
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/admin", adminRoutes);
+
 // Default route
 app.get("/", (req, res) => res.redirect("/login"));
-
-app.get("/admin/dashboard", (req, res) => {
-    res.sendFile(path.join(__dirname, "views/administrator/dashboard.html"));
-});
 
 // Start server
 const PORT = 3000;
