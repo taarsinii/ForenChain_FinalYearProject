@@ -19,4 +19,6 @@ router.get("/users/edit/:id", adminController.showEditForm);
 router.post("/users/edit/:id", adminController.editUser);
 router.post("/users/delete/:id", adminController.deleteUser);
 
+router.get("/audit-logs", adminController.viewAuditLogs);
+
 module.exports = router;

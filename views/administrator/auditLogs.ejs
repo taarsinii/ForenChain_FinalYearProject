@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Audit Logs</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+
+<body>
+
+    <h1>Audit Logs</h1>
+    <a href="/admin/dashboard">⬅ Back to Dashboard</a>
+
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Log ID</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Timestamp</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (logs.length===0) { %>
+                <tr>
+                    <td colspan="5">No logs available</td>
+                </tr>
+                <% } else { %>
+                    <% logs.forEach(log=> { %>
+                        <tr>
+                            <td>
+                                <%= log.log_id %>
+                            </td>
+                            <td>
+                                <%= log.username || 'Unknown User' %>
+                            </td>
+                            <td>
+                                <%= log.action %>
+                            </td>
+                            <td>
+                                <%= log.timestamp.toLocaleString() %>
+                            </td>
+                            <td>
+                                <%= log.user_ip_address %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% } %>
+        </tbody>
+    </table>
+
+</body>
+
+</html>
