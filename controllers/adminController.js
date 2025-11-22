@@ -1,23 +1,30 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
-const logger = require("../utils/logger");  // <-- ADD THIS
 
 // Admin dashboard
-exports.dashboard = (req, res) => {
-    // Log viewing dashboard
-    logger(req, "Viewed Admin Dashboard");
-
+exports.dashboard = async (req, res) => {
+    try {
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [req.session.user.id, "Viewed Admin Dashboard", req.ip]
+        );
+    } catch (err) {
+        console.error("Audit log failed:", err);
+    }
     res.render("administrator/dashboard");
 };
+
+// ================= Manage Users =================
 
 // List all users
 exports.listUsers = async (req, res) => {
     try {
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [req.session.user.id, "Viewed Manage Users page", req.ip]
+        );
+
         const [users] = await db.execute("SELECT user_id, username, role, full_name FROM users");
-
-        // Log viewing user list
-        logger(req, "Viewed Manage Users page");
-
         res.render("administrator/manageUsers", { users });
     } catch (err) {
         console.error(err);
@@ -29,7 +36,6 @@ exports.listUsers = async (req, res) => {
 exports.addUser = async (req, res) => {
     try {
         const { username, password, role, full_name } = req.body;
-
         const hashed = await bcrypt.hash(password, 10);
 
         await db.execute(
@@ -37,8 +43,11 @@ exports.addUser = async (req, res) => {
             [username, hashed, role, full_name]
         );
 
-        // Log creation
-        logger(req, `Created new user: ${username}`);
+        // Log action
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [req.session.user.id, `Created new user: ${username}`, req.ip]
+        );
 
         res.redirect("/admin/users");
     } catch (err) {
@@ -53,10 +62,6 @@ exports.showEditForm = async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT * FROM users WHERE user_id=?", [id]);
         if (rows.length === 0) return res.send("User not found");
-
-        // Log viewing edit form
-        logger(req, `Viewed edit form for user ID: ${id}`);
-
         res.render("administrator/editUser", { user: rows[0] });
     } catch (err) {
         console.error(err);
@@ -83,8 +88,11 @@ exports.editUser = async (req, res) => {
             );
         }
 
-        // Log update
-        logger(req, `Updated user ID: ${id} (${username})`);
+        // Log action
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [req.session.user.id, `Updated user ID: ${id} (${username})`, req.ip]
+        );
 
         res.redirect("/admin/users");
     } catch (err) {
@@ -94,14 +102,24 @@ exports.editUser = async (req, res) => {
 };
 
 // Delete user
+// Delete user
 exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
-        await db.execute("DELETE FROM users WHERE user_id=?", [id]);
+        // Get the username first
+        const [rows] = await db.execute("SELECT username FROM users WHERE user_id = ?", [id]);
+        if (rows.length === 0) return res.send("User not found");
+        const deletedUsername = rows[0].username;
 
-        // Log deletion
-        logger(req, `Deleted user ID: ${id}`);
+        // Delete user
+        await db.execute("DELETE FROM users WHERE user_id = ?", [id]);
+
+        // Log action with username
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [req.session.user.id, `Deleted user ID: ${id} (${deletedUsername})`, req.ip]
+        );
 
         res.redirect("/admin/users");
     } catch (err) {
@@ -110,21 +128,26 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-// View Audit Logs
+// ================= Audit Logs =================
+
+// View all audit logs
 exports.viewAuditLogs = async (req, res) => {
     try {
-        const [logs] = await db.execute(
-            `SELECT audit_logs.*, users.username 
-             FROM audit_logs 
-             LEFT JOIN users ON audit_logs.user_id = users.user_id
-             ORDER BY audit_logs.timestamp DESC`
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [req.session.user.id, "Viewed Audit Logs", req.ip]
         );
 
-        logger(req, "Viewed Audit Logs");
+        const [logs] = await db.execute(`
+            SELECT a.*, u.username 
+            FROM audit_logs a
+            LEFT JOIN users u ON a.user_id = u.user_id
+            ORDER BY a.log_id DESC
+        `);
 
         res.render("administrator/auditLogs", { logs });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error loading audit logs");
+        res.status(500).send("Error fetching audit logs");
     }
 };

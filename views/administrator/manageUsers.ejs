@@ -1,14 +1,7 @@
 <h2>Manage Users</h2>
 
 <form action="/admin/audit-logs" method="GET">
-    <button style="
-        padding:8px 15px;
-        background:#007bff;
-        color:white;
-        border:none;
-        border-radius:5px;
-        cursor:pointer;
-    ">
+    <button style="padding:8px 15px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;">
         View Audit Logs
     </button>
 </form>
@@ -31,7 +24,7 @@
 
 <hr>
 
-<table>
+<table border="1" cellpadding="10">
     <tr>
         <th>ID</th>
         <th>Name</th>
@@ -55,7 +48,7 @@
                 <%= user.username %>
             </td>
             <td>
-                <form action="/admin/users/edit/<%= user.user_id %>" method="POST">
+                <form action="/admin/users/edit/<%= user.user_id %>" method="POST" style="display:inline-block;">
                     <input type="text" name="username" value="<%= user.username %>">
                     <input type="text" name="full_name" value="<%= user.full_name %>">
                     <select name="role">
@@ -69,7 +62,7 @@
                     <button type="submit">Save</button>
                 </form>
 
-                <form action="/admin/users/delete/<%= user.user_id %>" method="POST">
+                <form action="/admin/users/delete/<%= user.user_id %>" method="POST" style="display:inline-block;">
                     <button type="submit" style="color:red">Delete</button>
                 </form>
             </td>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Backup Logs</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+
+<body>
+    <h1>Database Backup Logs</h1>
+    <a href="/admin/dashboard">⬅ Back to Dashboard</a>
+
+    <a href="/admin/backup"
+        style="display:inline-block; margin:10px 0; padding:8px 15px; background:#28a745; color:white; border-radius:5px; text-decoration:none;">
+        Create New Backup
+    </a>
+
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Backup ID</th>
+                <th>File Name</th>
+                <th>Created At</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (backups.length===0) { %>
+                <tr>
+                    <td colspan="4">No backups available</td>
+                </tr>
+                <% } else { %>
+                    <% backups.forEach(backup=> { %>
+                        <tr>
+                            <td>
+                                <%= backup.backup_id %>
+                            </td>
+                            <td>
+                                <%= backup.backup_file_path %>
+                            </td>
+                            <td>
+                                <%= backup.created_at.toLocaleString() %>
+                            </td>
+                            <td>
+                                <%= backup.username %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% } %>
+        </tbody>
+    </table>
+</body>
+
+</html>
