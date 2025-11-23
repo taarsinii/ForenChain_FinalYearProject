@@ -18,12 +18,16 @@ router.get("/dashboard", isLoggedIn, roleMiddleware("investigator"), (req, res) 
     res.render("investigator/dashboard");
 });
 
-// Investigator routes
-router.get("/add", isLoggedIn, roleMiddleware("investigator"), evidenceController.showAddForm);
-router.post("/add", isLoggedIn, roleMiddleware("investigator"), upload.single("photo"), evidenceController.addEvidence);
-router.get("/my-evidence", isLoggedIn, roleMiddleware("investigator"), evidenceController.listMyEvidence);
-router.get("/transfer/:id", isLoggedIn, roleMiddleware("investigator"), evidenceController.showTransferForm);
-router.post("/transfer/:id", isLoggedIn, roleMiddleware("investigator"), evidenceController.transferEvidence);
+// ============================
+// Evidence Routes
+// ============================
+router.get("/add", evidenceController.showAddForm);
+router.post("/add", upload.single("photo"), evidenceController.addEvidence);
+
+router.get("/my-evidence", evidenceController.listMyEvidence);
+
+router.get("/transfer/:id", evidenceController.showTransferForm);
+router.post("/transfer/:id", evidenceController.transferEvidence);
 
 module.exports = router;
 
