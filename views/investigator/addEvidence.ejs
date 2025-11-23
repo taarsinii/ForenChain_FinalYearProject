@@ -1,0 +1,10 @@
+<h2>Add New Evidence</h2>
+
+<form action="/evidence/add" method="POST" enctype="multipart/form-data">
+    <label for="description">Evidence Description</label>
+    <textarea id="description" name="description" required></textarea>
+
+    <label for="photo">Upload Photo</label>
+    <input type="file" id="photo" name="photo" accept="image/*">
+    <button type="submit">Submit Evidence</button>
+</form>

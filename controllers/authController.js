@@ -24,11 +24,12 @@ exports.login = async (req, res) => {
         const match = await bcrypt.compare(password, user.password_hash);
         if (!match) return res.send("Incorrect password");
 
-        // Optional: store session info
+
+        // SAVE USER SESSION
         req.session.user = {
-            id: user.user_id,
-            username: user.username,
-            role: user.role
+            user_id: user.user_id,
+            role: user.role,
+            username: user.username
         };
 
         // Role-based redirect

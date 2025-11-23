@@ -30,8 +30,14 @@ const adminRoutes = require("./routes/adminRoutes");
 app.use("/", authRoutes);        // /login, /logout, POST login
 app.use("/admin", adminRoutes);  // admin dashboard, manage users, audit logs
 
+const evidenceRoutes = require("./routes/evidenceRoutes");
+app.use("/investigator", require("./routes/evidenceRoutes"));
+// Make sure this is BEFORE your 404 handler
+app.use("/evidence", evidenceRoutes);
+
 // Default redirect
 app.get("/", (req, res) => res.redirect("/login"));
+
 
 // Start server
 const PORT = 3000;
