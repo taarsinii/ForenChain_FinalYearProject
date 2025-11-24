@@ -3,6 +3,8 @@ const session = require("express-session");
 const path = require("path");
 const app = express();
 
+app.use(express.static('public'));
+
 // Set EJS as template engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));

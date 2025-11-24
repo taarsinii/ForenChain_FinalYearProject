@@ -3,20 +3,209 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login – Chain of Custody System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Access - ForenChain</title>
+    <style>
+        /* General Reset and Body Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Using a clean system font */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/public/images/login_background.jpg');
+            /* Dark background color */
+            color: #ffffff;
+            /* White text color */
+            display: flex;
+            justify-content: center;
+            /* Center horizontally */
+            align-items: center;
+            /* Center vertically */
+            min-height: 100vh;
+            /* Full viewport height */
+
+        }
+
+        /* Container for the main access card */
+        .system-access-card {
+            background-color: #1f283d;
+            /* Darker card background */
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            /* Limit the width of the card */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(66, 135, 245, 0.3);
+            /* Shadow and subtle blue border glow */
+            text-align: center;
+        }
+
+        /* Logo/Header Section */
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .logo-text {
+            color: #4287f5;
+            /* Blue color for the logo/brand */
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        /* You'd typically use an actual icon/SVG for the $ symbol, but for text: */
+        .logo-text::before {
+            content: '§';
+            /* Using a placeholder symbol, a custom icon is better */
+            margin-right: 8px;
+            font-size: 28px;
+        }
+
+        /* System Title */
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+        }
+
+        /* Form Styling */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* Spacing between input groups */
+        }
+
+        /* Input Field Styling */
+        .input-group {
+            text-align: left;
+            /* Align labels/placeholders left */
+        }
+
+        .label {
+            display: block;
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 5px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #1a1a2e;
+            /* Input background, slightly darker than card */
+            border: 1px solid #4a4e69;
+            /* Subtle border */
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            box-sizing: border-box;
+            /* Include padding in the element's total width and height */
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Input focus effect (the blue glow) */
+        .text-input:focus {
+            outline: none;
+            border-color: #4287f5;
+            /* Blue border on focus */
+            box-shadow: 0 0 0 1px #4287f5, 0 0 8px rgba(66, 135, 245, 0.5);
+            /* Blue glow effect */
+        }
+
+        /* Custom Placeholder Text Color (optional, but helps match the image) */
+        .text-input::placeholder {
+            color: #8c8c8c;
+            opacity: 1;
+            /* For Firefox */
+        }
+
+        /* Log In Button */
+        .login-button {
+            background-color: #4287f5;
+            /* Blue background */
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .login-button:hover {
+            background-color: #5a9bff;
+            /* Slightly lighter blue on hover */
+        }
+
+        /* Need Assistance Link */
+        .assistance-link {
+            display: block;
+            color: #4287f5;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .assistance-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer/Audit Text */
+        .footer-text {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #8c8c8c;
+            width: 90%;
+            max-width: 450px;
+            line-height: 1.4;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>Login</h2>
-    <form action="/login" method="POST">
-        <label>Username:</label><br>
-        <input type="text" name="username" required><br><br>
+    <div class="system-access-card">
+        <header class="header">
+            <div class="logo-text">ForenChain</div>
+            <h1 class="title">System Access</h1>
+            <p class="subtitle">Zero-Trust Authentication Required</p>
+        </header>
 
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
+        <form action="/login" method="POST" class="login-form">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Enter Your Registered Username" required
+                    class="text-input" aria-label="Username">
+            </div>
 
-        <button type="submit">Login</button>
-    </form>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Enter Your Secure Password" required
+                    class="text-input" aria-label="Password">
+            </div>
+
+            <button type="submit" class="login-button">Log In</button>
+        </form>
+
+        <a href="#" class="assistance-link">Need Assistance?</a>
+    </div>
+
+    <p class="footer-text">
+        This system is protected by *bcrypt hashing and JWT token authentication. All activity to recorded for audit
+        purposes.
+    </p>
 </body>
 
 </html>
