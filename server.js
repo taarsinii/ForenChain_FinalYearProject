@@ -33,15 +33,16 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 // ROUTES
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-
 app.use("/", authRoutes);        // /login, /logout, POST login
 app.use("/admin", adminRoutes);  // admin dashboard, manage users, audit logs
 
 const evidenceRoutes = require("./routes/evidenceRoutes");
 app.use("/investigator", require("./routes/evidenceRoutes"))
-
-// Make sure this is BEFORE your 404 handler
+// Make sure this is BEFORE 404 handler
 app.use("/evidence", evidenceRoutes);
+
+const supervisorRoutes = require("./routes/supervisorRoutes");
+app.use("/supervisor", supervisorRoutes);
 
 // Default redirect
 app.get("/", (req, res) => res.redirect("/login"));

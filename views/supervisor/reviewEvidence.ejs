@@ -1,0 +1,37 @@
+<h2>Pending Evidence</h2>
+
+<table border="1">
+    <tr>
+        <th>Case ID</th>
+        <th>Description</th>
+        <th>Collected By</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+
+    <% evidenceList.forEach(e=> { %>
+        <tr>
+            <td>
+                <%= e.case_id %>
+            </td>
+            <td>
+                <%= e.description %>
+            </td>
+            <td>
+                <%= e.investigator %>
+            </td>
+            <td>
+                <%= e.current_status %>
+            </td>
+            <td>
+                <form action="/supervisor/approve/<%= e.evidence_id %>" method="POST" style="display:inline;">
+                    <button>Approve</button>
+                </form>
+
+                <form action="/supervisor/reject/<%= e.evidence_id %>" method="POST" style="display:inline;">
+                    <button style="color:red;">Reject</button>
+                </form>
+            </td>
+        </tr>
+        <% }) %>
+</table>
