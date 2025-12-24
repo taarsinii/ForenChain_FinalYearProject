@@ -24,11 +24,15 @@
                 <%= e.current_status %>
             </td>
             <td>
-                <form action="/supervisor/approve/<%= e.evidence_id %>" method="POST" style="display:inline;">
+                <!-- Approve -->
+                <form action="/supervisor/approve/<%= e.evidence_id %>" method="POST">
+                    <textarea name="notes" placeholder="Optional supervisor notes"></textarea>
                     <button>Approve</button>
                 </form>
 
-                <form action="/supervisor/reject/<%= e.evidence_id %>" method="POST" style="display:inline;">
+                <!-- Reject with reason -->
+                <form action="/supervisor/reject/<%= e.evidence_id %>" method="POST">
+                    <textarea name="reason" placeholder="Enter rejection reason" required></textarea>
                     <button style="color:red;">Reject</button>
                 </form>
             </td>

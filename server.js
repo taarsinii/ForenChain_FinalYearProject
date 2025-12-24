@@ -44,6 +44,7 @@ app.use("/evidence", evidenceRoutes);
 const supervisorRoutes = require("./routes/supervisorRoutes");
 app.use("/supervisor", supervisorRoutes);
 
+
 // Default redirect
 app.get("/", (req, res) => res.redirect("/login"));
 
