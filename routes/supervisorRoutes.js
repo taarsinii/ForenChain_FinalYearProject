@@ -10,6 +10,7 @@ router.use(roleMiddleware("supervisor"));
 
 router.get("/dashboard", supervisorController.dashboard);
 router.get("/pending", supervisorController.listPendingEvidence);
+router.get("/review/:id", supervisorController.reviewEvidence);
 router.post("/approve/:id", supervisorController.approveEvidence);
 router.post("/reject/:id", supervisorController.rejectEvidence);
 

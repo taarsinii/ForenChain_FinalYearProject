@@ -1,41 +1,29 @@
-<h2>Pending Evidence</h2>
+<h2>Review Evidence</h2>
 
-<table border="1">
-    <tr>
-        <th>Case ID</th>
-        <th>Description</th>
-        <th>Collected By</th>
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
+<p><b>Case ID:</b>
+    <%= evidence.case_id %>
+</p>
+<p><b>Description:</b>
+    <%= evidence.description %>
+</p>
+<p><b>Collected By:</b>
+    <%= evidence.investigator %>
+</p>
 
-    <% evidenceList.forEach(e=> { %>
-        <tr>
-            <td>
-                <%= e.case_id %>
-            </td>
-            <td>
-                <%= e.description %>
-            </td>
-            <td>
-                <%= e.investigator %>
-            </td>
-            <td>
-                <%= e.current_status %>
-            </td>
-            <td>
-                <!-- Approve -->
-                <form action="/supervisor/approve/<%= e.evidence_id %>" method="POST">
-                    <textarea name="notes" placeholder="Optional supervisor notes"></textarea>
-                    <button>Approve</button>
-                </form>
+<hr>
 
-                <!-- Reject with reason -->
-                <form action="/supervisor/reject/<%= e.evidence_id %>" method="POST">
-                    <textarea name="reason" placeholder="Enter rejection reason" required></textarea>
-                    <button style="color:red;">Reject</button>
-                </form>
-            </td>
-        </tr>
-        <% }) %>
-</table>
+<!-- APPROVE -->
+<form action="/supervisor/approve/<%= evidence.evidence_id %>" method="POST">
+    <label for="supervisor_notes">Supervisor Notes (Optional):</label><br>
+    <textarea name="supervisor_notes" id="supervisor_notes" rows="4" cols="50"></textarea><br><br>
+    <button>Approve Evidence</button>
+</form>
+
+<br>
+
+<!-- REJECT WITH REASON -->
+<form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
+    <label><b>Rejection Reason:</b></label><br>
+    <textarea name="reason" rows="4" cols="50" required></textarea><br><br>
+    <button type="submit" style="color:red;">Reject Evidence</button>
+</form>

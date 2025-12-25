@@ -1,0 +1,31 @@
+<h2>Pending Evidence</h2>
+
+<table border="1">
+    <tr>
+        <th>Case ID</th>
+        <th>Description</th>
+        <th>Collected By</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    <% evidenceList.forEach(e=> { %>
+        <tr>
+            <td>
+                <%= e.case_id %>
+            </td>
+            <td>
+                <%= e.description %>
+            </td>
+            <td>
+                <%= e.investigator %>
+            </td>
+            <td>
+                <%= e.current_status %>
+            </td>
+            <td>
+                <a href="/supervisor/review/<%= e.evidence_id %>">Review</a>
+            </td>
+        </tr>
+        <% }) %>
+</table>
