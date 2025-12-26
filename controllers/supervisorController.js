@@ -72,8 +72,8 @@ exports.approveEvidence = async (req, res) => {
 
         // Audit log
         await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-            [supervisorId, `Approved evidence ID: ${id} with notes`, req.ip]
+            "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
+            [supervisorId, `Approved evidence ID: ${id}`, req.ip, supervisor_notes || '']
         );
 
         res.redirect("/supervisor/pending");
@@ -103,9 +103,10 @@ exports.rejectEvidence = async (req, res) => {
 
         // Audit log
         await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-            [supervisorId, `Rejected evidence ID: ${id} with reason`, req.ip]
+            "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
+            [supervisorId, `Rejected evidence ID: ${id}`, req.ip, supervisor_reason]
         );
+
 
         res.redirect("/supervisor/pending");
     } catch (err) {

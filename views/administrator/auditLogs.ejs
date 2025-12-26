@@ -7,7 +7,6 @@
 </head>
 
 <body>
-
     <h1>Audit Logs</h1>
     <a href="/admin/dashboard">⬅ Back to Dashboard</a>
 
@@ -17,6 +16,7 @@
                 <th>Log ID</th>
                 <th>User</th>
                 <th>Action</th>
+                <th>Details / Notes</th>
                 <th>Timestamp</th>
                 <th>IP Address</th>
             </tr>
@@ -24,7 +24,7 @@
         <tbody>
             <% if (logs.length===0) { %>
                 <tr>
-                    <td colspan="5">No logs available</td>
+                    <td colspan="6">No logs available</td>
                 </tr>
                 <% } else { %>
                     <% logs.forEach(log=> { %>
@@ -39,6 +39,9 @@
                                 <%= log.action %>
                             </td>
                             <td>
+                                <%= log.details || '-' %>
+                            </td>
+                            <td>
                                 <%= log.timestamp.toLocaleString() %>
                             </td>
                             <td>
@@ -49,7 +52,6 @@
                             <% } %>
         </tbody>
     </table>
-
 </body>
 
 </html>
