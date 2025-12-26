@@ -1,29 +1,27 @@
 <h2>Review Evidence</h2>
 
-<p><b>Case ID:</b>
-    <%= evidence.case_id %>
+<p><strong>Case ID:</strong>
+    <%= evidenceList[0].case_id %>
 </p>
-<p><b>Description:</b>
-    <%= evidence.description %>
+<p><strong>Description:</strong>
+    <%= evidenceList[0].description %>
 </p>
-<p><b>Collected By:</b>
-    <%= evidence.investigator %>
+<p><strong>Collected By:</strong>
+    <%= evidenceList[0].investigator %>
 </p>
 
 <hr>
 
-<!-- APPROVE -->
-<form action="/supervisor/approve/<%= evidence.evidence_id %>" method="POST">
-    <label for="supervisor_notes">Supervisor Notes (Optional):</label><br>
-    <textarea name="supervisor_notes" id="supervisor_notes" rows="4" cols="50"></textarea><br><br>
+<form action="/supervisor/approve/<%= evidenceList[0].evidence_id %>" method="POST">
+    <label>Supervisor Notes (optional):</label><br>
+    <textarea name="notes" rows="4" cols="50"></textarea><br><br>
     <button>Approve Evidence</button>
 </form>
 
-<br>
+<hr>
 
-<!-- REJECT WITH REASON -->
-<form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
-    <label><b>Rejection Reason:</b></label><br>
+<form action="/supervisor/reject/<%= evidenceList[0].evidence_id %>" method="POST">
+    <label style="color:red;">Rejection Reason (required):</label><br>
     <textarea name="reason" rows="4" cols="50" required></textarea><br><br>
-    <button type="submit" style="color:red;">Reject Evidence</button>
+    <button style="color:red;">Reject Evidence</button>
 </form>

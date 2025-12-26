@@ -1,32 +1,29 @@
 <h2>My Submitted Evidence</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>Case ID</th>
-            <th>Description</th>
-            <th>Timestamp</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% evidenceList.forEach(e=> { %>
-            <tr>
-                <td>
-                    <%= e.case_id %>
-                </td>
-                <td>
-                    <%= e.description %>
-                </td>
-                <td>
-                    <%= e.timestamp_collected %>
-                </td>
-                <td>
-                    <%= e.current_status %>
-                </td>
-            </tr>
-            <% }) %>
-    </tbody>
-</table>
+<table border="1">
+    <tr>
+        <th>Case ID</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
 
-<a href="/evidence/add">⬅ Add New Evidence</a>
+    <% evidenceList.forEach(e=> { %>
+        <tr>
+            <td>
+                <%= e.case_id %>
+            </td>
+            <td>
+                <%= e.description %>
+            </td>
+            <td>
+                <%= e.current_status %>
+            </td>
+            <td>
+                <a href="/investigator/evidence/<%= e.evidence_id %>">
+                    View Details
+                </a>
+            </td>
+        </tr>
+        <% }) %>
+</table>

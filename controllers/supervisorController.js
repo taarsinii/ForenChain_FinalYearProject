@@ -89,24 +89,25 @@ exports.rejectEvidence = async (req, res) => {
     try {
         const supervisorId = req.session.user.user_id;
         const { id } = req.params;
-        const { supervisor_reason } = req.body;
+        const { reason } = req.body;
 
-        if (!supervisor_reason || supervisor_reason.trim().length < 5) {
-            return res.status(400).send("Rejection reason must be at least 5 characters");
+        if (!reason || reason.trim() === "") {
+            return res.send("Rejection reason is required");
         }
 
-        // Update evidence status + save reason
         await db.execute(
-            "UPDATE evidence SET current_status='rejected', supervisor_reason=? WHERE evidence_id=?",
-            [supervisor_reason, id]
+            `UPDATE evidence 
+             SET current_status = 'rejected_supervisor',
+                 supervisor_reason = ?
+             WHERE evidence_id = ?`,
+            [reason, id]
         );
 
         // Audit log
         await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
-            [supervisorId, `Rejected evidence ID: ${id}`, req.ip, supervisor_reason]
+            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+            [supervisorId, `Rejected evidence ID ${id}: ${reason}`, req.ip]
         );
-
 
         res.redirect("/supervisor/pending");
     } catch (err) {

@@ -29,5 +29,7 @@ router.get("/my-evidence", evidenceController.listMyEvidence);
 router.get("/transfer/:id", evidenceController.showTransferForm);
 router.post("/transfer/:id", evidenceController.transferEvidence);
 
+router.get("/evidence/:id", evidenceController.viewEvidenceDetails);
+
 module.exports = router;
 

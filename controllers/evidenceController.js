@@ -121,3 +121,27 @@ exports.transferEvidence = async (req, res) => {
         res.status(500).send("Error transferring evidence");
     }
 };
+// NEW FEATURE TO VIEW EVIDENCE DETAILS
+exports.viewEvidenceDetails = async (req, res) => {
+    try {
+        const investigatorId = req.session.user.user_id;
+        const { id } = req.params;
+
+        const [rows] = await db.execute(
+            `SELECT * FROM evidence 
+             WHERE evidence_id = ? AND collected_by = ?`,
+            [id, investigatorId]
+        );
+
+        if (rows.length === 0) {
+            return res.send("Evidence not found");
+        }
+
+        res.render("investigator/evidenceDetails", {
+            evidence: rows[0]
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading evidence details");
+    }
+};
