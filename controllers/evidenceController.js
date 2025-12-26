@@ -145,3 +145,51 @@ exports.viewEvidenceDetails = async (req, res) => {
         res.status(500).send("Error loading evidence details");
     }
 };
+//EDIT FORM IF REJECTED TO DO RESUBMIT
+exports.editEvidenceForm = async (req, res) => {
+    const { id } = req.params;
+    const investigatorId = req.session.user.user_id;
+
+    const [rows] = await db.execute(
+        `SELECT * FROM evidence 
+         WHERE evidence_id = ? 
+         AND collected_by = ?
+         AND current_status = 'rejected'`,
+        [id, investigatorId]
+    );
+
+    if (rows.length === 0) {
+        return res.send("Evidence not found or cannot be edited");
+    }
+
+    res.render("investigator/editEvidence", {
+        evidence: rows[0]
+    });
+};
+// RESUBMIT EVIDENCE
+exports.resubmitEvidence = async (req, res) => {
+    const { id } = req.params;
+    const investigatorId = req.session.user.user_id;
+    const { description } = req.body;
+
+    await db.execute(`
+        UPDATE evidence
+        SET description = ?,
+            current_status = 'pending_supervisor',
+            supervisor_reason = NULL
+        WHERE evidence_id = ?
+        AND collected_by = ?
+    `, [description, id, investigatorId]);
+
+    // Audit log
+    await db.execute(
+        "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
+        [
+            investigatorId,
+            `Resubmitted evidence ID ${id} after rejection`,
+            req.ip
+        ]
+    );
+
+    res.redirect("/investigator/my-evidence");
+};

@@ -31,5 +31,13 @@ router.post("/transfer/:id", evidenceController.transferEvidence);
 
 router.get("/evidence/:id", evidenceController.viewEvidenceDetails);
 
+// IF REJECTED (EDIT & RESUBMITTED)
+
+// Edit rejected evidence
+router.get("/edit/:id", investigatorController.editEvidenceForm);
+
+// Resubmit rejected evidence
+router.post("/resubmit/:id", investigatorController.resubmitEvidence);
+
 module.exports = router;
 
