@@ -5,7 +5,8 @@ const validator = require("validator");
 
 // Show login page
 exports.showLogin = (req, res) => {
-    res.sendFile(path.join(__dirname, "../views/login.html"));
+    // for "login.ejs" 
+    res.render("login");
 };
 
 // Handle login

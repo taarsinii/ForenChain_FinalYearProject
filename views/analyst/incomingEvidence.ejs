@@ -1,0 +1,33 @@
+<h2>Incoming Evidence (Lab)</h2>
+
+<table border="1">
+    <tr>
+        <th>Case ID</th>
+        <th>Description</th>
+        <th>Investigator</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    <% evidenceList.forEach(e=> { %>
+        <tr>
+            <td>
+                <%= e.case_id %>
+            </td>
+            <td>
+                <%= e.description %>
+            </td>
+            <td>
+                <%= e.investigator %>
+            </td>
+            <td>
+                <%= e.current_status %>
+            </td>
+            <td>
+                <a href="/analyst/report/<%= e.evidence_id %>">
+                    Upload Report
+                </a>
+            </td>
+        </tr>
+        <% }) %>
+</table>

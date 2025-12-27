@@ -34,10 +34,10 @@ router.get("/evidence/:id", evidenceController.viewEvidenceDetails);
 // IF REJECTED (EDIT & RESUBMITTED)
 
 // Edit rejected evidence
-router.get("/edit/:id", investigatorController.editEvidenceForm);
+router.get("/edit/:id", evidenceController.editEvidenceForm);
 
 // Resubmit rejected evidence
-router.post("/resubmit/:id", investigatorController.resubmitEvidence);
+router.post("/resubmit/:id", evidenceController.resubmitEvidence);
 
 module.exports = router;
 
