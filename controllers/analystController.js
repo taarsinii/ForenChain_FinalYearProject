@@ -155,3 +155,84 @@ exports.viewReports = async (req, res) => {
         res.status(500).send("Error loading forensic reports");
     }
 };
+
+// ============================
+// View Evidence Ready for Prosecutor
+// ============================
+exports.readyForProsecutor = async (req, res) => {
+    try {
+        const analystId = req.session.user.user_id;
+
+        const [rows] = await db.execute(`
+            SELECT e.*
+            FROM evidence e
+            JOIN forensic_reports fr ON e.evidence_id = fr.evidence_id
+            WHERE fr.analyst_id = ?
+              AND e.current_status = 'report_uploaded'
+        `, [analystId]);
+
+        res.render("analyst/readyForProsecutor", { evidenceList: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading cases");
+    }
+};
+
+// ============================
+// Transfer to Prosecutor
+// ============================
+exports.transferToProsecutor = async (req, res) => {
+    try {
+        const analystId = req.session.user.user_id;
+        const { id } = req.params;
+
+        // Find prosecutor (simplified: first prosecutor)
+        const [users] = await db.execute(
+            "SELECT user_id FROM users WHERE role='prosecutor' LIMIT 1"
+        );
+        if (users.length === 0) return res.send("No prosecutor found");
+
+        const prosecutorId = users[0].user_id;
+
+        // Create signature hash
+        const signature = crypto.createHash("sha256")
+            .update(`${id}-${analystId}-${prosecutorId}-${Date.now()}`)
+            .digest("hex");
+
+        // Insert transfer record
+        await db.execute(`
+            INSERT INTO transfers
+            (evidence_id, sender_id, receiver_id, transfer_type, signature_hash)
+            VALUES (?, ?, ?, 'to_prosecutor', ?)
+        `, [id, analystId, prosecutorId, signature]);
+
+        // Update evidence status
+        await db.execute(
+            "UPDATE evidence SET current_status='completed' WHERE evidence_id=?",
+            [id]
+        );
+
+        // Evidence chain
+        await db.execute(`
+            INSERT INTO evidence_chain
+            (evidence_id, action, actor_id, data_hash, previous_hash)
+            VALUES (?, 'Transferred to Prosecutor', ?, ?, '')
+        `, [id, analystId, signature]);
+
+        // Audit log
+        await db.execute(`
+            INSERT INTO audit_logs (user_id, action, user_ip_address, details)
+            VALUES (?, ?, ?, ?)
+        `, [
+            analystId,
+            `Transferred evidence ID ${id} to Prosecutor`,
+            req.ip,
+            "Forensic report completed and handed over"
+        ]);
+
+        res.redirect("/analyst/dashboard");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Transfer failed");
+    }
+};

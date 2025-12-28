@@ -1,0 +1,39 @@
+<h2>Cases Ready for Prosecutor</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Case ID</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    <% if (evidenceList.length===0) { %>
+        <tr>
+            <td colspan="4">No cases ready</td>
+        </tr>
+        <% } %>
+
+            <% evidenceList.forEach(e=> { %>
+                <tr>
+                    <td>
+                        <%= e.case_id %>
+                    </td>
+                    <td>
+                        <%= e.description %>
+                    </td>
+                    <td>
+                        <%= e.current_status %>
+                    </td>
+                    <td>
+                        <form action="/analyst/transfer/<%= e.evidence_id %>" method="POST">
+                            <button style="background:green;color:white;">
+                                Transfer to Prosecutor
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+</table>
+
+<a href="/analyst/dashboard">⬅ Back</a>

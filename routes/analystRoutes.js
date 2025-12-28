@@ -31,4 +31,11 @@ router.post("/report/:id", upload.single("report"), analystController.uploadRepo
 // Uploaded forensic reports
 router.get("/reports", analystController.viewReports);
 
+// Ready for Prosecutor
+router.get("/ready", analystController.readyForProsecutor);
+
+// Transfer to Prosecutor
+router.post("/transfer/:id", analystController.transferToProsecutor);
+
+
 module.exports = router;
