@@ -1,0 +1,25 @@
+<h2>Prosecutor Dashboard</h2>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Case ID</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    <% cases.forEach(c=> { %>
+        <tr>
+            <td>
+                <%= c.case_id %>
+            </td>
+            <td>
+                <%= c.current_status %>
+            </td>
+            <td>
+                <a href="/prosecutor/case/<%= c.evidence_id %>">
+                    View Full Chain
+                </a>
+            </td>
+        </tr>
+        <% }) %>
+</table>

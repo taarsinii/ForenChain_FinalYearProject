@@ -1,0 +1,22 @@
+<h2>Case: <%= evidence.case_id %>
+</h2>
+
+<h3>Evidence Details</h3>
+<p><strong>Description:</strong>
+    <%= evidence.description %>
+</p>
+
+<h3>Forensic Report</h3>
+<a href="/<%= report.report_file_path %>" target="_blank">Download Report</a>
+
+<h3>Chain of Custody</h3>
+<ul>
+    <% chain.forEach(c=> { %>
+        <li>
+            <strong>
+                <%= c.action %>
+            </strong>
+            — <%= c.timestamp.toLocaleString() %>
+        </li>
+        <% }) %>
+</ul>

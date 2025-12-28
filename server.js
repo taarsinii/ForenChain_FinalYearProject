@@ -47,6 +47,9 @@ app.use("/supervisor", supervisorRoutes);
 const analystRoutes = require("./routes/analystRoutes");
 app.use("/analyst", analystRoutes);
 
+const prosecutorRoutes = require("./routes/prosecutorRoutes");
+app.use("/prosecutor", prosecutorRoutes);
+
 // Default redirect
 app.get("/", (req, res) => res.redirect("/login"));
 
