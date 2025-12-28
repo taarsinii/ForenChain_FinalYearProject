@@ -8,7 +8,6 @@
         <th>Status</th>
         <th>Action</th>
     </tr>
-
     <% evidenceList.forEach(e=> { %>
         <tr>
             <td>
@@ -24,9 +23,7 @@
                 <%= e.current_status %>
             </td>
             <td>
-                <a href="/analyst/report/<%= e.evidence_id %>">
-                    Upload Report
-                </a>
+                <a href="/analyst/view/<%= e.evidence_id %>">View / Download</a>
             </td>
         </tr>
         <% }) %>

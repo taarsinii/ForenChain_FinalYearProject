@@ -1,24 +1,22 @@
 const express = require("express");
 const router = express.Router();
-
 const analystController = require("../controllers/analystController");
 const { isLoggedIn } = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-// Protect all analyst routes
 router.use(isLoggedIn);
 router.use(roleMiddleware("analyst"));
 
 // Dashboard
 router.get("/dashboard", analystController.dashboard);
 
-// Incoming evidence
-router.get("/incoming", analystController.listIncomingEvidence);
+// Incoming Evidence
+router.get("/incoming", analystController.incomingEvidence);
 
-// Upload report page
-router.get("/report/:id", analystController.viewUploadReport);
+// View evidence
+router.get("/view/:id", analystController.viewEvidence);
 
-// Submit report
-router.post("/report/:id", analystController.submitReport);
+// Download evidence file
+router.get("/download/:id", analystController.downloadEvidence);
 
 module.exports = router;

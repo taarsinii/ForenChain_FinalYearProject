@@ -1,19 +1,23 @@
 const db = require("../config/db");
 const crypto = require("crypto");
+const path = require("path");
+const fs = require("fs");
 
 // Analyst Dashboard
 exports.dashboard = (req, res) => {
     res.render("analyst/dashboard");
 };
 
-// List incoming evidence (approved & transferred)
-exports.listIncomingEvidence = async (req, res) => {
+// List Incoming Evidence
+exports.incomingEvidence = async (req, res) => {
     try {
+        const analystId = req.session.user.user_id;
+
         const [rows] = await db.execute(`
             SELECT e.*, u.username AS investigator
             FROM evidence e
             JOIN users u ON e.collected_by = u.user_id
-            WHERE e.current_status = 'transferred_to_lab'
+            WHERE e.current_status = 'approved_supervisor'
             ORDER BY e.timestamp_collected DESC
         `);
 
@@ -24,48 +28,38 @@ exports.listIncomingEvidence = async (req, res) => {
     }
 };
 
-// Upload report page
-exports.viewUploadReport = async (req, res) => {
-    const { id } = req.params;
-
-    const [rows] = await db.execute(
-        "SELECT * FROM evidence WHERE evidence_id = ?",
-        [id]
-    );
-
-    if (rows.length === 0) return res.send("Evidence not found");
-
-    res.render("analyst/uploadReport", { evidence: rows[0] });
-};
-
-// Submit forensic report
-exports.submitReport = async (req, res) => {
+// View single evidence and allow download
+exports.viewEvidence = async (req, res) => {
     try {
-        const analystId = req.session.user.user_id;
         const { id } = req.params;
+        const [rows] = await db.execute(
+            "SELECT e.*, u.username AS investigator FROM evidence e JOIN users u ON e.collected_by = u.user_id WHERE e.evidence_id=?",
+            [id]
+        );
 
-        const reportHash = crypto
-            .createHash("sha256")
-            .update(`FORENSIC-REPORT-${id}-${Date.now()}`)
-            .digest("hex");
+        if (rows.length === 0) return res.send("Evidence not found");
 
-        // Update evidence
-        await db.execute(`
-            UPDATE evidence
-            SET current_status = 'report_uploaded',
-                final_hash = ?
-            WHERE evidence_id = ?
-        `, [reportHash, id]);
-
-        // Audit log
-        await db.execute(`
-            INSERT INTO audit_logs (user_id, action, user_ip_address)
-            VALUES (?, ?, ?)
-        `, [analystId, `Uploaded forensic report for evidence ${id}`, req.ip]);
-
-        res.redirect("/analyst/incoming");
+        res.render("analyst/viewEvidence", { evidence: rows[0] });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error uploading report");
+        res.status(500).send("Error loading evidence");
+    }
+};
+
+// Download evidence file
+exports.downloadEvidence = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await db.execute(
+            "SELECT photo_path FROM evidence WHERE evidence_id=?",
+            [id]
+        );
+
+        if (!rows[0] || !rows[0].photo_path) return res.send("No file to download");
+
+        res.download(path.join(__dirname, "../" + rows[0].photo_path));
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error downloading file");
     }
 };
