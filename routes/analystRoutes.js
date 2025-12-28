@@ -19,4 +19,16 @@ router.get("/view/:id", analystController.viewEvidence);
 // Download evidence file
 router.get("/download/:id", analystController.downloadEvidence);
 
+// Show report form
+router.get("/report/:id", analystController.showReportForm);
+
+// Handle report upload
+const multer = require("multer");
+const upload = multer({ dest: "uploads/reports/" });
+
+router.post("/report/:id", upload.single("report"), analystController.uploadReport);
+
+// Uploaded forensic reports
+router.get("/reports", analystController.viewReports);
+
 module.exports = router;

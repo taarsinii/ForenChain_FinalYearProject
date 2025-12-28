@@ -1,0 +1,42 @@
+<h2>Uploaded Forensic Reports</h2>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Case ID</th>
+        <th>Report File</th>
+        <th>Report Hash</th>
+        <th>Uploaded At</th>
+        <th>Status</th>
+    </tr>
+
+    <% if (reports.length===0) { %>
+        <tr>
+            <td colspan="5">No reports uploaded yet</td>
+        </tr>
+        <% } %>
+
+            <% reports.forEach(r=> { %>
+                <tr>
+                    <td>
+                        <%= r.case_id %>
+                    </td>
+                    <td>
+                        <a href="/<%= r.report_file_path %>" target="_blank">
+                            Download PDF
+                        </a>
+                    </td>
+                    <td style="font-size:12px;">
+                        <%= r.report_hash %>
+                    </td>
+                    <td>
+                        <%= r.uploaded_at.toLocaleString() %>
+                    </td>
+                    <td>
+                        <%= r.current_status %>
+                    </td>
+                </tr>
+                <% }) %>
+</table>
+
+<br>
+<a href="/analyst/dashboard">⬅ Back to Dashboard</a>
