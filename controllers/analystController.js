@@ -3,12 +3,16 @@ const crypto = require("crypto");
 const path = require("path");
 const fs = require("fs");
 
+// ================================
 // Analyst Dashboard
+// ================================
 exports.dashboard = (req, res) => {
     res.render("analyst/dashboard");
 };
 
+// ================================
 // List Incoming Evidence
+// ================================
 exports.incomingEvidence = async (req, res) => {
     try {
         const analystId = req.session.user.user_id;
@@ -28,8 +32,9 @@ exports.incomingEvidence = async (req, res) => {
         res.status(500).send("Error loading incoming evidence");
     }
 };
-
+// =======================================
 // View single evidence and allow download
+// =======================================
 exports.viewEvidence = async (req, res) => {
     try {
         const { id } = req.params;
@@ -47,7 +52,9 @@ exports.viewEvidence = async (req, res) => {
     }
 };
 
+// ================================
 // Download evidence file
+// ================================
 exports.downloadEvidence = async (req, res) => {
     const { id } = req.params;
     try {
@@ -65,7 +72,9 @@ exports.downloadEvidence = async (req, res) => {
     }
 };
 
+// ================================
 // Show report form
+// ================================
 exports.showReportForm = async (req, res) => {
     const { id } = req.params;
     const [rows] = await db.execute(
@@ -89,7 +98,9 @@ exports.showReportForm = async (req, res) => {
     });
 };
 
+// ================================
 // Upload / Save forensic report
+// ================================
 exports.uploadReport = async (req, res) => {
     try {
         const analystId = req.session.user.user_id;
@@ -116,7 +127,9 @@ exports.uploadReport = async (req, res) => {
             [id]
         );
 
+        // ================================
         // Audit log
+        // ================================
         await db.execute(
             "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
             [analystId, `Uploaded forensic report for Evidence ID: ${id}`, req.ip, additional_notes]
@@ -129,7 +142,9 @@ exports.uploadReport = async (req, res) => {
     }
 };
 
+// ================================
 // View uploaded forensic reports
+// ================================
 exports.viewReports = async (req, res) => {
     try {
         const analystId = req.session.user.user_id;
@@ -156,9 +171,9 @@ exports.viewReports = async (req, res) => {
     }
 };
 
-// ============================
+// ==================================
 // View Evidence Ready for Prosecutor
-// ============================
+// ==================================
 exports.readyForProsecutor = async (req, res) => {
     try {
         const analystId = req.session.user.user_id;
@@ -178,9 +193,9 @@ exports.readyForProsecutor = async (req, res) => {
     }
 };
 
-// ============================
+// ================================
 // Transfer to Prosecutor
-// ============================
+// ================================
 exports.transferToProsecutor = async (req, res) => {
     try {
         const analystId = req.session.user.user_id;
@@ -219,20 +234,22 @@ exports.transferToProsecutor = async (req, res) => {
             VALUES (?, 'Transferred to Prosecutor', ?, ?, '')
         `, [id, analystId, signature]);
 
-        // Audit log
-        await db.execute(`
-            INSERT INTO audit_logs (user_id, action, user_ip_address, details)
-            VALUES (?, ?, ?, ?)
-        `, [
-            analystId,
-            `Transferred evidence ID ${id} to Prosecutor`,
-            req.ip,
-            "Forensic report completed and handed over"
-        ]);
+        // ================================
+        // Audit log with report hash
+        // ================================
+        await db.execute(
+            "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
+            [
+                analystId,
+                "Forensic report uploaded",
+                req.ip,
+                `Evidence ID ${id}, Report hash ${reportHash}${additional_notes ? ", Notes: " + additional_notes : ""}`
+            ]
+        );
 
-        res.redirect("/analyst/dashboard");
+        res.redirect("/analyst/incoming");
     } catch (err) {
         console.error(err);
-        res.status(500).send("Transfer failed");
+        res.status(500).send("Error uploading report");
     }
 };

@@ -1,12 +1,17 @@
 const db = require("../config/db");
 const crypto = require("crypto");
+const AuditLog = require("../models/AuditLog");
 
-// ================= Dashboard =================
+// ================================
+// Supervisor Dashboard 
+// ================================
 exports.dashboard = (req, res) => {
     res.render("supervisor/dashboard");
 };
 
-// ================= List Pending Evidence =================
+// ================================
+// View Pending Evidence
+// ================================
 exports.listPendingEvidence = async (req, res) => {
     try {
         const [rows] = await db.execute(`
@@ -24,7 +29,9 @@ exports.listPendingEvidence = async (req, res) => {
     }
 };
 
-// ================= Review Evidence Page =================
+// ================================
+// Review Evidence Page 
+// ================================
 exports.reviewEvidence = async (req, res) => {
     try {
         const { id } = req.params;
@@ -45,8 +52,9 @@ exports.reviewEvidence = async (req, res) => {
     }
 };
 
-// ================= Approve Evidence =================
-// Approve evidence
+// ================================
+// Approve Evidence 
+// ================================
 exports.approveEvidence = async (req, res) => {
     try {
         const supervisorId = req.session.user.user_id;
@@ -70,21 +78,31 @@ exports.approveEvidence = async (req, res) => {
             [id, "Approved by Supervisor", supervisorId, hash, ""]
         );
 
-        // Audit log
-        await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
-            [supervisorId, `Approved evidence ID: ${id}`, req.ip, supervisor_notes || '']
-        );
+        // ================================
+        // AUDIT LOG: EVIDENCE APPROVED 
+        // ================================
+        try {
+            await AuditLog.log({
+                user_id: supervisorId,
+                action: "EVIDENCE_APPROVED",
+                details: `Evidence ID ${id}. Notes: ${supervisor_notes || "None"}`,
+                ip: req.ip
+            });
+        } catch (logErr) {
+            console.error("Audit log failed (EVIDENCE_APPROVED):", logErr);
+        }
 
-        res.redirect("/supervisor/pending");
+        res.redirect("/supervisor/pending-evidence");
+
     } catch (err) {
         console.error(err);
         res.status(500).send("Error approving evidence");
     }
 };
 
-// ================= Reject Evidence (WITH REASON) =================
-// Reject evidence
+// ================================
+// Reject Evidence (WITH REASON)
+// ================================
 exports.rejectEvidence = async (req, res) => {
     try {
         const supervisorId = req.session.user.user_id;
@@ -103,13 +121,22 @@ exports.rejectEvidence = async (req, res) => {
             [reason, id]
         );
 
-        // Audit log
-        await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-            [supervisorId, `Rejected evidence ID ${id}: ${reason}`, req.ip]
-        );
+        // ================================
+        // AUDIT LOG: EVIDENCE REJECTED
+        // ================================
+        try {
+            await AuditLog.log({
+                user_id: supervisorId,
+                action: "EVIDENCE_REJECTED",
+                details: `Evidence ID ${id}. Reason: ${reason}`,
+                ip: req.ip
+            });
+        } catch (logErr) {
+            console.error("Audit log failed (EVIDENCE_REJECTED):", logErr);
+        }
 
-        res.redirect("/supervisor/pending");
+        res.redirect("/supervisor/pending-evidence");
+
     } catch (err) {
         console.error(err);
         res.status(500).send("Error rejecting evidence");

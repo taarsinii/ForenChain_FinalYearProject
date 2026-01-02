@@ -2,60 +2,89 @@ const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const validator = require("validator");
+const AuditLog = require("../models/AuditLog");
 
-// Show login page
+// ================================
+// SHOW LOGIN PAGE
+// ================================
 exports.showLogin = (req, res) => {
-    // for "login.ejs" 
     res.render("login");
 };
 
-// Handle login
+// ================================
+// HANDLE LOGIN
+// ================================
 exports.login = async (req, res) => {
     const { username, password } = req.body;
 
     // ================================
-    // 🔐 INPUT VALIDATION
+    // INPUT VALIDATION
     // ================================
     if (!username || !password) {
-        return res.status(400).send("Username and password are required");
+        return res.status(400).render("login", {
+            error: "Username and password are required"
+        });
     }
 
     if (!validator.isAlphanumeric(username)) {
-        return res.status(400).render("login", { error: "Invalid username format" });
+        return res.status(400).render("login", {
+            error: "Invalid username format"
+        });
     }
 
     try {
+        // ================================
+        // FETCH USER
+        // ================================
         const [rows] = await db.execute(
             "SELECT * FROM users WHERE username = ?",
             [username]
         );
 
-        if (rows.length === 0) return res.send("User not found");
+        if (rows.length === 0) {
+            return res.render("login", {
+                error: "User not found"
+            });
+        }
 
         const user = rows[0];
 
+        // ================================
+        // PASSWORD CHECK
+        // ================================
         const match = await bcrypt.compare(password, user.password_hash);
-        if (!match) return res.send("Incorrect password");
-
-        // SAVE USER SESSION
-        req.session.user = {
-            user_id: user.user_id,
-            role: user.role,
-            username: user.username
-        };
-
-        // ===== Add audit log entry =====
-        try {
-            await db.execute(
-                "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-                [user.user_id, "User logged in", req.ip]
-            );
-        } catch (logErr) {
-            console.error("Failed to log login action:", logErr);
+        if (!match) {
+            return res.render("login", {
+                error: "Incorrect password"
+            });
         }
 
+        // ================================
+        // SAVE USER SESSION
+        // ================================
+        req.session.user = {
+            user_id: user.user_id,
+            username: user.username,
+            role: user.role
+        };
 
-        // Role-based redirect
+        // ================================
+        // AUDIT LOG: USER LOGIN
+        // ================================
+        try {
+            await AuditLog.log({
+                user_id: user.user_id,
+                action: "USER_LOGIN",
+                details: `Role: ${user.role}`,
+                ip: req.ip
+            });
+        } catch (logErr) {
+            console.error("Audit log failed (login):", logErr);
+        }
+
+        // ================================
+        // ROLE-BASED REDIRECT
+        // ================================
         switch (user.role) {
             case "administrator":
                 return res.redirect("/admin/dashboard");
@@ -71,15 +100,33 @@ exports.login = async (req, res) => {
                 return res.send("Unknown role");
         }
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Login error");
+        console.error("Login error:", err);
+        return res.status(500).send("Login failed");
     }
 };
 
-// Logout
-exports.logout = (req, res) => {
+// ================================
+// HANDLE LOGOUT
+// ================================
+exports.logout = async (req, res) => {
+
+    if (req.session.user) {
+        try {
+            await AuditLog.log({
+                user_id: req.session.user.user_id,
+                action: "USER_LOGOUT",
+                ip: req.ip
+            });
+        } catch (logErr) {
+            console.error("Audit log failed (logout):", logErr);
+        }
+    }
+
     req.session.destroy(err => {
-        if (err) return res.send("Error logging out");
+        if (err) {
+            console.error("Logout error:", err);
+            return res.status(500).send("Error logging out");
+        }
         res.redirect("/login");
     });
 };

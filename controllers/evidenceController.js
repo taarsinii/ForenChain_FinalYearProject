@@ -1,12 +1,16 @@
 const db = require("../config/db");
 const crypto = require("crypto");
+const AuditLog = require("../models/AuditLog");
 
-// Show Add Evidence Form
+// ================================
+// Show Add Evidence Form 
+// ================================
 exports.showAddForm = (req, res) => {
     res.render("investigator/addEvidence");
 };
-
-// Add Evidence POST
+// ================================
+// Add Evidence 
+// ================================
 exports.addEvidence = async (req, res) => {
     try {
         const { description } = req.body;
@@ -38,7 +42,9 @@ exports.addEvidence = async (req, res) => {
             [evidence_id, 'Evidence Collected', userId, hash, '']
         );
 
-        // Audit log for admin tracking
+        // ================================
+        // AUDIT LOG: EVIDENCE REGISTERED 
+        // ================================
         await db.execute(
             "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
             [userId, `Added evidence ID: ${evidence_id}`, req.ip]
@@ -51,7 +57,9 @@ exports.addEvidence = async (req, res) => {
     }
 };
 
-// List My Submitted Evidence
+// ================================
+// List My Evidence 
+// ================================
 exports.listMyEvidence = async (req, res) => {
     try {
         const userId = req.session?.user?.user_id || null;
@@ -66,7 +74,9 @@ exports.listMyEvidence = async (req, res) => {
     }
 };
 
-// Show Transfer Form
+// ================================ 
+// Show Transfer Form 
+// ================================
 exports.showTransferForm = async (req, res) => {
     try {
         const evidence_id = req.params.id;
@@ -86,7 +96,9 @@ exports.showTransferForm = async (req, res) => {
     }
 };
 
-// Transfer Evidence POST
+// ================================
+// Transfer Evidence 
+// ================================
 exports.transferEvidence = async (req, res) => {
     try {
         const evidence_id = req.params.id;
@@ -109,7 +121,9 @@ exports.transferEvidence = async (req, res) => {
             [status, evidence_id]
         );
 
-        // Audit log for admin tracking
+        // ================================
+        // AUDIT LOG: EVIDENCE TRANSFERRED 
+        // ================================
         await db.execute(
             "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
             [from_user, `Transferred evidence ID: ${evidence_id} to user ${to_user}`, req.ip]
@@ -121,7 +135,10 @@ exports.transferEvidence = async (req, res) => {
         res.status(500).send("Error transferring evidence");
     }
 };
-// NEW FEATURE TO VIEW EVIDENCE DETAILS
+
+// ================================
+// View Evidence Details 
+// ================================
 exports.viewEvidenceDetails = async (req, res) => {
     try {
         const investigatorId = req.session.user.user_id;
@@ -145,7 +162,10 @@ exports.viewEvidenceDetails = async (req, res) => {
         res.status(500).send("Error loading evidence details");
     }
 };
-//EDIT FORM IF REJECTED TO DO RESUBMIT
+
+// ================================
+// Edit Evidence (Rejected) 
+// ================================
 exports.editEvidenceForm = async (req, res) => {
     const { id } = req.params;
     const investigatorId = req.session.user.user_id;
@@ -166,7 +186,10 @@ exports.editEvidenceForm = async (req, res) => {
         evidence: rows[0]
     });
 };
-// RESUBMIT EVIDENCE
+
+// ================================
+// Resubmit Evidence 
+// ================================
 exports.resubmitEvidence = async (req, res) => {
     const { id } = req.params;
     const investigatorId = req.session.user.user_id;
@@ -181,15 +204,19 @@ exports.resubmitEvidence = async (req, res) => {
         AND collected_by = ?
     `, [description, id, investigatorId]);
 
-    // Audit log
-    await db.execute(
-        "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-        [
-            investigatorId,
-            `Resubmitted evidence ID ${id} after rejection`,
-            req.ip
-        ]
-    );
+    // ================================
+    // AUDIT LOG: EVIDENCE RESUBMITTED 
+    // ================================
+    try {
+        await AuditLog.log({
+            user_id: investigatorId,
+            action: "EVIDENCE_RESUBMITTED",
+            details: `Evidence ID ${id} resubmitted after rejection`,
+            ip: req.ip
+        });
+    } catch (logErr) {
+        console.error("Audit log failed (EVIDENCE_RESUBMITTED):", logErr);
+    }
 
     res.redirect("/investigator/my-evidence");
 };

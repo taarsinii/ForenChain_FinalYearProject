@@ -9,5 +9,6 @@ router.use(roleMiddleware("prosecutor"));
 
 router.get("/dashboard", prosecutorController.dashboard);
 router.get("/case/:id", prosecutorController.viewCase);
+router.get("/export/:id", prosecutorController.exportChainPDF);
 
 module.exports = router;

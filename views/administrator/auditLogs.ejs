@@ -1,16 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Logs</title>
-    <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* ===== Professional Table Styling ===== */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background-color: #007bff;
+            color: #fff;
+            position: sticky;
+            top: 0;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #e1f0ff;
+        }
+
+        th {
+            font-weight: bold;
+        }
+
+        td {
+            word-break: break-word;
+        }
+
+        @media (max-width: 768px) {
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                display: none;
+            }
+
+            tr {
+                margin-bottom: 15px;
+                border-bottom: 1px solid #ccc;
+            }
+
+            td {
+                padding-left: 50%;
+                position: relative;
+            }
+
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                font-weight: bold;
+                white-space: nowrap;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <h1>Audit Logs</h1>
-    <a href="/admin/dashboard">⬅ Back to Dashboard</a>
+    <a href="/admin/dashboard" class="back-link">⬅ Back to Dashboard</a>
 
-    <table border="1" cellpadding="10" cellspacing="0">
+    <table>
         <thead>
             <tr>
                 <th>Log ID</th>
@@ -22,30 +121,30 @@
             </tr>
         </thead>
         <tbody>
-            <% if (logs.length===0) { %>
+            <% if (!logs || logs.length===0) { %>
                 <tr>
-                    <td colspan="6">No logs available</td>
+                    <td colspan="6" style="text-align:center;">No logs available</td>
                 </tr>
                 <% } else { %>
                     <% logs.forEach(log=> { %>
                         <tr>
-                            <td>
+                            <td data-label="Log ID">
                                 <%= log.log_id %>
                             </td>
-                            <td>
+                            <td data-label="User">
                                 <%= log.username || 'Unknown User' %>
                             </td>
-                            <td>
+                            <td data-label="Action">
                                 <%= log.action %>
                             </td>
-                            <td>
+                            <td data-label="Details / Notes">
                                 <%= log.details || '-' %>
                             </td>
-                            <td>
-                                <%= log.timestamp.toLocaleString() %>
+                            <td data-label="Timestamp">
+                                <%= new Date(log.timestamp).toLocaleString() %>
                             </td>
-                            <td>
-                                <%= log.user_ip_address %>
+                            <td data-label="IP Address">
+                                <%= log.user_ip_address || '-' %>
                             </td>
                         </tr>
                         <% }) %>
