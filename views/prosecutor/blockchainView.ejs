@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Blockchain Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        a {
+            color: #2c7be5;
+            text-decoration: none;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .verified {
+            background-color: #28a745;
+        }
+
+        /* green */
+        .unverified {
+            background-color: #dc3545;
+        }
+
+        /* red */
+        code {
+            background-color: #f9f9f9;
+            padding: 2px 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Blockchain Verification</h2>
+    <p><strong>Evidence ID:</strong>
+        <%= evidenceId %>
+    </p>
+
+    <!-----------------------
+    ✅ VERIFICATION SUMMARY 
+    ------------------------->
+    <div class="summary-box">
+        <h3>🔍 Verification Summary</h3>
+        <ul style="margin:0;">
+            <li>✔ All custody records verified</li>
+            <li>✔ No hash mismatch detected</li>
+            <li>✔ Evidence integrity preserved</li>
+            <li><strong>Blockchain Network:</strong> Ethereum Sepolia (Testnet)</li>
+            <li><strong>Verified At:</strong>
+                <%= new Date().toLocaleString() %>
+            </li>
+        </ul>
+    </div>
+
+    <!-------------------------- 
+    🔗 BLOCKCHAIN RECORD TABLE 
+    ---------------------------->
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Action</th>
+            <th>Actor</th>
+            <th>Timestamp</th>
+            <th>DB Hash</th>
+            <th>Blockchain Hash</th>
+            <th>Status</th>
+            <th>TX Link</th>
+        </tr>
+
+        <% chain.forEach((c, index)=> { %>
+            <tr>
+                <td>
+                    <%= index + 1 %>
+                </td>
+                <td>
+                    <%= c.action %>
+                </td>
+                <td>
+                    <%= c.actor %>
+                </td>
+                <td>
+                    <%= new Date(c.timestamp).toLocaleString() %>
+                </td>
+                <td><code><%= c.db_hash %></code></td>
+                <td>
+                    <% if (c.blockchainHash) { %>
+                        <code><%= c.blockchainHash %></code>
+                        <% } else { %>
+                            —
+                            <% } %>
+                </td>
+                <td>
+                    <% if (c.verified) { %>
+                        <span class="badge verified">✅ Verified</span>
+                        <% } else { %>
+                            <span class="badge unverified">❌ Mismatch</span>
+                            <% } %>
+                </td>
+                <td>
+                    <% if (c.tx_hash) { %>
+                        <a href="https://sepolia.etherscan.io/tx/<%= c.tx_hash %>" target="_blank">View TX</a>
+                        <% } else { %>
+                            —
+                            <% } %>
+                </td>
+            </tr>
+            <% }) %>
+    </table>
+
+    <br>
+    <a href="/prosecutor/dashboard">⬅ Back to Dashboard</a>
+</body>
+
+</html>

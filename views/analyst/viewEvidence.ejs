@@ -1,24 +1,61 @@
-<h2>Evidence Details</h2>
-
-<p><strong>Case ID:</strong>
-    <%= evidence.case_id %>
-</p>
-<p><strong>Description:</strong>
-    <%= evidence.description %>
-</p>
-<p><strong>Investigator:</strong>
-    <%= evidence.investigator %>
-</p>
-<p><strong>Collected at:</strong>
-    <%= evidence.timestamp_collected %>
-</p>
-<p><strong>Status:</strong>
-    <%= evidence.current_status %>
-</p>
-
-<% if (evidence.photo_path) { %>
-    <a href="/analyst/download/<%= evidence.evidence_id %>">Download Evidence File</a>
+<% if (typeof saved !=='undefined' ) { %>
+    <p style="color:green;font-weight:bold;">
+        ✅ Forensic analysis saved successfully
+    </p>
     <% } %>
 
-        <br><br>
-        <a href="/analyst/report/<%= evidence.evidence_id %>">Generate / Upload Forensic Report</a>
+        <h2>Evidence Details</h2>
+
+
+        <p><strong>Case ID:</strong>
+            <%= evidence.case_id %>
+        </p>
+        <p><strong>Description:</strong>
+            <%= evidence.description %>
+        </p>
+        <p><strong>Investigator:</strong>
+            <%= evidence.investigator %>
+        </p>
+        <p><strong>Collected at:</strong>
+            <%= evidence.timestamp_collected %>
+        </p>
+        <p><strong>Status:</strong>
+            <%= evidence.current_status %>
+        </p>
+
+        <% if (evidence.photo_path) { %>
+            <a href="/analyst/download/<%= evidence.evidence_id %>">Download Evidence File</a>
+            <% } %>
+
+                <br><br>
+                <a href="/analyst/analysis/<%= evidence.evidence_id %>">
+                    📝 Add / Edit Forensic Analysis
+                </a>
+
+                <br><br>
+
+                <% if (!analysis || analysis.is_finalized===0) { %>
+                    <form action="/analyst/finalize/<%= evidence.evidence_id %>" method="POST">
+                        <button>Finalize & Generate PDF</button>
+                    </form>
+                    <% } else { %>
+                        <p style="color:gray;">🔒 Report already finalized</p>
+                        <% } %>
+
+                            <% if (analysis && analysis.is_finalized===1 && evidence.current_status==='report_uploaded'
+                                ) { %>
+                                <form action="/analyst/submit-review/<%= evidence.evidence_id %>" method="POST">
+                                    <button class="btn btn-warning">
+                                        📤 Submit for Supervisor Review
+                                    </button>
+                                </form>
+                                <% } %>
+
+                                    <% if (evidence.supervisor_video_path) { %>
+                                        <h3>Supervisor Verification Video</h3>
+                                        <video width="500" controls>
+                                            <source src="/<%= evidence.supervisor_video_path %>" type="video/mp4">
+                                        </video>
+
+                                        <p><strong>Status:</strong> Approved by Supervisor</p>
+                                        <% } %>

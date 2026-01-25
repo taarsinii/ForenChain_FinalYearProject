@@ -6,23 +6,35 @@
     <%= evidence.description %>
 </p>
 
-<h3>Forensic Report</h3>
-<a href="/<%= report.report_file_path %>" target="_blank">Download Report</a>
+<% if (evidence.supervisor_video_path) { %>
+    <h3>Supervisor Witness Video</h3>
+    <video width="500" controls>
+        <source src="/<%= evidence.supervisor_video_path %>" type="video/mp4">
+    </video>
+    <% } %>
 
-<h3>Chain of Custody</h3>
-<ul>
-    <% chain.forEach(c=> { %>
-        <li>
-            <strong>
-                <%= c.action %>
-            </strong>
-            — <%= c.timestamp.toLocaleString() %>
-        </li>
-        <% }) %>
-</ul>
+        <h3>Forensic Report</h3>
+        <a href="/<%= report.report_file_path %>" target="_blank">Download Report</a>
 
-<hr>
+        <h3>Chain of Custody</h3>
+        <ul>
+            <% chain.forEach(c=> { %>
+                <li>
+                    <strong>
+                        <%= c.action %>
+                    </strong>
+                    — <%= c.timestamp.toLocaleString() %>
+                </li>
+                <% }) %>
+        </ul>
 
-<a href="/prosecutor/export/<%= evidence.evidence_id %>">
-    📄 Export Chain of Custody PDF
-</a>
+        <hr>
+
+        <a href="/prosecutor/export/<%= evidence.evidence_id %>">
+            📄 Export Chain of Custody PDF
+        </a>
+
+        <hr>
+        <a href="/prosecutor/blockchain/<%= evidence.evidence_id %>">
+            🔗 View Blockchain Verification
+        </a>

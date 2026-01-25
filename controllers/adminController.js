@@ -2,6 +2,9 @@ const bcrypt = require("bcrypt");
 const db = require("../config/db");
 const validator = require("validator");
 const AuditLog = require("../models/AuditLog");
+const fs = require("fs");
+const path = require("path");
+const { exec } = require("child_process");
 
 const allowedRoles = [
     "administrator",
@@ -210,6 +213,114 @@ exports.deleteUser = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Error deleting user");
+    }
+};
+
+// ================================
+// Create Database Backup
+// ================================
+exports.createBackup = async (req, res) => {
+    try {
+        const userId = req.session.user.user_id;
+
+        const backupFileName = `backup_${Date.now()}.sql`;
+        const backupPath = path.join(__dirname, "../backups", backupFileName);
+
+        // ⚠️ Replace credentials with your .env values
+        const MYSQLDUMP_PATH = `"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe"`;
+
+        const command = `${MYSQLDUMP_PATH} -u root -pTaarsinii123! forenchain_system > "${backupPath}"`;
+
+        exec(command, async (error) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send("Backup failed");
+            }
+
+            // Save backup log
+            await db.execute(
+                "INSERT INTO backup_logs (backup_file_path, created_by) VALUES (?, ?)",
+                [backupFileName, userId]
+            );
+
+            // Audit log
+            await AuditLog.log({
+                user_id: userId,
+                action: "DATABASE_BACKUP_CREATED",
+                details: `Backup file: ${backupFileName}`,
+                ip: req.ip
+            });
+
+            res.redirect("/admin/backups");
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Backup error");
+    }
+};
+
+// ================================
+// Restore Database Backup
+// ================================
+exports.restoreBackup = async (req, res) => {
+    try {
+        const userId = req.session.user.user_id;
+        const { backupFile } = req.body;
+
+        if (!backupFile) {
+            return res.status(400).send("No backup file selected");
+        }
+
+        const backupPath = path.join(__dirname, "../backups", backupFile);
+
+        if (!fs.existsSync(backupPath)) {
+            return res.status(404).send("Backup file not found");
+        }
+
+        const MYSQL_PATH = `"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe"`;
+
+        const command = `${MYSQL_PATH} -u root -pTaarsinii123! forenchain_system < "${backupPath}"`;
+
+        exec(command, async (error) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send("Restore failed");
+            }
+
+            await AuditLog.log({
+                user_id: userId,
+                action: "DATABASE_RESTORED",
+                details: `Restored from backup: ${backupFile}`,
+                ip: req.ip
+            });
+
+            res.redirect("/admin/backups");
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Restore error");
+    }
+};
+
+// ================================
+// View Backup Logs
+// ================================
+exports.viewBackups = async (req, res) => {
+    try {
+        const [backups] = await db.execute(`
+            SELECT b.*, u.username
+            FROM backup_logs b
+            LEFT JOIN users u ON b.created_by = u.user_id
+            ORDER BY b.created_at DESC
+        `);
+
+        res.render("administrator/backup", { backups });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading backups");
     }
 };
 

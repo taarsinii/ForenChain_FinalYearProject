@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pending Forensic Analysis</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Pending Forensic Analysis Review</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Case ID</th>
+                    <th>Analyst</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (evidenceList.length===0) { %>
+                    <tr>
+                        <td colspan="4">No pending analysis</td>
+                    </tr>
+                    <% } %>
+
+                        <% evidenceList.forEach(e=> { %>
+                            <tr>
+                                <td>
+                                    <%= e.case_id %>
+                                </td>
+                                <td>
+                                    <%= e.analyst %>
+                                </td>
+                                <td>
+                                    <%= e.current_status %>
+                                </td>
+                                <td>
+                                    <a href="/supervisor/analysis/review/<%= e.evidence_id %>" class="btn">
+                                        Review
+                                    </a>
+                                </td>
+                            </tr>
+                            <% }) %>
+            </tbody>
+        </table>
+
+        <br>
+        <a href="/supervisor/dashboard">⬅ Back to Dashboard</a>
+    </div>
+
+</body>
+
+</html>

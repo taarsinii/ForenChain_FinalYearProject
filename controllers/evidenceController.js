@@ -1,6 +1,10 @@
 const db = require("../config/db");
 const crypto = require("crypto");
 const AuditLog = require("../models/AuditLog");
+const { logBlockchainEvent } = require("../utils/blockchainLogger");
+const fs = require("fs");
+const path = require("path");
+const { generateChainHash } = require("../utils/hashChain");
 
 // ================================
 // Show Add Evidence Form 
@@ -14,46 +18,59 @@ exports.showAddForm = (req, res) => {
 exports.addEvidence = async (req, res) => {
     try {
         const { description } = req.body;
-        const userId = req.session?.user?.user_id || null;
-        const photo_path = req.file ? req.file.path : null;
+        const userId = req.session.user.user_id;
+        const photoPath = req.file ? req.file.path : null;
 
-        const timestamp = new Date().toISOString().slice(0, 19).replace("T", " ");
-        const hash = crypto.createHash("sha256").update(description + timestamp).digest("hex");
+        if (!photoPath) return res.send("Evidence file required");
 
-        const [rows] = await db.execute("SELECT COUNT(*) AS count FROM evidence");
-        const nextId = rows[0].count + 1;
+        // 1️⃣ HASH THE ACTUAL FILE (CRITICAL)
+        const fileBuffer = fs.readFileSync(photoPath);
+        const fileHash = crypto.createHash("sha256").update(fileBuffer).digest("hex");
 
-        const [result] = await db.execute(
-            `INSERT INTO evidence (case_id, description, timestamp_collected, collected_by, photo_path, current_status, initial_hash)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            ["CASE-" + nextId.toString().padStart(4, "0"), description, timestamp, userId, photo_path, 'pending_supervisor', hash]
-        );
+        // 2️⃣ Generate Case ID
+        const [[{ count }]] = await db.execute("SELECT COUNT(*) AS count FROM evidence");
+        const caseId = "CASE-" + String(count + 1).padStart(4, "0");
 
-        const evidence_id = result.insertId;
+        // 3️⃣ Insert evidence
+        const [result] = await db.execute(`
+            INSERT INTO evidence
+            (case_id, description, timestamp_collected, collected_by, photo_path, current_status, initial_hash)
+            VALUES (?, ?, NOW(), ?, ?, 'pending_supervisor', ?)
+        `, [caseId, description, userId, photoPath, fileHash]);
 
-        await db.execute(
-            "UPDATE evidence SET case_id=? WHERE evidence_id=?",
-            ["CASE-" + nextId.toString().padStart(4, "0"), evidence_id]
-        );
+        const evidenceId = result.insertId;
 
-        await db.execute(
-            `INSERT INTO evidence_chain (evidence_id, action, actor_id, data_hash, previous_hash)
-             VALUES (?, ?, ?, ?, ?)`,
-            [evidence_id, 'Evidence Collected', userId, hash, '']
-        );
+        // 4️⃣ GENESIS BLOCK
+        const timestamp = new Date().toISOString();
+        const chainHash = generateChainHash({
+            previousHash: null,
+            evidenceId,
+            action: "Evidence Collected",
+            actorId: userId,
+            timestamp,
+            extraData: fileHash
+        });
 
-        // ================================
-        // AUDIT LOG: EVIDENCE REGISTERED 
-        // ================================
-        await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-            [userId, `Added evidence ID: ${evidence_id}`, req.ip]
-        );
+        const txHash = await logBlockchainEvent(evidenceId, "Evidence Collected");
+
+        await db.execute(`
+            INSERT INTO evidence_chain
+            (evidence_id, action, actor_id, data_hash, previous_hash, tx_hash)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [evidenceId, "Evidence Collected", userId, chainHash, null, txHash]);
+
+        await AuditLog.log({
+            user_id: userId,
+            action: "EVIDENCE_COLLECTED",
+            details: `Evidence ${caseId} collected`,
+            ip: req.ip
+        });
 
         res.redirect("/evidence/my-evidence");
+
     } catch (err) {
-        console.error("Error adding evidence:", err);
-        res.status(500).send("Error adding evidence");
+        console.error(err);
+        res.status(500).send("Evidence upload failed");
     }
 };
 
@@ -99,37 +116,61 @@ exports.showTransferForm = async (req, res) => {
 // ================================
 // Transfer Evidence 
 // ================================
-exports.transferEvidence = async (req, res) => {
+exports.transferToAnalyst = async (req, res) => {
     try {
         const evidence_id = req.params.id;
-        const from_user = req.session?.user?.user_id || null;
-        const { to_user, transfer_type } = req.body;
+        const investigatorId = req.session.user.user_id;
 
+        // 1. Find analyst automatically
+        const [[analyst]] = await db.execute(
+            "SELECT user_id FROM users WHERE role='analyst' LIMIT 1"
+        );
+
+        if (!analyst) return res.send("No analyst available");
+
+        // 2. Create transfer
         const signature = crypto.createHash("sha256")
-            .update(`${evidence_id}-${from_user}-${to_user}-${Date.now()}`)
+            .update(`${evidence_id}-${investigatorId}-${analyst.user_id}-${Date.now()}`)
             .digest("hex");
 
+        await db.execute(`
+            INSERT INTO transfers
+            (evidence_id, sender_id, receiver_id, transfer_type, signature_hash)
+            VALUES (?, ?, ?, 'to_lab', ?)
+        `, [evidence_id, investigatorId, analyst.user_id, signature]);
+
+        // 3. Update evidence status
         await db.execute(
-            `INSERT INTO transfers (evidence_id, from_user, to_user, transfer_type, signature_hash)
-             VALUES (?, ?, ?, ?, ?)`,
-            [evidence_id, from_user, to_user, transfer_type, signature]
+            "UPDATE evidence SET current_status='transferred_to_lab' WHERE evidence_id=?",
+            [evidence_id]
         );
 
-        const status = transfer_type === 'to_supervisor' ? 'pending_supervisor' : 'transferred_to_lab';
-        await db.execute(
-            "UPDATE evidence SET current_status=? WHERE evidence_id=?",
-            [status, evidence_id]
-        );
+        // 4. Blockchain
+        const txHash = await logBlockchainEvent(evidence_id, "Transferred to Analyst");
 
-        // ================================
-        // AUDIT LOG: EVIDENCE TRANSFERRED 
-        // ================================
-        await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address) VALUES (?, ?, ?)",
-            [from_user, `Transferred evidence ID: ${evidence_id} to user ${to_user}`, req.ip]
-        );
+        await db.execute(`
+            INSERT INTO evidence_chain
+            (evidence_id, action, actor_id, data_hash, previous_hash, tx_hash)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [
+            evidence_id,
+            "Transferred to Analyst",
+            investigatorId,
+            signature,
+            null,
+            txHash
+        ]);
+
+        // 5. Audit log
+        await AuditLog.log({
+            user_id: investigatorId,
+            action: "EVIDENCE_TRANSFERRED_TO_ANALYST",
+            details: `Evidence ID ${evidence_id} transferred to Analyst ID ${analyst.user_id}`,
+            ip: req.ip
+        });
 
         res.redirect("/evidence/my-evidence");
+
     } catch (err) {
         console.error(err);
         res.status(500).send("Error transferring evidence");
@@ -166,25 +207,23 @@ exports.viewEvidenceDetails = async (req, res) => {
 // ================================
 // Edit Evidence (Rejected) 
 // ================================
-exports.editEvidenceForm = async (req, res) => {
-    const { id } = req.params;
-    const investigatorId = req.session.user.user_id;
+exports.editEvidence = async (req, res) => {
+    const evidenceId = req.params.id;
+    const userId = req.session.user.user_id;
 
     const [rows] = await db.execute(
-        `SELECT * FROM evidence 
-         WHERE evidence_id = ? 
+        `SELECT * FROM evidence
+         WHERE evidence_id = ?
          AND collected_by = ?
-         AND current_status = 'rejected'`,
-        [id, investigatorId]
+         AND current_status = 'rejected_supervisor'`,
+        [evidenceId, userId]
     );
 
     if (rows.length === 0) {
-        return res.send("Evidence not found or cannot be edited");
+        return res.status(403).send("Evidence not found or cannot be edited");
     }
 
-    res.render("investigator/editEvidence", {
-        evidence: rows[0]
-    });
+    res.render("investigator/editEvidence", { evidence: rows[0] });
 };
 
 // ================================

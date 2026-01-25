@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Supervisor Review – Forensic Analysis</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2,
+        h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            resize: vertical;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+
+        .readonly {
+            background: #f0f0f0;
+        }
+
+        .meta p {
+            margin: 4px 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .approve {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .back {
+            background: #7f8c8d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 4px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #f39c12;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Supervisor Review – Forensic Analysis</h2>
+
+        <div class="warning">
+            <strong>Supervisor Responsibility:</strong><br>
+            You are required to review the analyst’s work and upload CCTV / screen recording
+            footage as proof of supervision to prevent misconduct.
+        </div>
+
+        <!-- ================= Evidence Info ================= -->
+        <div class="section meta">
+            <h3>Evidence Information</h3>
+            <p><strong>Case ID:</strong>
+                <%= evidence.case_id %>
+            </p>
+            <p><strong>Description:</strong>
+                <%= evidence.description %>
+            </p>
+            <p><strong>Collected By:</strong>
+                <%= evidence.investigator_full_name %>
+            </p>
+            <p><strong>Current Status:</strong>
+                <%= evidence.current_status %>
+            </p>
+
+            <p>
+                <a href="/analyst/download/<%= evidence.evidence_id %>">
+                    Download Original Evidence File
+                </a>
+            </p>
+        </div>
+
+        <!-- ================= Analyst Analysis ================= -->
+        <div class="section">
+            <h3>Analyst Forensic Analysis (Read Only)</h3>
+
+            <label>Tools Used</label>
+            <textarea class="readonly" readonly rows="2"><%= analysis?.tools_used || '-' %></textarea>
+
+            <label>Methodology</label>
+            <textarea class="readonly" readonly rows="3"><%= analysis?.methodology || '-' %></textarea>
+
+            <label>Observations</label>
+            <textarea class="readonly" readonly rows="4"><%= analysis?.observations || '-' %></textarea>
+
+            <label>Conclusion</label>
+            <textarea class="readonly" readonly rows="3"><%= analysis?.conclusion || '-' %></textarea>
+        </div>
+
+        <!-- ================= Supervisor Upload ================= -->
+        <div class="section">
+            <h3>Supervisor Verification Video</h3>
+
+            <form action="/supervisor/analysis/approve/<%= evidence.evidence_id %>" method="POST"
+                enctype="multipart/form-data">
+
+                <label>Upload CCTV / Screen Recording (MP4)</label>
+                <input type="file" name="supervisor_video" accept="video/*" required>
+
+                <label>Supervisor Notes</label>
+                <textarea name="supervisor_notes" rows="3"
+                    placeholder="Notes regarding review, supervision, or observations"></textarea>
+
+                <div class="actions">
+                    <button type="submit" class="btn approve">
+                        Upload & Approve
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ================= Reject ================= -->
+        <div class="section">
+            <h3>Reject Analysis</h3>
+
+            <form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
+                <label>Reason for Rejection</label>
+                <textarea name="reason" rows="3" required></textarea>
+
+                <div class="actions">
+                    <button type="submit" class="btn reject">
+                        Reject Analysis
+                    </button>
+                    <a href="/supervisor/pending" class="back">Back</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -29,7 +29,7 @@
                         <%= r.report_hash %>
                     </td>
                     <td>
-                        <%= r.uploaded_at.toLocaleString() %>
+                        <%= new Date(r.uploaded_at).toLocaleString() %>
                     </td>
                     <td>
                         <%= r.current_status %>

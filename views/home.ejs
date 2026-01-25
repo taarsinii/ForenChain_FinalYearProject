@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForenChain | Digital Thread of Justice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617;
+            background-image: linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.8)), url('/public/images/homepage_background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #3b82f6;
+            /* Blue-500 color */
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link:hover {
+            color: white;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .partner-bar {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes pulse-green {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-green 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center">
+
+    <div class="w-full flex justify-end px-12 py-4">
+        <div class="flex items-center space-x-2 text-xs font-medium text-gray-300">
+            <span class="status-dot"></span>
+            <span>Network Status: Secure / Blockchain Active</span>
+        </div>
+    </div>
+
+    <header class="w-full max-w-6xl px-6">
+        <nav class="glass-nav flex justify-between items-center px-8 py-4">
+            <div class="flex items-center space-x-2 text-2xl font-bold">
+                <span class="text-blue-500">§</span>
+                <span>ForenChain</span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-lg font-medium text-gray-300">
+                <a href="#" class="nav-link">Features</a>
+                <a href="#" class="nav-link">SOP Standards</a>
+                <a href="#" class="nav-link">About Us</a>
+            </div>
+            <a href="/login"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-2 rounded-lg font-bold transition shadow-lg shadow-blue-900/20">
+                Log In
+            </a>
+        </nav>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-center text-center px-4 mt-12">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight">
+            Securing the <br> <span class="text-white">Digital Thread of Justice</span>
+        </h1>
+        <p class="text-gray-400 max-w-2xl text-lg mb-8 leading-relaxed">
+            Blockchain-Based Chain of Custody Management <br>
+            compliant with Forensic SOPs and PDRM Standards
+        </p>
+
+        <a href="/login"
+            class="bg-blue-500 hover:bg-blue-400 text-white px-10 py-4 rounded-lg text-xl font-bold transition-all transform hover:scale-105 shadow-xl shadow-blue-500/30 mb-16">
+            Access Secure Portal
+        </a>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mb-16">
+            <div class="feature-card p-8 text-center relative overflow-hidden">
+                <div class="absolute top-4 right-4 text-blue-500/20 text-4xl"><i class="fas fa-lock"></i></div>
+                <h3 class="text-xl font-bold mb-4">Integrity</h3>
+                <p class="text-gray-400 text-sm mb-4 leading-relaxed">Cryptographic proof for tamper-proof evidence for
+                    evidence records.</p>
+                <div class="text-[10px] text-gray-500 font-mono italic">(Immutable Hashing)</div>
+            </div>
+
+            <div class="feature-card p-8 text-center relative overflow-hidden">
+                <div class="absolute top-4 right-4 text-blue-500/20 text-4xl"><i class="fas fa-share-nodes"></i></div>
+                <h3 class="text-xl font-bold mb-4">Transparency</h3>
+                <p class="text-gray-400 text-sm mb-4 leading-relaxed">Real-time distributed audit logs accessible to
+                    authorized personnel.</p>
+                <div class="text-[10px] text-gray-500 font-mono italic">(Distributed Ledger)</div>
+            </div>
+
+            <div class="feature-card p-8 text-center relative overflow-hidden border-blue-500/50">
+                <div class="absolute top-4 right-4 text-blue-500/20 text-4xl"><i class="fas fa-file-contract"></i></div>
+                <h3 class="text-xl font-bold mb-4 border-b border-blue-500/30 pb-2">Compliance</h3>
+                <p class="text-gray-400 text-sm mb-4 leading-relaxed">Adherence to Evidence Act 1950 & Digital Forensic
+                    SOPs.</p>
+                <div class="text-[10px] text-gray-500 font-mono italic">(Malaysian SOPs)</div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-5xl mb-12">
+            <h4 class="text-left text-gray-500 text-xs font-bold uppercase tracking-widest mb-4 px-6">Trust Partners
+            </h4>
+            <div
+                class="partner-bar flex flex-col md:flex-row justify-between items-center px-10 py-6 space-y-4 md:space-y-0">
+                <div class="text-gray-500 text-[10px] text-left">
+                    Developed for Peninsula College FYP 2026. <br>
+                    Securely encrypted with SHA-256 protocols.
+                </div>
+                <div class="flex items-center space-x-8 opacity-80">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Coat_of_arms_of_Malaysia.svg/1200px-Coat_of_arms_of_Malaysia.svg.png"
+                            alt="Gov" class="h-8">
+                        <div class="text-left leading-none">
+                            <div class="text-[10px] font-bold">CyberSecurity</div>
+                            <div class="text-[8px] uppercase">Malaysia</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 border-l border-white/10 pl-8">
+                        <div class="text-right leading-none">
+                            <div class="text-sm font-black tracking-tighter">PDRM</div>
+                        </div>
+                        <i class="fas fa-shield-halved text-2xl text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

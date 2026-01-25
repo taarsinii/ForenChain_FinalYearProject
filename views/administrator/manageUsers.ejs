@@ -1,71 +1,199 @@
-<h2>Manage Users</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<form action="/admin/audit-logs" method="GET">
-    <button style="padding:8px 15px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;">
-        View Audit Logs
-    </button>
-</form>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForenChain | Manage Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #050a18;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
 
-<form action="/admin/users/add" method="POST">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="text" name="full_name" placeholder="Full Name" required>
-    <input type="password" name="password" placeholder="Password" required>
+        .sidebar-item-active {
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+            border-radius: 8px;
+        }
 
-    <select name="role">
-        <option value="administrator">Admin</option>
-        <option value="investigator">Investigator</option>
-        <option value="supervisor">Supervisor</option>
-        <option value="analyst">Analyst</option>
-        <option value="prosecutor">Prosecutor</option>
-    </select>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-    <button type="submit">Add User</button>
-</form>
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
 
-<hr>
+        .administrator-bg {
+            background: #1d4dcf;
+        }
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Role</th>
-        <th>Username</th>
-        <th>Actions</th>
-    </tr>
+        .investigator-bg {
+            background: #15803d;
+        }
 
-    <% users.forEach(user=> { %>
-        <tr>
-            <td>
-                <%= user.user_id %>
-            </td>
-            <td>
-                <%= user.full_name %>
-            </td>
-            <td>
-                <%= user.role %>
-            </td>
-            <td>
-                <%= user.username %>
-            </td>
-            <td>
-                <form action="/admin/users/edit/<%= user.user_id %>" method="POST" style="display:inline-block;">
-                    <input type="text" name="username" value="<%= user.username %>">
-                    <input type="text" name="full_name" value="<%= user.full_name %>">
-                    <select name="role">
-                        <option <%=user.role=='administrator' ?'selected':'' %> value="administrator">Admin</option>
-                        <option <%=user.role=='investigator' ?'selected':'' %> value="investigator">Investigator
-                        </option>
-                        <option <%=user.role=='supervisor' ?'selected':'' %> value="supervisor">Supervisor</option>
-                        <option <%=user.role=='analyst' ?'selected':'' %> value="analyst">Analyst</option>
-                        <option <%=user.role=='prosecutor' ?'selected':'' %> value="prosecutor">Prosecutor</option>
+        .supervisor-bg {
+            background: #7e22ce;
+        }
+
+        .analyst-bg {
+            background: #b45309;
+        }
+
+        .prosecutor-bg {
+            background: #be123c;
+        }
+
+        input,
+        select {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(59, 130, 246, 0.2) !important;
+            color: white !important;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <aside class="w-64 border-r border-gray-800 flex flex-col p-6 space-y-8">
+        <div class="flex items-center space-x-2 text-2xl font-bold tracking-tight">
+            <span class="text-[#3b82f6] text-3xl">§</span>
+            <span>ForenChain</span>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <a href="/admin/dashboard"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i><span>Dashboard</span>
+            </a>
+            <a href="/admin/users" class="sidebar-item-active flex items-center space-x-3 p-3 transition">
+                <i data-lucide="users" class="w-5 h-5"></i><span>Manage Users</span>
+            </a>
+            <a href="/admin/audit-logs"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="file-text" class="w-5 h-5"></i><span>Audit Logs</span>
+            </a>
+            <a href="/admin/backups" class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="save" class="w-5 h-5"></i><span>Backup & Restore</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto">
+        <header class="flex items-center justify-between p-6">
+            <h1 class="text-2xl font-semibold">Manage Users</span></h1>
+        </header>
+
+        <section class="p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <div class="relative w-72">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-500 w-4 h-4"></i>
+                    <input type="text" placeholder="Search"
+                        class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <button onclick="toggleModal('addUserModal')"
+                    class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-medium transition flex items-center space-x-2">
+                    <span>Add User</span>
+                </button>
+            </div>
+
+            <div class="glass-card overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-white/5 text-gray-400 text-sm uppercase">
+                        <tr>
+                            <th class="p-4">ID</th>
+                            <th class="p-4">Name</th>
+                            <th class="p-4">Role</th>
+                            <th class="p-4">Username</th>
+                            <th class="p-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800">
+                        <% users.forEach(user=> { %>
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-4 text-gray-400">
+                                    <%= user.user_id %>
+                                </td>
+                                <td class="p-4 font-medium">
+                                    <%= user.full_name %>
+                                </td>
+                                <td class="p-4">
+                                    <span class="role-badge <%= user.role %>-bg">
+                                        <%= user.role %>
+                                    </span>
+                                </td>
+                                <td class="p-4 text-gray-300">
+                                    <%= user.username %>
+                                </td>
+                                <td class="p-4 flex justify-center space-x-2">
+                                    <a href="/admin/users/edit/<%= user.user_id %>"
+                                        class="p-2 border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white rounded-md transition">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </a>
+                                    <form action="/admin/users/delete/<%= user.user_id %>" method="POST"
+                                        onsubmit="return confirm('Delete this user?')">
+                                        <button
+                                            class="p-2 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white rounded-md transition">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="addUserModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50">
+        <div class="glass-card p-8 w-full max-w-md bg-[#0a0f1d]">
+            <h2 class="text-xl font-bold mb-6">Create New User</h2>
+            <form action="/admin/users/add" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Full Name</label>
+                    <input type="text" name="full_name" required class="w-full p-2 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Username</label>
+                    <input type="text" name="username" required class="w-full p-2 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Role</label>
+                    <select name="role" class="w-full p-2 rounded-md">
+                        <option value="administrator">Administrator</option>
+                        <option value="investigator">Investigator</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="analyst">Analyst</option>
+                        <option value="prosecutor">Prosecutor</option>
                     </select>
-                    <button type="submit">Save</button>
-                </form>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Password</label>
+                    <input type="password" name="password" required class="w-full p-2 rounded-md">
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" onclick="toggleModal('addUserModal')"
+                        class="flex-1 bg-gray-700 p-2 rounded-md">Cancel</button>
+                    <button type="submit" class="flex-1 bg-blue-600 p-2 rounded-md">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                <form action="/admin/users/delete/<%= user.user_id %>" method="POST" style="display:inline-block;">
-                    <button type="submit" style="color:red">Delete</button>
-                </form>
-            </td>
-        </tr>
-        <% }) %>
-</table>
+    <script>
+        lucide.createIcons();
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+    </script>
+</body>
+
+</html>

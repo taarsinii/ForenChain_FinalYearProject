@@ -19,4 +19,19 @@ router.post("/approve/:id", supervisorController.approveEvidence);
 // Reject evidence (with reason)
 router.post("/reject/:id", supervisorController.rejectEvidence);
 
+// 🔍 Analysis review
+router.get("/analysis/pending", supervisorController.listPendingAnalysis);
+router.get("/analysis/review/:id", supervisorController.reviewAnalysis);
+
+// 🎥 Approve analysis + upload video
+const multer = require("multer");
+const upload = multer({ dest: "uploads/supervisor_videos/" });
+
+router.post(
+    "/analysis/approve/:id",
+    upload.single("supervisor_video"),
+    supervisorController.approveAnalysis
+);
+
+
 module.exports = router;

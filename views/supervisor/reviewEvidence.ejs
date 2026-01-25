@@ -1,27 +1,117 @@
-<h2>Review Evidence</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<p><strong>Case ID:</strong>
-    <%= evidenceList[0].case_id %>
-</p>
-<p><strong>Description:</strong>
-    <%= evidenceList[0].description %>
-</p>
-<p><strong>Collected By:</strong>
-    <%= evidenceList[0].investigator %>
-</p>
+<head>
+    <meta charset="UTF-8">
+    <title>Review Evidence</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
 
-<hr>
+        .evidence-box {
+            border: 1px solid #333;
+            padding: 20px;
+            max-width: 800px;
+        }
 
-<form action="/supervisor/approve/<%= evidenceList[0].evidence_id %>" method="POST">
-    <label>Supervisor Notes (optional):</label><br>
-    <textarea name="notes" rows="4" cols="50"></textarea><br><br>
-    <button>Approve Evidence</button>
-</form>
+        img {
+            margin-top: 10px;
+            max-width: 400px;
+            border: 1px solid #000;
+        }
 
-<hr>
+        textarea {
+            width: 100%;
+        }
 
-<form action="/supervisor/reject/<%= evidenceList[0].evidence_id %>" method="POST">
-    <label style="color:red;">Rejection Reason (required):</label><br>
-    <textarea name="reason" rows="4" cols="50" required></textarea><br><br>
-    <button style="color:red;">Reject Evidence</button>
-</form>
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .approve {
+            background-color: #2ecc71;
+            border: none;
+        }
+
+        .reject {
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🔍 Review Evidence </h2>
+
+    <div class="evidence-box">
+
+        <p><strong>Case ID:</strong>
+            <%= evidence.case_id %>
+        </p>
+
+        <p><strong>Description:</strong><br>
+            <%= evidence.description %>
+        </p>
+
+        <p><strong>Collected By:</strong><br>
+            Investigator ID: <%= evidence.investigator %><br>
+                Full Name: <%= evidence.investigator_full_name %><br>
+                    Username: <%= evidence.investigator_username %>
+        </p>
+
+
+        <p><strong>Collected At:</strong>
+            <%= new Date(evidence.timestamp_collected).toLocaleString() %>
+        </p>
+
+        <p><strong>Evidence Status:</strong>
+            <%= evidence.current_status %>
+        </p>
+
+        <hr>
+
+        <h3>📁 Uploaded Evidence</h3>
+
+        <% if (evidence.photo_path) { %>
+            <p><strong>Evidence Photo:</strong></p>
+            <img src="/<%= evidence.photo_path %>" alt="Uploaded Evidence Photo">
+            <% } else { %>
+                <p><em>No photo uploaded by investigator.</em></p>
+                <% } %>
+
+    </div>
+
+    <br>
+
+    <!-- ================================ -->
+    <!-- APPROVE EVIDENCE -->
+    <!-- ================================ -->
+    <form action="/supervisor/approve/<%= evidence.evidence_id %>" method="POST">
+        <label><strong>Supervisor Notes (optional):</strong></label><br>
+        <textarea name="supervisor_notes" rows="4"></textarea><br>
+        <button class="approve" type="submit">✅ Approve Evidence</button>
+    </form>
+
+    <br>
+
+    <!-- ================================ -->
+    <!-- REJECT EVIDENCE -->
+    <!-- ================================ -->
+    <form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
+        <label><strong>Rejection Reason (required):</strong></label><br>
+        <textarea name="reason" rows="4" required></textarea><br>
+        <button class="reject" type="submit">❌ Reject Evidence</button>
+    </form>
+
+    <br>
+    <a href="/supervisor/pending">⬅ Back to Pending Evidence</a>
+
+</body>
+
+</html>

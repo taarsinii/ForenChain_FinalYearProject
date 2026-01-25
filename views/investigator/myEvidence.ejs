@@ -23,39 +23,43 @@
                 <% if (e.current_status==='pending_supervisor' ) { %>
                     ⏳ Waiting for Supervisor
                     <% } else if (e.current_status==='approved_supervisor' ) { %>
-                        ✅ Approved
-                        <% } else if (e.current_status==='rejected' ) { %>
-                            ❌ Rejected
-                            <% } %>
+                        ✅ Approved by Supervisor
+                        <% } else if (e.current_status==='rejected_supervisor' ) { %>
+                            ❌ Rejected by Supervisor
+                            <% } else if (e.current_status==='transferred_to_lab' ) { %>
+                                🔬 Transferred to Analyst
+                                <% } else if (e.current_status==='report_uploaded' ) { %>
+                                    📄 Forensic Report Uploaded
+                                    <% } else if (e.current_status==='completed' ) { %>
+                                        🏁 Case Completed
+                                        <% } else { %>
+                                            —
+                                            <% } %>
             </td>
 
             <!-- SUPERVISOR FEEDBACK -->
             <td>
                 <% if (e.current_status==='approved_supervisor' ) { %>
                     <strong>Notes:</strong>
-                    <%= e.supervisor_reason || '—' %>
-
-                        <% } else if (e.current_status==='rejected' ) { %>
+                    <%= e.supervisor_notes || '—' %>
+                        <% } else if (e.current_status==='rejected_supervisor' ) { %>
                             <strong style="color:red;">Reason:</strong>
                             <%= e.supervisor_reason %>
-
                                 <% } else { %>
                                     —
                                     <% } %>
             </td>
 
-            <!-- ACTION BUTTONS -->
+            <!-- ACTION -->
             <td>
-                <% if (e.current_status==='rejected' ) { %>
+                <% if (e.current_status==='rejected_supervisor' ) { %>
                     <a href="/investigator/edit/<%= e.evidence_id %>">
-                        ✏️ Edit & Resubmit
+                        ✏ Edit & Resubmit
                     </a>
-
                     <% } else if (e.current_status==='approved_supervisor' ) { %>
-                        <a href="/investigator/transfer/<%= e.evidence_id %>">
+                        <a href="/evidence/transfer/<%= e.evidence_id %>">
                             🔁 Transfer to Analyst
                         </a>
-
                         <% } else { %>
                             —
                             <% } %>

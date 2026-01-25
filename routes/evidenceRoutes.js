@@ -21,21 +21,27 @@ router.get("/dashboard", isLoggedIn, roleMiddleware("investigator"), (req, res) 
 // ============================
 // Evidence Routes
 // ============================
+
+// Add evidence
 router.get("/add", evidenceController.showAddForm);
 router.post("/add", upload.single("photo"), evidenceController.addEvidence);
 
+//my evidence
 router.get("/my-evidence", evidenceController.listMyEvidence);
 
-router.get("/transfer/:id", evidenceController.showTransferForm);
-router.post("/transfer/:id", evidenceController.transferEvidence);
+router.get("/transfer/:id", evidenceController.showTransferForm); //// Show transfer page (after supervisor approval)
+router.post("/transfer-to-analyst/:id", evidenceController.transferToAnalyst); //NEW: Transfer to Analyst (AUTO)
 
 router.get("/evidence/:id", evidenceController.viewEvidenceDetails);
+
+// ============================
+// Rejected Evidence Flow
+// ============================
 
 // IF REJECTED (EDIT & RESUBMITTED)
 
 // Edit rejected evidence
-router.get("/edit/:id", evidenceController.editEvidenceForm);
-
+router.get("/edit/:id", evidenceController.editEvidence);
 // Resubmit rejected evidence
 router.post("/resubmit/:id", evidenceController.resubmitEvidence);
 

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OTP Verification</title>
+</head>
+
+<body>
+    <h2>OTP Verification</h2>
+
+    <p>
+        An OTP has been sent to your registered device.
+    </p>
+
+    <form method="POST" action="/verify-otp">
+        <input type="text" name="otp" placeholder="Enter OTP" required />
+        <button type="submit">Verify</button>
+    </form>
+
+    <p style="font-size:12px;color:gray;">
+        * OTP verification is simulated for prototype demonstration
+    </p>
+
+    <!-- Safe rendering of error -->
+    <p style="color:red">
+        <%= error %>
+    </p>
+</body>
+
+</html>

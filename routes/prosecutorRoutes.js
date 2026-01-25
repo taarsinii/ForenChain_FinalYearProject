@@ -11,4 +11,7 @@ router.get("/dashboard", prosecutorController.dashboard);
 router.get("/case/:id", prosecutorController.viewCase);
 router.get("/export/:id", prosecutorController.exportChainPDF);
 
+//view blockchain page 
+router.get("/blockchain/:id", prosecutorController.viewBlockchain);
+
 module.exports = router;

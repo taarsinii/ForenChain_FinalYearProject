@@ -13,19 +13,26 @@
 <hr>
 
 <% if (evidence.current_status==='approved_supervisor' ) { %>
-    <h3 style="color:green;">Approved by Supervisor</h3>
+    <h3 style="color:green;">✅ Approved by Supervisor</h3>
+
     <p><strong>Supervisor Notes:</strong></p>
     <p>
-        <%= evidence.supervisor_reason || "No notes provided" %>
+        <%= evidence.supervisor_notes ? evidence.supervisor_notes : "No notes provided." %>
     </p>
     <% } %>
 
         <% if (evidence.current_status==='rejected_supervisor' ) { %>
-            <h3 style="color:red;">Rejected by Supervisor</h3>
+            <h3 style="color:red;">❌ Rejected by Supervisor</h3>
+
             <p><strong>Rejection Reason:</strong></p>
             <p>
                 <%= evidence.supervisor_reason %>
             </p>
+
+            <a href="/evidence/edit/<%= evidence.evidence_id %>" class="btn btn-warning">
+                ✏ Edit & Resubmit Evidence
+            </a>
             <% } %>
 
-                <a href="/investigator/my-evidence">⬅ Back</a>
+                <br>
+                <a href="/evidence/my-evidence">⬅ Back</a>

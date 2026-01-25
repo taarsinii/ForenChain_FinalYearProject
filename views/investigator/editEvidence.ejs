@@ -9,7 +9,7 @@
     <%= evidence.supervisor_reason %>
 </p>
 
-<form method="POST">
+<form method="POST" action="/investigator/resubmit/<%= evidence.evidence_id %>">
     <label>Description</label><br>
     <textarea name="description" rows="5" required>
 <%= evidence.description %>

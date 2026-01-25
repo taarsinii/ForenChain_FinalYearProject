@@ -47,6 +47,8 @@ app.use("/supervisor", supervisorRoutes);
 const analystRoutes = require("./routes/analystRoutes");
 app.use("/analyst", analystRoutes);
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 const prosecutorRoutes = require("./routes/prosecutorRoutes");
 app.use("/prosecutor", prosecutorRoutes);
 

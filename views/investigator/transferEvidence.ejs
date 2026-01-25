@@ -1,20 +1,20 @@
-<h2>Transfer Evidence</h2>
+<h2>Transfer Evidence to Analyst</h2>
 
-<form action="/evidence/transfer/<%= evidence.evidence_id %>" method="POST">
-    <p>Case ID: <%= evidence.case_id %>
+<div class="evidence-box">
+    <p><strong>Case ID:</strong>
+        <%= evidence.case_id %>
     </p>
-    <p>Description: <%= evidence.description %>
+    <p><strong>Description:</strong>
+        <%= evidence.description %>
     </p>
+    <p><strong>Status:</strong> Approved by Supervisor</p>
+</div>
 
-    <label>Transfer To User ID:</label>
-    <input type="number" name="to_user" required>
-
-    <label>Transfer Type:</label>
-    <select name="transfer_type">
-        <option value="to_supervisor">To Supervisor</option>
-        <option value="to_lab">To Lab</option>
-    </select>
-
-    <button type="submit">Transfer</button>
+<form action="/evidence/transfer-to-analyst/<%= evidence.evidence_id %>" method="POST">
+    <button type="submit" class="btn btn-primary">
+        🔁 Transfer to Analyst
+    </button>
 </form>
+
+<br>
 <a href="/evidence/my-evidence">⬅ Back</a>

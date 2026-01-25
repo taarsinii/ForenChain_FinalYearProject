@@ -10,3 +10,25 @@
 <form method="POST">
     <button type="submit">Submit Forensic Report</button>
 </form>
+
+--> views/analyst/reportForm.ejs code:
+
+<h2>Forensic Report for <%= evidence.case_id %>
+</h2>
+
+<p><strong>Description:</strong>
+    <%= evidence.description %>
+</p>
+<p><strong>Investigator:</strong>
+    <%= evidence.collected_by %>
+</p>
+
+<form action="/analyst/report/<%= evidence.evidence_id %>" method="POST" enctype="multipart/form-data">
+    <label>Upload Report (PDF)</label><br>
+    <input type="file" name="report" accept="application/pdf" required><br><br>
+
+    <label>Additional Notes / Observations</label><br>
+    <textarea name="notes" rows="6" cols="60"><%= report ? report.notes : '' %></textarea><br><br>
+
+    <button type="submit">Upload Report</button>
+</form>

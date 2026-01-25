@@ -1,0 +1,36 @@
+<h2>Database Backup & Restore</h2>
+
+<form action="/admin/backup/create" method="POST">
+    <button>Create Backup</button>
+</form>
+
+<h3>Available Backups</h3>
+
+<table border="1">
+    <tr>
+        <th>Backup File</th>
+        <th>Created At</th>
+        <th>Action</th>
+    </tr>
+
+    <% backups.forEach(b=> { %>
+        <tr>
+            <td>
+                <%= b.backup_file_path %>
+            </td>
+            <td>
+                <%= new Date(b.created_at).toLocaleString() %>
+            </td>
+            <td>
+                <form action="/admin/backup/restore" method="POST">
+                    <input type="hidden" name="backupFile" value="<%= b.backup_file_path %>">
+                    <button type="submit"
+                        onclick="return confirm('⚠️ Restore will overwrite current database. Continue?')">
+                        Restore
+                    </button>
+                </form>
+
+            </td>
+        </tr>
+        <% }) %>
+</table>

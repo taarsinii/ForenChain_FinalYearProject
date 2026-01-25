@@ -1,0 +1,26 @@
+<h2>Forensic Analysis - <%= evidence.case_id %>
+</h2>
+
+<form method="POST">
+    <label>Tools Used</label><br>
+    <textarea name="tools_used"><%= analysis?.tools_used || "" %></textarea><br><br>
+
+    <label>Methodology</label><br>
+    <textarea name="methodology"><%= analysis?.methodology || "" %></textarea><br><br>
+
+    <label>Observations</label><br>
+    <textarea name="observations"><%= analysis?.observations || "" %></textarea><br><br>
+
+    <label>Conclusion</label><br>
+    <textarea name="conclusion"><%= analysis?.conclusion || "" %></textarea><br><br>
+
+    <button type="submit">Save Analysis</button>
+</form>
+
+<% if (analysis && !analysis.is_finalized) { %>
+    <form action="/analyst/finalize/<%= evidence.evidence_id %>" method="POST">
+        <button style="background:red;color:white;">Finalize & Generate PDF</button>
+    </form>
+    <% } %>
+
+        <a href="/analyst/view/<%= evidence.evidence_id %>">⬅ Back</a>

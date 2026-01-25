@@ -22,4 +22,11 @@ router.post("/users/delete/:id", adminController.deleteUser);
 // ============================
 router.get("/audit-logs", adminController.viewAuditLogs);
 
+// ============================
+// Backup & Restore
+// ============================
+router.get("/backups", adminController.viewBackups);
+router.post("/backup/create", adminController.createBackup);
+router.post("/backup/restore", adminController.restoreBackup);
+
 module.exports = router;
