@@ -1,36 +1,146 @@
-<h2>Database Backup & Restore</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<form action="/admin/backup/create" method="POST">
-    <button>Create Backup</button>
-</form>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForenChain | Database Backup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #050a18;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
 
-<h3>Available Backups</h3>
+        .sidebar-item-active {
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+            border-radius: 8px;
+        }
 
-<table border="1">
-    <tr>
-        <th>Backup File</th>
-        <th>Created At</th>
-        <th>Action</th>
-    </tr>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-    <% backups.forEach(b=> { %>
-        <tr>
-            <td>
-                <%= b.backup_file_path %>
-            </td>
-            <td>
-                <%= new Date(b.created_at).toLocaleString() %>
-            </td>
-            <td>
-                <form action="/admin/backup/restore" method="POST">
-                    <input type="hidden" name="backupFile" value="<%= b.backup_file_path %>">
-                    <button type="submit"
-                        onclick="return confirm('⚠️ Restore will overwrite current database. Continue?')">
-                        Restore
-                    </button>
-                </form>
+        .backup-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
 
-            </td>
-        </tr>
-        <% }) %>
-</table>
+        .backup-item:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <aside class="w-64 border-r border-gray-800 flex flex-col p-6 space-y-8">
+        <div class="flex items-center space-x-2 text-2xl font-bold tracking-tight">
+            <span class="text-[#3b82f6] text-3xl">§</span>
+            <span>ForenChain</span>
+        </div>
+
+        <nav class="flex-1 space-y-2">
+            <a href="/admin/dashboard"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/admin/users" class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span>Manage Users</span>
+            </a>
+            <a href="/admin/audit-logs"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                <span>Audit Logs</span>
+            </a>
+            <a href="/admin/backups" class="sidebar-item-active flex items-center space-x-3 p-3 transition">
+                <i data-lucide="save" class="w-5 h-5"></i>
+                <span>Backup & Restore</span>
+            </a>
+            <a href="/logout" class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto">
+        <header class="flex items-center justify-between p-6">
+            <h1 class="text-2xl font-semibold">Database <span class="text-blue-400">Backup & Restore</span></h1>
+
+            <form action="/admin/backup/create" method="POST">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-medium transition flex items-center space-x-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Create New Backup</span>
+                </button>
+            </form>
+        </header>
+
+        <section class="p-6 space-y-6">
+            <h3 class="text-lg font-medium text-gray-300">Available Backups</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <% backups.forEach(b=> { %>
+                    <div class="backup-item p-5 rounded-xl space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div class="space-y-1">
+                                <p class="font-mono text-sm text-blue-400 break-all">
+                                    <%= b.backup_file_path %>
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    <%= new Date(b.created_at).toLocaleString() %>
+                                </p>
+                            </div>
+                            <i data-lucide="database" class="w-5 h-5 text-gray-600"></i>
+                        </div>
+
+                        <div class="flex space-x-3 pt-2">
+                            <form action="/admin/backup/restore" method="POST" class="flex-1">
+                                <input type="hidden" name="backupFile" value="<%= b.backup_file_path %>">
+                                <button type="submit"
+                                    onclick="return confirm('⚠️ Restore will overwrite current database. Continue?')"
+                                    class="w-full flex items-center justify-center space-x-2 py-2 px-3 rounded-md border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white transition text-sm">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                    <span>Restore</span>
+                                </button>
+                            </form>
+
+                            <a href="/admin/backup/download/<%= b.backup_file_path %>"
+                                class="flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition text-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+
+            <% if (backups.length===0) { %>
+                <div class="glass-card p-12 text-center text-gray-500">
+                    <i data-lucide="archive" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
+                    <p>No backups found. Create one to get started.</p>
+                </div>
+                <% } %>
+        </section>
+
+        <div class="fixed bottom-10 right-10 opacity-20 pointer-events-none">
+            <i data-lucide="sparkle" class="w-12 h-12 text-blue-400"></i>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

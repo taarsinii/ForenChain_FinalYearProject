@@ -404,12 +404,15 @@ exports.readyForProsecutor = async (req, res) => {
 // ================================
 // Transfer Evidence to Prosecutor
 // ================================
+// ================================
+// Transfer Evidence to Prosecutor (FIXED BLOCKCHAIN LINKING)
+// ================================
 exports.transferToProsecutor = async (req, res) => {
     try {
         const analystId = req.session.user.user_id;
         const { id } = req.params;
 
-        // Find a prosecutor
+        // 1️⃣ Find prosecutor
         const [[prosecutor]] = await db.execute(
             "SELECT user_id FROM users WHERE role='prosecutor' LIMIT 1"
         );
@@ -418,48 +421,72 @@ exports.transferToProsecutor = async (req, res) => {
             return res.send("No prosecutor available");
         }
 
-        // Create signature hash
+        // 2️⃣ Create transfer signature (proof of handover)
         const signatureHash = crypto
             .createHash("sha256")
-            .update(`${id} -${analystId} -${prosecutor.user_id} -${Date.now()} `)
+            .update(`${id}-${analystId}-${prosecutor.user_id}-${Date.now()}`)
             .digest("hex");
 
-        // Save transfer
+        // 3️⃣ Save transfer record
         await db.execute(`
             INSERT INTO transfers
-    (evidence_id, sender_id, receiver_id, transfer_type, signature_hash)
-VALUES(?, ?, ?, 'to_prosecutor', ?)
-    `, [id, analystId, prosecutor.user_id, signatureHash]);
+            (evidence_id, sender_id, receiver_id, transfer_type, signature_hash)
+            VALUES (?, ?, ?, 'to_prosecutor', ?)
+        `, [id, analystId, prosecutor.user_id, signatureHash]);
 
-        // Update evidence
+        // 4️⃣ Update evidence status
         await db.execute(
             "UPDATE evidence SET current_status='completed' WHERE evidence_id=?",
             [id]
         );
 
-        // Blockchain log
-        const txHash = await logBlockchainEvent(id, "Transferred to Prosecutor");
+        // 🔗 5️⃣ FETCH LAST BLOCK (CRITICAL FIX)
+        const [[last]] = await db.execute(
+            "SELECT data_hash FROM evidence_chain WHERE evidence_id=? ORDER BY block_id DESC LIMIT 1",
+            [id]
+        );
 
+        // 6️⃣ CREATE CHAINED BLOCK HASH (FIXED)
+        const timestamp = new Date().toISOString();
+
+        const chainHash = generateChainHash({
+            previousHash: last.data_hash,
+            evidenceId: id,
+            action: "Transferred to Prosecutor",
+            actorId: analystId,
+            timestamp,
+            extraData: signatureHash
+        });
+
+        // 7️⃣ Blockchain anchor (Ethereum / Testnet)
+        const txHash = await logBlockchainEvent(
+            id,
+            "Transferred to Prosecutor",
+            chainHash
+        );
+
+        // 🔒 8️⃣ SAVE FULL BLOCK (FIXED)
         await db.execute(`
             INSERT INTO evidence_chain
-    (evidence_id, action, actor_id, data_hash, tx_hash)
-VALUES(?, ?, ?, ?, ?)
+            (evidence_id, action, actor_id, data_hash, previous_hash, tx_hash)
+            VALUES (?, ?, ?, ?, ?, ?)
         `, [
             id,
             "Transferred to Prosecutor",
             analystId,
-            signatureHash,
+            chainHash,
+            last.data_hash,
             txHash
         ]);
 
-        // Audit log
+        // 9️⃣ Audit log
         await db.execute(
             "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
             [
                 analystId,
-                "Transferred evidence to prosecutor",
+                "EVIDENCE_TRANSFERRED_TO_PROSECUTOR",
                 req.ip,
-                `Evidence ID ${id}, Signature ${signatureHash} `
+                `Evidence ID ${id}, Signature ${signatureHash}`
             ]
         );
 

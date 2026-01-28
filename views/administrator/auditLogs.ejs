@@ -4,153 +4,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Logs</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Audit Logs | ForenChain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* ===== Professional Table Styling ===== */
+        /* Unified background with Dashboard */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 20px;
+            background-color: #050a18;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
         }
 
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+        /* Sidebar active style from Dashboard */
+        .sidebar-item-active {
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+            border-radius: 8px;
         }
 
-        a.back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
+        /* Table Card styling to match dashboard cards */
+        .log-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        a.back-link:hover {
-            text-decoration: underline;
+        .table-row:hover {
+            background-color: rgba(59, 130, 246, 0.1);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Action Badge Colors from your reference image */
+        .badge-blue {
+            background: #1D4ED8;
+            color: white;
         }
 
-        thead {
-            background-color: #007bff;
-            color: #fff;
-            position: sticky;
-            top: 0;
+        .badge-green {
+            background: #059669;
+            color: white;
         }
 
-        th,
-        td {
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tbody tr:hover {
-            background-color: #e1f0ff;
-        }
-
-        th {
-            font-weight: bold;
-        }
-
-        td {
-            word-break: break-word;
-        }
-
-        @media (max-width: 768px) {
-
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-
-            thead tr {
-                display: none;
-            }
-
-            tr {
-                margin-bottom: 15px;
-                border-bottom: 1px solid #ccc;
-            }
-
-            td {
-                padding-left: 50%;
-                position: relative;
-            }
-
-            td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 15px;
-                font-weight: bold;
-                white-space: nowrap;
-            }
+        .badge-purple {
+            background: #7C3AED;
+            color: white;
         }
     </style>
 </head>
 
-<body>
-    <h1>Audit Logs</h1>
-    <a href="/admin/dashboard" class="back-link">⬅ Back to Dashboard</a>
+<body class="flex h-screen overflow-hidden">
 
-    <table>
-        <thead>
-            <tr>
-                <th>Log ID</th>
-                <th>User</th>
-                <th>Action</th>
-                <th>Details / Notes</th>
-                <th>Timestamp</th>
-                <th>IP Address</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (!logs || logs.length===0) { %>
-                <tr>
-                    <td colspan="6" style="text-align:center;">No logs available</td>
-                </tr>
-                <% } else { %>
-                    <% logs.forEach(log=> { %>
-                        <tr>
-                            <td data-label="Log ID">
-                                <%= log.log_id %>
-                            </td>
-                            <td data-label="User">
-                                <%= log.username || 'Unknown User' %>
-                            </td>
-                            <td data-label="Action">
-                                <%= log.action %>
-                            </td>
-                            <td data-label="Details / Notes">
-                                <%= log.details || '-' %>
-                            </td>
-                            <td data-label="Timestamp">
-                                <%= new Date(log.timestamp).toLocaleString() %>
-                            </td>
-                            <td data-label="IP Address">
-                                <%= log.user_ip_address || '-' %>
-                            </td>
-                        </tr>
-                        <% }) %>
-                            <% } %>
-        </tbody>
-    </table>
+    <aside class="w-64 border-r border-gray-800 flex flex-col p-6 space-y-8">
+        <div class="flex items-center space-x-2 text-2xl font-bold tracking-tight">
+            <span class="text-[#3b82f6] text-3xl ">§</span>
+            <span>ForenChain</span>
+        </div>
+
+        <nav class="flex-1 space-y-2">
+            <a href="/admin/dashboard"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition rounded-lg">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/admin/users"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition rounded-lg">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span>Manage Users</span>
+            </a>
+            <a href="/admin/audit-logs"
+                class="sidebar-item-active flex items-center space-x-3 p-3 transition text-white">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                <span>Audit Logs</span>
+            </a>
+            <a href="/admin/backups"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition rounded-lg">
+                <i data-lucide="save" class="w-5 h-5"></i>
+                <span>Backup & Restore</span>
+            </a>
+            <a href="/logout"
+                class="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition rounded-lg">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+
+        <header class="flex items-center justify-between p-6">
+            <h1 class="text-2xl font-semibold">System <span class="text-blue-400">Audit Logs</span></h1>
+        </header>
+
+        <section class="flex-1 overflow-y-auto p-6">
+            <div class="log-card rounded-xl overflow-hidden">
+
+                <div class="p-4 flex items-center justify-between border-b border-gray-800">
+                    <div
+                        class="flex items-center space-x-3 bg-gray-900/50 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-400">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>2021-01-01 — 2026-01-17</span>
+                    </div>
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-gray-500"></i>
+                        <input type="text" placeholder="Search logs..."
+                            class="bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 text-white w-64">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="text-gray-400 text-xs uppercase tracking-wider bg-white/5">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Log ID</th>
+                                <th class="px-6 py-4 font-semibold">User</th>
+                                <th class="px-6 py-4 font-semibold text-center">Action</th>
+                                <th class="px-6 py-4 font-semibold">Details / Notes</th>
+                                <th class="px-6 py-4 font-semibold">Timestamp</th>
+                                <th class="px-6 py-4 font-semibold">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800 text-sm">
+                            <% logs.forEach(log=> {
+                                let badgeClass = 'badge-blue';
+                                if(log.action.includes('RESTORED')) badgeClass = 'badge-green';
+                                if(log.action.includes('BACKUP')) badgeClass = 'badge-purple';
+                                %>
+                                <tr class="table-row transition">
+                                    <td class="px-6 py-4 font-mono text-gray-500">
+                                        <%= log.log_id %>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium">
+                                        <%= log.username || 'admin12' %>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span
+                                            class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide <%= badgeClass %>">
+                                            <%= log.action %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-400 max-w-xs truncate">
+                                        <%= log.details || '-' %>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-300">
+                                        <%= new Date(log.timestamp).toLocaleString() %>
+                                    </td>
+                                    <td class="px-6 py-4 font-mono text-gray-500">
+                                        <%= log.ip || '::1' %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="fixed bottom-10 right-10 opacity-10 pointer-events-none">
+            <i data-lucide="sparkle" class="w-12 h-12 text-blue-400"></i>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 
 </html>
