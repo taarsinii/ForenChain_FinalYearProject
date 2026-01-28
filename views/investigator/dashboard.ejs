@@ -1,3 +1,334 @@
-<h2>Investigator Dashboard</h2><a href="/investigator/add">Add Evidence</a>
-<br>
-<a href="/evidence/my-evidence">📁 My Evidence</a>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investigator Dashboard | ForenChain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #05080f;
+            /* Deepened to match image */
+            --sidebar-bg: #070b14;
+            --card-bg: #0c1220;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar Styles --- */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        /* --- Updated Logo Styles to match Admin --- */
+        .logo-section {
+            padding: 0 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            /* Matches tailwind's space-x-2 */
+        }
+
+        .logo-symbol {
+            color: #3b82f6;
+            /* Exact blue from admin dashboard */
+            font-size: 1.875rem;
+            /* Matches text-3xl */
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            /* Matches text-2xl */
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            /* Matches tracking-tight */
+            color: #ffffff;
+        }
+
+        .nav-link {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-dim);
+            transition: 0.2s;
+            position: relative;
+        }
+
+        /* Active Blue Pill Styling */
+        .nav-link.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+
+        /* The thick blue vertical indicator on the right side of the link */
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 4px;
+            background-color: var(--accent-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 50px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .user-pill {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-dot {
+            height: 7px;
+            width: 7px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .welcome-text {
+            font-size: 2.8rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
+
+        .section-label {
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-blue);
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        /* --- Cards --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 35px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Glass Glow Effect on top of cards */
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .icon-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .blue-icon {
+            background: var(--accent-blue);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+        }
+
+        .purple-icon {
+            background: var(--accent-purple);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .card-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-info p {
+            margin: 0;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* --- Sidebar Components --- */
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 20px 25px;
+        }
+
+        .logout-link {
+            color: #ef4444 !important;
+            /* Brighter red for visibility */
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .grid-icon {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .grid-icon span {
+            background-color: currentColor;
+            border-radius: 1px;
+        }
+
+        .sparkle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="logo-section">
+            <span class="logo-symbol">§</span>
+            <span class="logo-text">ForenChain</span>
+        </div>
+
+        <a href="/investigator/dashboard" class="nav-link active">
+            <i class="fa-solid fa-border-all"></i> Dashboard
+        </a>
+        <a href="/investigator/add" class="nav-link">
+            <i class="fa-solid fa-file-export"></i> Submit Evidence
+        </a>
+        <a href="/evidence/my-evidence" class="nav-link">
+            <i class="fa-solid fa-briefcase"></i> My Cases
+        </a>
+
+        <div style="margin-top: auto;">
+            <hr class="sidebar-divider">
+            <a href="/logout" class="nav-link logout-link">
+                <div class="grid-icon">
+                    <span></span><span></span>
+                    <span></span><span></span>
+                </div>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header-top">
+            <div style="font-weight: 600; color: var(--text-dim);">Investigator Dashboard</div>
+            <div class="user-pill">
+                <img src="https://ui-avatars.com/api/?name=Investigator&background=3b82f6&color=fff" alt="User"
+                    style="width:22px; border-radius:50%;">
+                <span>Investigator Session</span>
+                <span class="status-dot"></span>
+            </div>
+        </header>
+
+        <h1 class="welcome-text">Welcome, Investigator</h1>
+
+        <span class="section-label">Quick Actions</span>
+
+        <div class="card-grid">
+            <a href="/investigator/add" class="action-card">
+                <div class="icon-circle blue-icon">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Submit Evidence</h3>
+                    <p>Securely upload and hash new forensic files.</p>
+                </div>
+            </a>
+
+            <a href="/evidence/my-evidence" class="action-card">
+                <div class="icon-circle purple-icon">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <div class="card-info">
+                    <h3>My Cases</h3>
+                    <p>Track approvals and transfer cases to the lab.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="sparkle">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: white; font-size: 2rem;"></i>
+        </div>
+    </main>
+
+</body>
+
+</html>

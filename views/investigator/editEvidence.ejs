@@ -1,21 +1,242 @@
-<h2>Edit & Resubmit Evidence</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<p><strong>Case ID:</strong>
-    <%= evidence.case_id %>
-</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Evidence | ForenChain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<p style="color:red;">
-    <strong>Supervisor Rejection Reason:</strong><br>
-    <%= evidence.supervisor_reason %>
-</p>
+    <style>
+        :root {
+            --bg-dark: #050a12;
+            --sidebar-bg: #070b14;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --accent-blue: #2563eb;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+        }
 
-<form method="POST" action="/investigator/resubmit/<%= evidence.evidence_id %>">
-    <label>Description</label><br>
-    <textarea name="description" rows="5" required>
-<%= evidence.description %>
-    </textarea><br><br>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
 
-    <button type="submit">🔄 Resubmit Evidence</button>
-</form>
+        /* --- Sidebar (Same as Dashboard) --- */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
 
-<a href="/investigator/my-evidence">⬅ Back</a>
+        .logo-section {
+            padding: 0 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-symbol {
+            color: #3b82f6;
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .nav-link {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-dim);
+            transition: 0.2s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .evidence-container {
+            width: 100%;
+            max-width: 550px;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+
+        .case-id-subtitle {
+            color: #4a90e2;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .evidence-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        /* Rejection Box Style */
+        .rejection-reason-box {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .rejection-reason-box strong {
+            color: #ef4444;
+            font-size: 0.9rem;
+        }
+
+        .rejection-text {
+            color: #ef4444;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            box-sizing: border-box;
+            height: 120px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+
+        .resubmit-btn {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+
+        .resubmit-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="logo-section">
+            <span class="logo-symbol">§</span>
+            <span class="logo-text">ForenChain</span>
+        </div>
+        <a href="/investigator/dashboard" class="nav-link"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+        <a href="/investigator/add" class="nav-link"><i class="fa-solid fa-file-export"></i> Submit Evidence</a>
+        <a href="/evidence/my-evidence" class="nav-link"><i class="fa-solid fa-briefcase"></i> My Cases</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="evidence-container">
+            <header>
+                <h2>Edit & Resubmit Evidence</h2>
+                <p class="case-id-subtitle">Case ID: <%= evidence.case_id %>
+                </p>
+            </header>
+
+            <form method="POST" action="/investigator/resubmit/<%= evidence.evidence_id %>" class="evidence-card">
+
+                <div class="input-group">
+                    <label>Evidence Description</label>
+                    <div class="rejection-reason-box">
+                        <strong>Supervisor Rejection Reason:</strong>
+                        <span class="rejection-text">
+                            <%= evidence.supervisor_reason %>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="description">Updated Description</label>
+                    <textarea id="description" name="description" required><%= evidence.description %></textarea>
+                </div>
+
+                <a href="/evidence/my-evidence" class="back-link" style="margin-bottom: 20px; display: block;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to My Cases
+                </a>
+
+                <button type="submit" class="resubmit-btn">
+                    Resubmit Evidence
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path
+                            d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z">
+                        </path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </main>
+
+</body>
+
+</html>

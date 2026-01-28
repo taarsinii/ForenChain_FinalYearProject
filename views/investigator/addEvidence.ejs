@@ -1,10 +1,156 @@
-<h2>Add New Evidence</h2>
+<div class="evidence-container">
+    <header>
+        <h2>Add New Evidence</h2>
+        <p class="subtitle">Case Details</p>
+    </header>
 
-<form action="/evidence/add" method="POST" enctype="multipart/form-data">
-    <label for="description">Evidence Description</label>
-    <textarea id="description" name="description" required></textarea>
+    <form action="/evidence/add" method="POST" enctype="multipart/form-data" class="evidence-card">
 
-    <label for="photo">Upload Photo</label>
-    <input type="file" id="photo" name="photo" accept="image/*">
-    <button type="submit">Submit Evidence</button>
-</form>
+        <div class="input-group">
+            <label for="description">Evidence Description</label>
+            <textarea id="description" name="description"
+                placeholder="Provide a detailed description of the item, chain of custody, and context..."
+                required></textarea>
+        </div>
+
+        <div class="upload-section">
+            <label>Upload Files</label>
+            <div class="drop-zone" onclick="document.getElementById('photo').click()">
+                <div class="icon-cloud">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.5 19a5.5 5.5 0 0 0 2.5-10.5A7 7 0 1 0 5 10.5a5.5 5.5 0 1 0 3 10.5"></path>
+                        <polyline points="16 12 12 8 8 12"></polyline>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                    </svg>
+                </div>
+                <p>Drag & drop files here or <span>Click to browse</span></p>
+                <small>Supports images, videos, documents. Max size: 500MB</small>
+                <input type="file" id="photo" name="photo" accept="image/*" hidden>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            Submit Evidence
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path
+                    d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z">
+                </path>
+            </svg>
+        </button>
+    </form>
+</div>
+
+<style>
+    body {
+        background-color: #050a12;
+        color: white;
+        font-family: sans-serif;
+    }
+
+    .evidence-container {
+        max-width: 500px;
+        margin: 40px auto;
+    }
+
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #4a90e2;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .evidence-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: #ccc;
+    }
+
+    textarea,
+    .custom-select {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid #2d3748;
+        border-radius: 12px;
+        padding: 12px;
+        color: white;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        height: 100px;
+        resize: none;
+    }
+
+    .drop-zone {
+        border: 1px solid #1e293b;
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .drop-zone:hover {
+        border-color: #3b82f6;
+    }
+
+    .icon-cloud {
+        color: #3b82f6;
+        margin-bottom: 10px;
+    }
+
+    .drop-zone p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+    }
+
+    .drop-zone p span {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+
+    .drop-zone small {
+        color: #64748b;
+        font-size: 0.75rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 30px;
+        font-weight: bold;
+        margin-top: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .submit-btn:hover {
+        background: #1d4ed8;
+    }
+</style>

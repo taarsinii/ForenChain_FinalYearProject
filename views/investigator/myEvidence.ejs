@@ -1,72 +1,408 @@
-<h2>My Submitted Evidence</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<table border="1" cellpadding="10" cellspacing="0">
-    <tr>
-        <th>Case ID</th>
-        <th>Description</th>
-        <th>Status</th>
-        <th>Supervisor Feedback</th>
-        <th>Action</th>
-    </tr>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Evidence | ForenChain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <% evidenceList.forEach(e=> { %>
-        <tr>
-            <td>
-                <%= e.case_id %>
-            </td>
-            <td>
-                <%= e.description %>
-            </td>
+    <style>
+        :root {
+            --bg-dark: #05080f;
+            --sidebar-bg: #070b14;
+            --card-bg: rgba(12, 18, 32, 0.8);
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
 
-            <!-- STATUS -->
-            <td>
-                <% if (e.current_status==='pending_supervisor' ) { %>
-                    ⏳ Waiting for Supervisor
-                    <% } else if (e.current_status==='approved_supervisor' ) { %>
-                        ✅ Approved by Supervisor
-                        <% } else if (e.current_status==='rejected_supervisor' ) { %>
-                            ❌ Rejected by Supervisor
-                            <% } else if (e.current_status==='transferred_to_lab' ) { %>
-                                🔬 Transferred to Analyst
-                                <% } else if (e.current_status==='report_uploaded' ) { %>
-                                    📄 Forensic Report Uploaded
-                                    <% } else if (e.current_status==='completed' ) { %>
-                                        🏁 Case Completed
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            /* This makes the overall background dark */
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar Styles (Shared with Dashboard) --- */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .logo-section {
+            padding: 0 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-symbol {
+            color: var(--accent-blue);
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: #ffffff;
+        }
+
+        .nav-link {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-dim);
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .nav-link.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 4px;
+            background-color: var(--accent-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 50px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* --- High-Tech Table Styling --- */
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 15px 20px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 20px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .status-approved {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-lab {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .btn-edit {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            border: 1px solid #8b5cf6;
+        }
+
+        .btn-transfer {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #3b82f6;
+        }
+
+        .btn-action:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+
+        .feedback-text {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            max-width: 250px;
+            line-height: 1.4;
+        }
+
+        /* Ensure the header spreads items to the far left and far right */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            /* Increased margin to match dashboard layout */
+        }
+
+        /* The Session Pill Styling */
+        .user-pill {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        /* The Glowing Green Dot */
+        .status-dot {
+            height: 7px;
+            width: 7px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* Sidebar Divider line */
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 20px 25px;
+        }
+
+        /* Red Logout Text */
+        .logout-link {
+            color: #ef4444 !important;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* The 4-square grid icon next to Logout */
+        .grid-icon {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .grid-icon span {
+            background-color: currentColor;
+            /* Inherits the red color */
+            border-radius: 1px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="logo-section">
+            <span class="logo-symbol">§</span>
+            <span class="logo-text">ForenChain</span>
+        </div>
+
+        <a href="/investigator/dashboard" class="nav-link">
+            <i class="fa-solid fa-border-all"></i> Dashboard
+        </a>
+        <a href="/investigator/add" class="nav-link">
+            <i class="fa-solid fa-file-export"></i> Submit Evidence
+        </a>
+        <a href="/evidence/my-evidence" class="nav-link active">
+            <i class="fa-solid fa-briefcase"></i> My Cases
+        </a>
+
+        <div style="margin-top: auto;">
+            <hr class="sidebar-divider">
+            <a href="/logout" class="nav-link logout-link">
+                <div class="grid-icon">
+                    <span></span><span></span>
+                    <span></span><span></span>
+                </div>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header-top">
+            <h1 class="page-title">My Submitted Evidence</h1>
+            <div class="user-pill">
+                <img src="https://ui-avatars.com/api/?name=Investigator&background=3b82f6&color=fff" alt="User"
+                    style="width:22px; border-radius:50%;">
+                <span>Investigator Session</span>
+                <span class="status-dot"></span>
+            </div>
+            </div>
+        </header>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Case ID</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Feedback</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% evidenceList.forEach(e=> { %>
+                        <tr>
+                            <td style="font-weight: 600; color: var(--accent-blue);">#<%= e.case_id %>
+                            </td>
+                            <td>
+                                <div class="feedback-text">
+                                    <%= e.description %>
+                                </div>
+                            </td>
+
+                            <td>
+                                <% if (e.current_status==='pending_supervisor' ) { %>
+                                    <span class="status-badge status-pending"><i class="fa-solid fa-clock"></i>
+                                        Pending</span>
+                                    <% } else if (e.current_status==='approved_supervisor' ) { %>
+                                        <span class="status-badge status-approved"><i
+                                                class="fa-solid fa-check-circle"></i> Approved</span>
+                                        <% } else if (e.current_status==='rejected_supervisor' ) { %>
+                                            <span class="status-badge status-rejected"><i
+                                                    class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                            <% } else if (e.current_status==='transferred_to_lab' ) { %>
+                                                <span class="status-badge status-lab"><i class="fa-solid fa-flask"></i>
+                                                    In Lab</span>
+                                                <% } else if (e.current_status==='report_uploaded' ) { %>
+                                                    <span class="status-badge status-approved"><i
+                                                            class="fa-solid fa-file-lines"></i> Report Ready</span>
+                                                    <% } else if (e.current_status==='completed' ) { %>
+                                                        <span class="status-badge status-approved"
+                                                            style="background: #1e293b;"><i
+                                                                class="fa-solid fa-flag-checkered"></i> Completed</span>
+                                                        <% } %>
+                            </td>
+
+                            <td>
+                                <div class="feedback-text">
+                                    <% if (e.current_status==='rejected_supervisor' ) { %>
+                                        <span style="color:#ef4444; font-weight:bold;">Reason:</span>
+                                        <%= e.supervisor_reason %>
+                                            <% } else if (e.supervisor_notes) { %>
+                                                <%= e.supervisor_notes %>
+                                                    <% } else { %>
+                                                        <span style="opacity: 0.3;">No notes yet</span>
+                                                        <% } %>
+                                </div>
+                            </td>
+
+                            <td>
+                                <% if (e.current_status==='rejected_supervisor' ) { %>
+                                    <a href="/investigator/edit/<%= e.evidence_id %>" class="btn-action btn-edit">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <% } else if (e.current_status==='approved_supervisor' ) { %>
+                                        <a href="/evidence/transfer/<%= e.evidence_id %>"
+                                            class="btn-action btn-transfer">
+                                            <i class="fa-solid fa-share-from-square"></i> Transfer
+                                        </a>
                                         <% } else { %>
-                                            —
+                                            <span style="opacity: 0.3;">Locked</span>
                                             <% } %>
-            </td>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
 
-            <!-- SUPERVISOR FEEDBACK -->
-            <td>
-                <% if (e.current_status==='approved_supervisor' ) { %>
-                    <strong>Notes:</strong>
-                    <%= e.supervisor_notes || '—' %>
-                        <% } else if (e.current_status==='rejected_supervisor' ) { %>
-                            <strong style="color:red;">Reason:</strong>
-                            <%= e.supervisor_reason %>
-                                <% } else { %>
-                                    —
-                                    <% } %>
-            </td>
+        <div style="margin-top: 30px;">
+            <a href="/investigator/dashboard" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </main>
+</body>
 
-            <!-- ACTION -->
-            <td>
-                <% if (e.current_status==='rejected_supervisor' ) { %>
-                    <a href="/investigator/edit/<%= e.evidence_id %>">
-                        ✏ Edit & Resubmit
-                    </a>
-                    <% } else if (e.current_status==='approved_supervisor' ) { %>
-                        <a href="/evidence/transfer/<%= e.evidence_id %>">
-                            🔁 Transfer to Analyst
-                        </a>
-                        <% } else { %>
-                            —
-                            <% } %>
-            </td>
-        </tr>
-        <% }) %>
-</table>
-
-<br>
-<a href="/investigator/dashboard">⬅ Back to Dashboard</a>
+</html>

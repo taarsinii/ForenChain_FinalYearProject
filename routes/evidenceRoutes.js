@@ -15,7 +15,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get("/dashboard", isLoggedIn, roleMiddleware("investigator"), (req, res) => {
-    res.render("investigator/dashboard");
+    res.render("investigator/dashboard", {
+        user: req.session.user
+    });
 });
 
 // ============================
