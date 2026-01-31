@@ -3,45 +3,32 @@ const bcrypt = require("bcrypt");
 const validator = require("validator");
 const AuditLog = require("../models/AuditLog");
 
-/*
-====================================================
-AUTH CONTROLLER FUNCTION:
-- Password authentication
-- OTP (second-factor) verification (simulated)
-- Full audit trail
-====================================================
-*/
-
-// ================================
-// SHOW HOME PAGE
-// ================================
+/* ================================
+   SHOW HOME
+================================ */
 exports.showHome = (req, res) => {
     res.render("home");
 };
 
-// ================================
-// SHOW LOGIN PAGE
-// ================================
+/* ================================
+   SHOW LOGIN
+================================ */
 exports.showLogin = (req, res) => {
-    res.render("login", { error: "" });   // ✅ always pass error
+    res.render("login", { error: "" });
 };
 
-// ================================
-// HANDLE LOGIN (PASSWORD STEP)
-// ================================
+/* ================================
+   LOGIN: USERNAME + PASSWORD
+================================ */
 exports.login = async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.render("login", {
-            error: "Username and password are required"
-        });
+        return res.render("login", { error: "All fields required" });
     }
 
     if (!validator.isAlphanumeric(username)) {
-        return res.render("login", {
-            error: "Invalid username format"
-        });
+        return res.render("login", { error: "Invalid username format" });
     }
 
     try {
@@ -55,48 +42,86 @@ exports.login = async (req, res) => {
         }
 
         const user = rows[0];
+        const match = await bcrypt.compare(password, user.password_hash);
 
-        const passwordMatch = await bcrypt.compare(password, user.password_hash);
-        if (!passwordMatch) {
+        if (!match) {
             return res.render("login", { error: "Incorrect password" });
         }
 
-        // STORE USER TEMPORARILY (OTP NOT VERIFIED)
+        // TEMP USER (NOT FULLY AUTHENTICATED)
         req.session.tempUser = {
             user_id: user.user_id,
             username: user.username,
-            role: user.role
+            role: user.role,
+            phone_number: user.phone_number
         };
 
-        // HARD-CODED OTP (DEMO)
-        req.session.otp = "123456";
-
-        // Audit log
         await AuditLog.log({
             user_id: user.user_id,
-            action: "LOGIN_PASSWORD_VERIFIED",
-            details: `Role: ${user.role}`,
+            action: "PASSWORD_VERIFIED",
             ip: req.ip
         });
 
-        return res.redirect("/otp");
+        res.redirect("/verify-phone");
 
     } catch (err) {
-        console.error("Login error:", err);
+        console.error(err);
         res.status(500).send("Login failed");
     }
 };
 
-// ================================
-// SHOW OTP PAGE
-// ================================
-exports.showOtp = (req, res) => {
-    res.render("otp", { error: "" });   // ✅ always pass error
+/* ================================
+   SHOW PHONE VERIFICATION
+================================ */
+exports.showPhoneVerification = (req, res) => {
+    if (!req.session.tempUser) {
+        return res.redirect("/login");
+    }
+    res.render("verifyPhone", { error: "" });
 };
 
-// ================================
-// VERIFY OTP
-// ================================
+/* ================================
+   VERIFY PHONE NUMBER
+================================ */
+exports.verifyPhone = async (req, res) => {
+    const { phone } = req.body;
+
+    if (!req.session.tempUser) {
+        return res.redirect("/login");
+    }
+
+    if (phone !== req.session.tempUser.phone_number) {
+        return res.render("verifyPhone", {
+            error: "Phone number does not match registered number"
+        });
+    }
+
+    // SIMULATED OTP
+    req.session.otp = "123456";
+
+    await AuditLog.log({
+        user_id: req.session.tempUser.user_id,
+        action: "PHONE_VERIFIED",
+        details: "Phone number matched (OTP simulated)",
+        ip: req.ip
+    });
+
+    res.redirect("/otp");
+};
+
+/* ================================
+   SHOW OTP PAGE
+================================ */
+exports.showOtp = (req, res) => {
+    if (!req.session.otp) {
+        return res.redirect("/login");
+    }
+    res.render("otp", { error: "" });
+};
+
+/* ================================
+   VERIFY OTP
+================================ */
 exports.verifyOtp = async (req, res) => {
     const { otp } = req.body;
 
@@ -105,23 +130,20 @@ exports.verifyOtp = async (req, res) => {
     }
 
     if (otp !== req.session.otp) {
-        return res.render("otp", { error: "Invalid OTP" });   // ✅ safe
+        return res.render("otp", { error: "Invalid OTP" });
     }
 
-    // ✅ OTP VERIFIED (user login)
+    // FULL AUTH SUCCESS
     req.session.user = req.session.tempUser;
     delete req.session.tempUser;
     delete req.session.otp;
 
-    // Audit log
     await AuditLog.log({
         user_id: req.session.user.user_id,
         action: "OTP_VERIFIED",
-        details: "Second-factor authentication simulated",
         ip: req.ip
     });
 
-    // ROLE-BASED REDIRECT
     switch (req.session.user.role) {
         case "administrator":
             return res.redirect("/admin/dashboard");
@@ -138,9 +160,9 @@ exports.verifyOtp = async (req, res) => {
     }
 };
 
-// ================================
-// HANDLE LOGOUT
-// ================================
+/* ================================
+   LOGOUT
+================================ */
 exports.logout = async (req, res) => {
     if (req.session.user) {
         await AuditLog.log({

@@ -3,115 +3,420 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Review Evidence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Evidence | ForenChain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        :root {
+            --bg-dark: #05080f;
+            --sidebar-bg: #070b14;
+            --card-bg: rgba(12, 18, 32, 0.8);
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
         }
 
-        .evidence-box {
-            border: 1px solid #333;
-            padding: 20px;
-            max-width: 800px;
+        /* --- Sidebar Styles --- */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
         }
 
-        img {
+        .logo-section {
+            padding: 0 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-symbol {
+            color: var(--accent-blue);
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: #ffffff;
+        }
+
+        .nav-link {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-dim);
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .nav-link.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 4px;
+            background-color: var(--accent-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 50px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+
+        /* --- Grid Layout --- */
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-label {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* --- Data Styling --- */
+        .case-id-badge {
+            color: var(--accent-blue);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .data-group {
+            margin-bottom: 25px;
+        }
+
+        .data-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .data-key {
+            color: var(--text-dim);
+            width: 140px;
+            flex-shrink: 0;
+        }
+
+        .data-val {
+            color: var(--text-main);
+        }
+
+        /* --- Evidence Image --- */
+        .evidence-img-container {
+            border: 2px solid var(--accent-blue);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
             margin-top: 10px;
-            max-width: 400px;
-            border: 1px solid #000;
         }
 
-        textarea {
+        .evidence-img-container img {
+            width: 100%;
+            display: block;
+            filter: brightness(0.9);
+        }
+
+        /* --- Forms & Buttons --- */
+        .action-section {
+            margin-top: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.3s;
             width: 100%;
         }
 
-        button {
-            padding: 8px 16px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        .approve {
-            background-color: #2ecc71;
-            border: none;
-        }
-
-        .reject {
-            background-color: #e74c3c;
-            border: none;
+        .btn-approve {
+            background: var(--success);
             color: white;
+        }
+
+        .btn-reject {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: -5px;
+            display: block;
+        }
+
+        .user-pill {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .status-dot {
+            height: 7px;
+            width: 7px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 20px 25px;
+        }
+
+        .logout-link {
+            color: #ef4444 !important;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .grid-icon {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .grid-icon span {
+            background-color: currentColor;
+            border-radius: 1px;
         }
     </style>
 </head>
 
 <body>
 
-    <h2>🔍 Review Evidence </h2>
+    <nav class="sidebar">
+        <div class="logo-section">
+            <span class="logo-symbol">§</span>
+            <span class="logo-text">ForenChain</span>
+        </div>
+        <a href="/supervisor/dashboard" class="nav-link">
+            <i class="fa-solid fa-border-all"></i> Dashboard
+        </a>
+        <a href="/supervisor/pending" class="nav-link active">
+            <i class="fa-solid fa-clock-rotate-left"></i> Pending Evidence
+        </a>
+        <a href="/supervisor/analysis/pending" class="nav-link">
+            <i class="fa-solid fa-magnifying-glass-chart"></i> Pending Analysis
+        </a>
+        <div style="margin-top: auto;">
+            <hr class="sidebar-divider">
+            <a href="/logout" class="nav-link logout-link">
+                <div class="grid-icon">
+                    <span></span><span></span>
+                    <span></span><span></span>
+                </div>
+                Logout
+            </a>
+        </div>
+    </nav>
 
-    <div class="evidence-box">
+    <main class="main-content">
+        <header class="header-top">
+            <div>
+                <h1 class="page-title">Review Evidence</h1>
+                <div class="subtitle">Supervisor Review Portal</div>
+            </div>
+            <div class="user-pill">
+                <img src="https://ui-avatars.com/api/?name=Supervisor&background=8b5cf6&color=fff" alt="User"
+                    style="width:22px; border-radius:50%;">
+                <span>Supervisor Session</span>
+                <span class="status-dot"></span>
+            </div>
+        </header>
 
-        <p><strong>Case ID:</strong>
-            <%= evidence.case_id %>
-        </p>
+        <div class="review-grid">
+            <div class="glass-card">
+                <div class="data-group">
+                    <span class="card-label">Case Details</span>
+                    <div class="data-row">
+                        <span class="data-key">Case ID:</span>
+                        <span class="data-val case-id-badge">#<%= evidence.case_id %></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-val" style="line-height: 1.6;">
+                            <%= evidence.description %>
+                        </span>
+                    </div>
+                </div>
 
-        <p><strong>Description:</strong><br>
-            <%= evidence.description %>
-        </p>
+                <div class="data-group">
+                    <span class="card-label">Status</span>
+                    <div class="data-row">
+                        <span class="data-key">Investigator ID:</span>
+                        <span class="data-val">
+                            <%= evidence.investigator %>
+                        </span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-key">Full Name:</span>
+                        <span class="data-val">
+                            <%= evidence.investigator_full_name %>
+                        </span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-key">Collected At:</span>
+                        <span class="data-val">
+                            <%= new Date(evidence.timestamp_collected).toLocaleString() %>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-        <p><strong>Collected By:</strong><br>
-            Investigator ID: <%= evidence.investigator %><br>
-                Full Name: <%= evidence.investigator_full_name %><br>
-                    Username: <%= evidence.investigator_username %>
-        </p>
+            <div class="glass-card">
+                <span class="card-label">Uploaded Evidence</span>
+                <% if (evidence.photo_path) { %>
+                    <div class="evidence-img-container">
+                        <img src="/<%= evidence.photo_path %>" alt="Uploaded Evidence Photo">
+                    </div>
+                    <% } else { %>
+                        <div
+                            style="padding: 40px; text-align: center; color: var(--text-dim); border: 1px dashed var(--glass-border); border-radius: 12px;">
+                            <i class="fa-regular fa-image"
+                                style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            No photo uploaded by investigator.
+                        </div>
+                        <% } %>
+            </div>
+        </div>
 
+        <div class="action-section">
+            <div class="glass-card" style="padding: 20px;">
+                <span class="card-label">Approve Evidence</span>
+                <form action="/supervisor/approve/<%= evidence.evidence_id %>" method="POST">
+                    <textarea name="supervisor_notes" class="form-control"
+                        placeholder="Optional notes for the investigator..." rows="2"></textarea>
+                    <button class="btn btn-approve" type="submit">
+                        <i class="fa-solid fa-check"></i> Approve Evidence
+                    </button>
+                    <span class="form-hint" style="margin-top: 8px;">Notes are not mandatory for approvals.</span>
+                </form>
+            </div>
 
-        <p><strong>Collected At:</strong>
-            <%= new Date(evidence.timestamp_collected).toLocaleString() %>
-        </p>
+            <div class="glass-card" style="padding: 20px;">
+                <span class="card-label">Reject Evidence</span>
+                <form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
+                    <textarea name="reason" class="form-control" placeholder="Explain why this is being rejected..."
+                        rows="2" required></textarea>
+                    <button class="btn btn-reject" type="submit">
+                        <i class="fa-solid fa-xmark"></i> Reject Evidence
+                    </button>
+                    <span class="form-hint" style="margin-top: 8px;">A reason is required to reject evidence.</span>
+                </form>
+            </div>
+        </div>
 
-        <p><strong>Evidence Status:</strong>
-            <%= evidence.current_status %>
-        </p>
-
-        <hr>
-
-        <h3>📁 Uploaded Evidence</h3>
-
-        <% if (evidence.photo_path) { %>
-            <p><strong>Evidence Photo:</strong></p>
-            <img src="/<%= evidence.photo_path %>" alt="Uploaded Evidence Photo">
-            <% } else { %>
-                <p><em>No photo uploaded by investigator.</em></p>
-                <% } %>
-
-    </div>
-
-    <br>
-
-    <!-- ================================ -->
-    <!-- APPROVE EVIDENCE -->
-    <!-- ================================ -->
-    <form action="/supervisor/approve/<%= evidence.evidence_id %>" method="POST">
-        <label><strong>Supervisor Notes (optional):</strong></label><br>
-        <textarea name="supervisor_notes" rows="4"></textarea><br>
-        <button class="approve" type="submit">✅ Approve Evidence</button>
-    </form>
-
-    <br>
-
-    <!-- ================================ -->
-    <!-- REJECT EVIDENCE -->
-    <!-- ================================ -->
-    <form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
-        <label><strong>Rejection Reason (required):</strong></label><br>
-        <textarea name="reason" rows="4" required></textarea><br>
-        <button class="reject" type="submit">❌ Reject Evidence</button>
-    </form>
-
-    <br>
-    <a href="/supervisor/pending">⬅ Back to Pending Evidence</a>
-
+        <div style="margin-top: 30px;">
+            <a href="/supervisor/pending" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Pending Evidence
+            </a>
+        </div>
+    </main>
 </body>
 
 </html>

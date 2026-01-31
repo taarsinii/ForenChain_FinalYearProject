@@ -6,25 +6,25 @@
 </head>
 
 <body>
-    <h2>OTP Verification</h2>
 
-    <p>
-        An OTP has been sent to your registered device.
-    </p>
+    <h2>OTP Verification</h2>
 
     <form method="POST" action="/verify-otp">
         <input type="text" name="otp" placeholder="Enter OTP" required />
-        <button type="submit">Verify</button>
+
+        <br><br>
+
+        <button type="submit">Verify OTP</button>
     </form>
 
-    <p style="font-size:12px;color:gray;">
-        * OTP verification is simulated for prototype demonstration
-    </p>
-
-    <!-- Safe rendering of error -->
     <p style="color:red">
         <%= error %>
     </p>
+
+    <p style="font-size:12px;color:gray">
+        * OTP is simulated (use: 123456)
+    </p>
+
 </body>
 
 </html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Phone Verification</title>
+</head>
+
+<body>
+    <h2>Verify Phone Number</h2>
+
+    <p>Enter your registered phone number to receive OTP.</p>
+
+    <form method="POST" action="/verify-phone">
+        <input type="text" name="phone" placeholder="Phone Number" required>
+        <button type="submit">Send OTP</button>
+    </form>
+
+    <p style="color:red">
+        <%= error %>
+    </p>
+
+    <p style="font-size:12px;color:gray;">
+        * OTP delivery is simulated for prototype demonstration
+    </p>
+</body>
+
+</html>
