@@ -9,15 +9,62 @@
 
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --panel-bg: rgba(30, 41, 59, 0.7);
+            --bg-dark: #020617;
+            /* Deeper black-blue */
+            --panel-bg: rgba(15, 23, 42, 0.8);
             --accent-blue: #0ea5e9;
             --accent-glow: rgba(14, 165, 233, 0.3);
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --danger: #ef4444;
-            --border-color: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(14, 165, 233, 0.2);
+        }
+
+        /* CARD BORDER GLOW ANIMATION */
+        @keyframes card-breathe {
+
+            0%,
+            100% {
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 15px rgba(14, 165, 233, 0.1);
+                border-color: rgba(14, 165, 233, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(14, 165, 233, 0.25);
+                border-color: rgba(14, 165, 233, 0.5);
+            }
+        }
+
+        /* BUTTON ANIMATIONS */
+        @keyframes beacon-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(14, 165, 233, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+            }
+        }
+
+        @keyframes heartbeat-scale {
+
+            0%,
+            90%,
+            100% {
+                transform: scale(1);
+            }
+
+            93% {
+                transform: scale(1.04);
+            }
+
+            96% {
+                transform: scale(0.98);
+            }
         }
 
         * {
@@ -29,10 +76,14 @@
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
+            background-color: var(--bg-dark);
+            /* THE BEST BACKGROUND: GRID + RADIAL GLOW */
             background-image:
-                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.3) 0, transparent 50%);
+                linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.08) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.15) 0, transparent 50%);
+            background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
             color: var(--text-main);
             min-height: 100vh;
             padding: 40px 20px;
@@ -42,20 +93,20 @@
             max-width: 1000px;
             margin: auto;
             background: var(--panel-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: card-breathe 4s infinite ease-in-out;
         }
 
-        /* Header Styling */
         h2 {
             font-size: 32px;
             font-weight: 700;
             margin: 0;
             color: var(--accent-blue);
             letter-spacing: -0.025em;
+            text-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
         }
 
         .subtitle {
@@ -66,9 +117,9 @@
             letter-spacing: 1px;
         }
 
-        /* Alert Box */
         .warning {
-            background: rgba(14, 165, 233, 0.1);
+            background: rgba(14, 165, 233, 0.05);
+            border: 1px solid rgba(14, 165, 233, 0.2);
             border-left: 4px solid var(--accent-blue);
             padding: 20px;
             border-radius: 8px;
@@ -77,9 +128,8 @@
             line-height: 1.6;
         }
 
-        /* Section Cards */
         .section {
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 25px;
             margin-bottom: 35px;
         }
@@ -91,52 +141,32 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: var(--text-main);
         }
 
-        /* Data Display Grid */
         .meta-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(2, 6, 23, 0.5);
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .meta-item label {
             display: block;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
             margin-bottom: 4px;
             text-transform: uppercase;
-        }
-
-        .meta-item span {
-            font-weight: 500;
-            color: var(--text-main);
-        }
-
-        /* Analysis Box Arrangement (From Picture) */
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        /* Inputs & Textareas */
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
         textarea {
             width: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-color);
+            background: rgba(2, 6, 23, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 6px;
             color: #cbd5e1;
             padding: 12px;
@@ -147,16 +177,15 @@
 
         textarea.readonly {
             border-left: 3px solid var(--accent-blue);
-            background: rgba(14, 165, 233, 0.05);
+            background: rgba(14, 165, 233, 0.02);
         }
 
-        /* File Upload Zone (The "Nice" Part) */
         .file-drop-zone {
-            border: 2px dashed var(--border-color);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 30px;
             text-align: center;
-            background: rgba(15, 23, 42, 0.3);
+            background: rgba(2, 6, 23, 0.3);
             cursor: pointer;
             transition: 0.3s;
         }
@@ -166,13 +195,6 @@
             background: rgba(14, 165, 233, 0.05);
         }
 
-        /* Buttons */
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
         .btn {
             padding: 12px 24px;
             border-radius: 6px;
@@ -180,10 +202,18 @@
             cursor: pointer;
             transition: 0.2s;
             border: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 14px;
+            text-decoration: none;
+        }
+
+        .btn-download-urgent {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--text-main);
+            border: 1px solid var(--accent-blue);
+            animation: beacon-glow 2s infinite, heartbeat-scale 3s infinite;
         }
 
         .btn.approve {
@@ -198,11 +228,6 @@
             border: 1px solid var(--danger);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
         .status-badge {
             background: #f59e0b;
             color: #000;
@@ -215,7 +240,7 @@
         footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             color: var(--text-muted);
             font-size: 12px;
             display: flex;
@@ -233,9 +258,8 @@
         </header>
 
         <div class="warning">
-            <strong>System Protocol:</strong> You are performing a formal review of analyst evidence. Per procedural
-            requirements,
-            a screen recording or CCTV footage of this verification session must be attached to the final approval.
+            <strong>System Protocol:</strong> You are performing a formal review. A screen recording or CCTV footage of
+            this session must be attached.
         </div>
 
         <div class="section">
@@ -266,66 +290,53 @@
                     </span>
                 </div>
             </div>
-            <p style="margin-top: 20px;">
-                <button class="btn"
-                    style="background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);">
-                    <i data-lucide="download"></i> Download Source Evidence
-                </button>
+            <p style="margin-top: 25px;">
+                <a href="/analyst/download/<%= evidence.evidence_id %>" class="btn btn-download-urgent">
+                    <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                    Download Source Evidence
+                </a>
             </p>
         </div>
 
         <div class="section">
             <h3><i data-lucide="file-search"></i> Analyst Analysis Findings</h3>
-            <div class="analysis-grid">
-                <div>
-                    <label>Tools Used</label>
-                    <textarea class="readonly" readonly rows="2"><%= analysis?.tools_used || '-' %></textarea>
-                </div>
+            <div style="margin-bottom: 20px;">
+                <label>Tools Used</label>
+                <textarea class="readonly" readonly rows="2"><%= analysis?.tools_used || '-' %></textarea>
             </div>
-
-            <div style="margin-top: 20px;">
-                <label>Methodology</label><textarea class="readonly" readonly
-                    rows="3"><%= analysis?.methodology || '-' %></textarea>
-
+            <div style="margin-bottom: 20px;">
+                <label>Methodology</label>
+                <textarea class="readonly" readonly rows="3"><%= analysis?.methodology || '-' %></textarea>
             </div>
-
-            <div style="margin-top: 20px;">
-                <label>Observations</label><textarea class="readonly" readonly
-                    rows="4"><%= analysis?.observations || '-' %></textarea>
+            <div style="margin-bottom: 20px;">
+                <label>Observations</label>
+                <textarea class="readonly" readonly rows="4"><%= analysis?.observations || '-' %></textarea>
             </div>
-
-            <div style="margin-top: 20px;">
+            <div>
                 <label>Conclusion</label>
-                            <textarea class="readonly" readonly rows="4"><%= analysis?.conclusion || '-' %></textarea>
+                <textarea class="readonly" readonly rows="4"><%= analysis?.conclusion || '-' %></textarea>
             </div>
-
         </div>
 
         <div class="section"
             style="background: rgba(14, 165, 233, 0.03); border-radius: 12px; padding: 25px; border: 1px solid rgba(14, 165, 233, 0.2);">
             <h3><i data-lucide="shield-check"></i> Final Verification</h3>
-
             <form action="/approve" method="POST" enctype="multipart/form-data">
                 <label>Supervision Proof (Video Recording)</label>
                 <div class="file-drop-zone" onclick="document.getElementById('videoFile').click()">
                     <i data-lucide="video"
                         style="width: 40px; height: 40px; color: var(--accent-blue); margin-bottom: 10px;"></i>
                     <p style="margin: 0; font-weight: 500;">Click to upload CCTV / Screen Recording (MP4)</p>
-                    <p style="margin: 5px 0 0 0; font-size: 12px; color: var(--text-muted);">Proof of physical
-                        supervision required for chain-of-custody.</p>
                     <input type="file" id="videoFile" name="supervisor_video" accept="video/*" style="display: none;"
                         required>
                 </div>
-
                 <div style="margin-top: 20px;">
-                    <label>Notes</label>
-                    <textarea name="supervisor_notes" rows="3"
-                        placeholder="Verification notes, supervision confirmation, or observations"></textarea>
+                    <label>Supervisor Notes</label>
+                    <textarea name="supervisor_notes" rows="3" placeholder="Enter review findings..."></textarea>
                 </div>
-
                 <div class="actions">
                     <button type="submit" class="btn approve">
-                        <i data-lucide="check-circle"></i> Authenticate & Approve Case
+                        <i data-lucide="check-circle"></i> Authenticate & Approve
                     </button>
                 </div>
             </form>
@@ -334,25 +345,21 @@
         <div class="section">
             <h3><i data-lucide="alert-octagon"></i> Rejection</h3>
             <form action="/reject" method="POST">
-                <label>Reject Forensic Analysis</label>
-                <textarea name="reason" rows="2" placeholder="Detail the errors found in the analysis..."></textarea>
-                <div class="actions">
+                <label>Reason for Rejection</label>
+                <textarea name="reason" rows="2" placeholder="Detail errors..."></textarea>
+                <div style="margin-top: 15px;">
                     <button type="submit" class="btn reject">Reject Analysis</button>
-                    <a href="/pending"
-                        style="color: var(--text-muted); font-size: 13px; align-self: center; text-decoration: none;">Return
-                        to Dashboard</a>
                 </div>
             </form>
         </div>
 
         <footer>
             <span>© 2026 Digital Forensic Intelligence Unit</span>
-            <span>System Audit: <span style="color: var(--accent-blue);">ACTIVE</span></span>
+            <span>Audit: <span style="color: var(--accent-blue);">SECURE</span></span>
         </footer>
     </div>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
     </script>
 </body>
