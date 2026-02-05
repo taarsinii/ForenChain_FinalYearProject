@@ -1,25 +1,722 @@
-<h2>Prosecutor Dashboard</h2>
+<!doctype html>
+<html lang="en">
 
-<table border="1" cellpadding="8">
-    <tr>
-        <th>Case ID</th>
-        <th>Status</th>
-        <th>Action</th>
-    </tr>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prosecutor Dashboard</title>
 
-    <% cases.forEach(c=> { %>
-        <tr>
-            <td>
-                <%= c.case_id %>
-            </td>
-            <td>
-                <%= c.current_status %>
-            </td>
-            <td>
-                <a href="/prosecutor/case/<%= c.evidence_id %>">
-                    View Full Chain
-                </a>
-            </td>
-        </tr>
-        <% }) %>
-</table>
+    <style>
+        :root {
+            --bg0: #070B14;
+            --bg1: #0B1224;
+            --card: rgba(255, 255, 255, .06);
+            --card2: rgba(255, 255, 255, .085);
+            --border: rgba(255, 255, 255, .10);
+            --text: rgba(255, 255, 255, .92);
+            --muted: rgba(255, 255, 255, .62);
+            --shadow: 0 18px 50px rgba(0, 0, 0, .45);
+            --accent: #6EA8FE;
+            --good: #22C55E;
+            --warn: #F59E0B;
+            --bad: #EF4444;
+            --info: #38BDF8;
+            --focus: 0 0 0 4px rgba(110, 168, 254, .22);
+            --r: 18px;
+            --r2: 22px;
+        }
+
+        body.light {
+            --bg0: #f3f6ff;
+            --bg1: #f8fafc;
+            --card: #fff;
+            --card2: #fff;
+            --border: rgba(15, 23, 42, .10);
+            --text: #0f172a;
+            --muted: #64748b;
+            --shadow: 0 18px 40px rgba(15, 23, 42, .10);
+            --accent: #2563EB;
+            --focus: 0 0 0 4px rgba(37, 99, 235, .16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at 15% 10%, rgba(110, 168, 254, .22), transparent 60%),
+                radial-gradient(900px 500px at 85% 0%, rgba(34, 197, 94, .12), transparent 55%),
+                radial-gradient(900px 600px at 70% 95%, rgba(168, 85, 247, .14), transparent 55%),
+                linear-gradient(180deg, var(--bg0), var(--bg1));
+            min-height: 100vh;
+        }
+
+        .container {
+            width: min(1150px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 40px;
+        }
+
+        .glass {
+            background: linear-gradient(180deg, var(--card), var(--card2));
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .topbar {
+            display: flex;
+            gap: 14px;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .brand {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(110, 168, 254, .10);
+            width: fit-content;
+        }
+
+        .brand .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--good);
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, .12);
+        }
+
+        h1 {
+            margin: 10px 0 4px;
+            font-size: 26px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            transition: transform .12s ease, background .12s ease, border-color .12s ease;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background: rgba(110, 168, 254, .16);
+            border-color: rgba(110, 168, 254, .25);
+            transform: translateY(-1px);
+        }
+
+        .btn:focus {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .card {
+            border-radius: var(--r2);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            right: -80px;
+            top: -80px;
+            width: 220px;
+            height: 220px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(110, 168, 254, .22), transparent 60%);
+            transform: rotate(25deg);
+            pointer-events: none;
+        }
+
+        .kpi {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .label {
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .value {
+            font-size: 30px;
+            font-weight: 800;
+            margin-top: 6px;
+        }
+
+        .sub {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .pillIcon {
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .08);
+            flex: 0 0 auto;
+        }
+
+        .col-4 {
+            grid-column: span 4;
+        }
+
+        .col-12 {
+            grid-column: span 12;
+        }
+
+        @media (max-width: 900px) {
+            .col-4 {
+                grid-column: span 12;
+            }
+        }
+
+        .panel {
+            border-radius: var(--r2);
+            padding: 16px;
+        }
+
+        .panelHead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .panelHead h2 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .08);
+            border-radius: 14px;
+            padding: 10px 12px;
+            min-width: 260px;
+        }
+
+        .input input {
+            background: transparent;
+            border: 0;
+            color: var(--text);
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .input input::placeholder {
+            color: rgba(255, 255, 255, .45);
+        }
+
+        body.light .input input::placeholder {
+            color: rgba(15, 23, 42, .45);
+        }
+
+        select {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            border-radius: 14px;
+            padding: 10px 12px;
+            outline: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        select:focus {
+            box-shadow: var(--focus);
+        }
+
+        .tableWrap {
+            overflow: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        thead th {
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            padding: 14px 14px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, .02));
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        body.light thead th {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .85));
+        }
+
+        tbody td {
+            padding: 14px 14px;
+            border-top: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: rgba(110, 168, 254, .10);
+            cursor: pointer;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .06);
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .bDot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--info);
+            box-shadow: 0 0 0 6px rgba(56, 189, 248, .12);
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .linkBtn {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+        }
+
+        .linkBtn:hover {
+            background: rgba(110, 168, 254, .16);
+            transform: translateY(-1px);
+        }
+
+        .pager {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 2px 0;
+            flex-wrap: wrap;
+        }
+
+        .mini {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        footer {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <% const safeCases=Array.isArray(cases) ? cases : []; %>
+
+        <div class="container">
+            <div class="topbar">
+                <div>
+                    <div class="brand">
+                        <span class="dot"></span>
+                        <div>
+                            <div style="font-weight:800; line-height:1;">Digital Forensic System</div>
+                            <div class="muted" style="font-size:12px;">Prosecutor Workspace</div>
+                        </div>
+                    </div>
+                    <h1>Prosecutor Dashboard</h1>
+                    <div class="muted">Search, filter, sort, paginate — click any row to open the full chain.</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" id="btnTheme" type="button">🌓 Theme</button>
+                    <button class="btn" id="btnRefresh" type="button">⟳ Refresh</button>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card glass col-4">
+                    <div class="kpi">
+                        <div>
+                            <div class="label">Total Cases</div>
+                            <div class="value" id="kpiTotal">
+                                <%= safeCases.length %>
+                            </div>
+                            <div class="sub">Rendered dynamically from server results.</div>
+                        </div>
+                        <div class="pillIcon">📁</div>
+                    </div>
+                </div>
+
+                <div class="card glass col-4">
+                    <div class="kpi">
+                        <div>
+                            <div class="label">Most Common Status</div>
+                            <div class="value" style="font-size:20px; margin-top:10px;" id="kpiCommon">—</div>
+                            <div class="sub">Calculated from rows currently in the table.</div>
+                        </div>
+                        <div class="pillIcon">📊</div>
+                    </div>
+                </div>
+
+                <div class="card glass col-4">
+                    <div class="kpi">
+                        <div>
+                            <div class="label">Status Breakdown</div>
+                            <div class="sub">Generated from table rows</div>
+                        </div>
+                        <div class="pillIcon">🧩</div>
+                    </div>
+                    <div id="breakdown" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
+                </div>
+
+                <div class="panel glass col-12">
+                    <div class="panelHead">
+                        <div>
+                            <h2>Cases</h2>
+                            <div class="muted" style="font-size:13px; margin-top:4px;">No static JSON needed — EJS
+                                renders rows, JS reads them.</div>
+                        </div>
+
+                        <div class="controls">
+                            <div class="input">
+                                <span class="muted">🔎</span>
+                                <input id="searchInput" placeholder="Search case / status / evidence…">
+                            </div>
+
+                            <select id="statusSelect">
+                                <option value="">All Statuses</option>
+                            </select>
+
+                            <select id="pageSize">
+                                <option value="8">8 / page</option>
+                                <option value="12" selected>12 / page</option>
+                                <option value="20">20 / page</option>
+                            </select>
+
+                            <button class="btn" id="btnClear" type="button">✕ Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="tableWrap">
+                        <table id="casesTable">
+                            <thead>
+                                <tr>
+                                    <th data-col="case">Case ID</th>
+                                    <th data-col="status">Status</th>
+                                    <th data-col="evidence">Evidence ID</th>
+                                    <th class="right">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tbody">
+                                <% safeCases.forEach(c=> { %>
+                                    <tr data-case="<%= String(c.case_id ?? '') %>"
+                                        data-status="<%= String(c.current_status ?? '') %>"
+                                        data-evidence="<%= String(c.evidence_id ?? '') %>"
+                                        data-href="/prosecutor/case/<%= encodeURIComponent(String(c.evidence_id ?? '')) %>">
+                                        <td style="font-weight:800;"># <%= c.case_id %>
+                                        </td>
+                                        <td>
+                                            <span class="badge">
+                                                <span class="bDot"></span>
+                                                <span class="statusText">
+                                                    <%= c.current_status %>
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td class="muted">
+                                            <%= c.evidence_id %>
+                                        </td>
+                                        <td class="right">
+                                            <a class="linkBtn"
+                                                href="/prosecutor/case/<%= encodeURIComponent(String(c.evidence_id ?? '')) %>">🔗
+                                                View Full Chain</a>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pager">
+                        <div class="mini" id="pageInfo">—</div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" id="prevBtn" type="button">‹</button>
+                            <button class="btn" id="pageNum" type="button" disabled>1</button>
+                            <button class="btn" id="nextBtn" type="button">›</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <div>Tip: Click headers to sort. Click a row to open the chain.</div>
+                <div>© <span id="year"></span> Digital Forensic System</div>
+            </footer>
+        </div>
+
+        <script>
+            // Theme toggle
+            const themeKey = "dfs_theme_dom_v1";
+            const body = document.body;
+            if (localStorage.getItem(themeKey) === "light") body.classList.add("light");
+            document.getElementById("btnTheme").addEventListener("click", () => {
+                body.classList.toggle("light");
+                localStorage.setItem(themeKey, body.classList.contains("light") ? "light" : "dark");
+            });
+
+            document.getElementById("btnRefresh").addEventListener("click", () => location.reload());
+            document.getElementById("year").textContent = new Date().getFullYear();
+
+            // Read rows from DOM (no JSON)
+            const tbody = document.getElementById("tbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr"));
+
+            // Click row navigation
+            allRows.forEach(tr => {
+                tr.addEventListener("click", (e) => {
+                    if (e.target.closest("a")) return;
+                    window.location.href = tr.getAttribute("data-href");
+                });
+            });
+
+            // Badge dot colors by status
+            function normalizeStatus(s) { return (s || "").trim() || "Unknown"; }
+            function dotColor(status) {
+                const s = normalizeStatus(status).toLowerCase();
+                if (s.includes("open") || s.includes("new")) return getVar("--info");
+                if (s.includes("progress") || s.includes("processing")) return getVar("--warn");
+                if (s.includes("pending") || s.includes("review")) return getVar("--accent");
+                if (s.includes("closed") || s.includes("complete") || s.includes("resolved")) return getVar("--good");
+                if (s.includes("reject") || s.includes("fail")) return getVar("--bad");
+                return getVar("--info");
+            }
+            function getVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+            allRows.forEach(tr => {
+                const st = tr.getAttribute("data-status");
+                const dot = tr.querySelector(".bDot");
+                if (dot) dot.style.background = dotColor(st);
+            });
+
+            // Build status counts from DOM
+            const statusCounts = {};
+            allRows.forEach(tr => {
+                const st = normalizeStatus(tr.getAttribute("data-status"));
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+            });
+            const entries = Object.entries(statusCounts).sort((a, b) => b[1] - a[1]);
+            document.getElementById("kpiCommon").textContent = entries.length ? `${entries[0][0]} (${entries[0][1]})` : "—";
+
+            // Fill status select options
+            const statusSelect = document.getElementById("statusSelect");
+            entries.forEach(([st]) => {
+                const opt = document.createElement("option");
+                opt.value = st;
+                opt.textContent = st;
+                statusSelect.appendChild(opt);
+            });
+
+            // Breakdown chips
+            const breakdown = document.getElementById("breakdown");
+            const total = allRows.length || 1;
+            breakdown.innerHTML = entries.slice(0, 4).map(([st, n]) => {
+                const pct = Math.round((n / total) * 100);
+                return `
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--border); background: rgba(255,255,255,.06); font-size:13px;">
+        <span style="font-weight:800;">${escapeHtml(st)}</span>
+        <span class="muted">(${n})</span>
+        <span style="width:80px;height:8px;border-radius:999px;background: rgba(255,255,255,.10); overflow:hidden; border:1px solid rgba(255,255,255,.08);">
+          <span style="display:block;height:100%;width:${pct}%;background: rgba(110,168,254,.75); border-radius:999px;"></span>
+        </span>
+      </div>
+    `;
+            }).join("");
+
+            function escapeHtml(s) {
+                return String(s).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+            }
+
+            // Interactions: filter/sort/pagination using rows
+            const searchInput = document.getElementById("searchInput");
+            const pageSizeSel = document.getElementById("pageSize");
+            const pageInfo = document.getElementById("pageInfo");
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
+            const pageNum = document.getElementById("pageNum");
+
+            let state = { q: "", status: "", page: 1, size: parseInt(pageSizeSel.value, 10), sortCol: "case", sortDir: "asc" };
+
+            function rowText(tr) {
+                return (
+                    (tr.getAttribute("data-case") || "") + " " +
+                    (tr.getAttribute("data-status") || "") + " " +
+                    (tr.getAttribute("data-evidence") || "")
+                ).toLowerCase();
+            }
+
+            function getVal(tr, col) {
+                return (tr.getAttribute("data-" + col) || "").trim();
+            }
+
+            function sortRows(rows) {
+                const col = state.sortCol;
+                const dir = state.sortDir;
+                rows.sort((a, b) => {
+                    const av = getVal(a, col);
+                    const bv = getVal(b, col);
+                    const an = Number(av), bn = Number(bv);
+                    const bothNum = !Number.isNaN(an) && !Number.isNaN(bn) && av !== "" && bv !== "";
+                    let res = bothNum ? (an - bn) : av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" });
+                    return dir === "asc" ? res : -res;
+                });
+                return rows;
+            }
+
+            function apply() {
+                const q = state.q.toLowerCase();
+                let rows = allRows.filter(tr => {
+                    const st = normalizeStatus(tr.getAttribute("data-status"));
+                    const matchQ = !q || rowText(tr).includes(q);
+                    const matchS = !state.status || st === state.status;
+                    return matchQ && matchS;
+                });
+
+                rows = sortRows(rows);
+
+                const total = rows.length;
+                const pages = Math.max(1, Math.ceil(total / state.size));
+                state.page = Math.min(state.page, pages);
+
+                const start = (state.page - 1) * state.size;
+                const slice = rows.slice(start, start + state.size);
+
+                // Hide all, show slice
+                allRows.forEach(r => r.style.display = "none");
+                slice.forEach(r => r.style.display = "");
+
+                const shownFrom = total === 0 ? 0 : start + 1;
+                const shownTo = Math.min(total, start + slice.length);
+                pageInfo.textContent = `Showing ${shownFrom}–${shownTo} of ${total} cases`;
+                pageNum.textContent = String(state.page);
+
+                prevBtn.disabled = state.page <= 1;
+                nextBtn.disabled = state.page >= pages;
+            }
+
+            searchInput.addEventListener("input", (e) => { state.q = e.target.value; state.page = 1; apply(); });
+            statusSelect.addEventListener("change", (e) => { state.status = e.target.value; state.page = 1; apply(); });
+            pageSizeSel.addEventListener("change", (e) => { state.size = parseInt(e.target.value, 10); state.page = 1; apply(); });
+
+            document.getElementById("btnClear").addEventListener("click", () => {
+                searchInput.value = "";
+                statusSelect.value = "";
+                state.q = ""; state.status = ""; state.page = 1;
+                apply();
+            });
+
+            prevBtn.addEventListener("click", () => { state.page = Math.max(1, state.page - 1); apply(); });
+            nextBtn.addEventListener("click", () => { state.page = state.page + 1; apply(); });
+
+            // Sorting by clicking headers
+            document.querySelectorAll("thead th[data-col]").forEach(th => {
+                th.addEventListener("click", () => {
+                    const col = th.getAttribute("data-col");
+                    if (state.sortCol === col) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+                    else { state.sortCol = col; state.sortDir = "asc"; }
+                    apply();
+                });
+            });
+
+            // Initial
+            apply();
+        </script>
+</body>
+
+</html>

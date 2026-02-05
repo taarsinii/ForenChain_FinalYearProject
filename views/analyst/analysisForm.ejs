@@ -1,26 +1,235 @@
-<h2>Forensic Analysis - <%= evidence.case_id %>
-</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<form method="POST">
-    <label>Tools Used</label><br>
-    <textarea name="tools_used"><%= analysis?.tools_used || "" %></textarea><br><br>
+<head>
+    <meta charset="UTF-8">
+    <title>Forensic Analysis | <%= evidence.case_id %>
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <label>Methodology</label><br>
-    <textarea name="methodology"><%= analysis?.methodology || "" %></textarea><br><br>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <label>Observations</label><br>
-    <textarea name="observations"><%= analysis?.observations || "" %></textarea><br><br>
+    <style>
+        :root {
+            --bg-dark: #05080f;
+            --card-bg: rgba(12, 18, 32, 0.85);
+            --accent-blue: #3b82f6;
+            --accent-blue-soft: rgba(59, 130, 246, 0.15);
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
 
-    <label>Conclusion</label><br>
-    <textarea name="conclusion"><%= analysis?.conclusion || "" %></textarea><br><br>
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12), transparent 50%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='42' viewBox='0 0 24 42'%3E%3Cpath fill='%231e293b' fill-opacity='0.15' d='M12 8l10 6v12l-10 6L2 26V14l10-6zm0 2.3L4 15.1v9.8l8 4.8 8-4.8v-9.8l-8-4.8z'/%3E%3C/svg%3E");
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
 
-    <button type="submit">Save Analysis</button>
-</form>
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 30px;
+        }
 
-<% if (analysis && !analysis.is_finalized) { %>
-    <form action="/analyst/finalize/<%= evidence.evidence_id %>" method="POST">
-        <button style="background:red;color:white;">Finalize & Generate PDF</button>
-    </form>
-    <% } %>
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
 
-        <a href="/analyst/view/<%= evidence.evidence_id %>">⬅ Back</a>
+        .page-title {
+            font-size: 2.1rem;
+            font-weight: 600;
+        }
+
+        .case-pill {
+            background: var(--accent-blue-soft);
+            color: var(--accent-blue);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            border: 1px solid var(--accent-blue);
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 35px;
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 15px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border: none;
+            padding: 12px 26px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-back {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-back:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Footer Note */
+        .info-note {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            border-left: 3px solid var(--accent-blue);
+            padding-left: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="page-header">
+            <h1 class="page-title">Forensic Analysis Report</h1>
+            <div class="case-pill">
+                Case ID: <strong>
+                    <%= evidence.case_id %>
+                </strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>
+                <i class="fa-solid fa-microscope"></i>
+                Analyst Examination
+            </h3>
+
+            <form method="POST">
+
+                <div class="form-group">
+                    <label>Tools Used</label>
+                    <textarea name="tools_used"
+                        placeholder="List forensic tools, software, versions, and hardware used during analysis..."><%= analysis?.tools_used || "" %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Methodology</label>
+                    <textarea name="methodology"
+                        placeholder="Describe step-by-step forensic procedures followed, standards applied, and validation methods..."><%= analysis?.methodology || "" %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Observations</label>
+                    <textarea name="observations"
+                        placeholder="Document factual observations discovered during analysis without interpretation..."><%= analysis?.observations || "" %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Conclusion</label>
+                    <textarea name="conclusion"
+                        placeholder="Summarize findings and professional forensic conclusions based on evidence..."><%= analysis?.conclusion || "" %></textarea>
+                </div>
+
+                <div class="actions">
+                    <a href="/analyst/view/<%= evidence.evidence_id %>" class="btn-back">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Evidence
+                    </a>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Analysis
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="info-note">
+                All entries are logged and audited. Ensure accuracy and completeness before submission.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

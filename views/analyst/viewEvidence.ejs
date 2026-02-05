@@ -1,61 +1,351 @@
-<% if (typeof saved !=='undefined' ) { %>
-    <p style="color:green;font-weight:bold;">
-        ✅ Forensic analysis saved successfully
-    </p>
-    <% } %>
+<!DOCTYPE html>
+<html lang="en">
 
-        <h2>Evidence Details</h2>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evidence Details | ForenChain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        :root {
+            --bg-dark: #0f111a;
+            --sidebar-bg: #070b14;
+            --card-bg: rgba(22, 28, 45, 0.6);
+            --accent-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --action-red: #ff5f56;
+            /* Match the red/coral color in your screenshot */
+        }
 
-        <p><strong>Case ID:</strong>
-            <%= evidence.case_id %>
-        </p>
-        <p><strong>Description:</strong>
-            <%= evidence.description %>
-        </p>
-        <p><strong>Investigator:</strong>
-            <%= evidence.investigator %>
-        </p>
-        <p><strong>Collected at:</strong>
-            <%= evidence.timestamp_collected %>
-        </p>
-        <p><strong>Status:</strong>
-            <%= evidence.current_status %>
-        </p>
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
 
-        <% if (evidence.photo_path) { %>
-            <a href="/analyst/download/<%= evidence.evidence_id %>">Download Evidence File</a>
-            <% } %>
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
 
-                <br><br>
-                <a href="/analyst/analysis/<%= evidence.evidence_id %>">
-                    📝 Add / Edit Forensic Analysis
-                </a>
+        .logo-section {
+            padding: 0 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-                <br><br>
+        .logo-symbol {
+            color: var(--accent-blue);
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
 
-                <% if (!analysis || analysis.is_finalized===0) { %>
-                    <form action="/analyst/finalize/<%= evidence.evidence_id %>" method="POST">
-                        <button>Finalize & Generate PDF</button>
-                    </form>
-                    <% } else { %>
-                        <p style="color:gray;">🔒 Report already finalized</p>
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav-link {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-dim);
+            transition: 0.2s;
+        }
+
+        .nav-link.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%);
+            border-right: 4px solid var(--accent-blue);
+        }
+
+        /* --- Main Layout --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1200px;
+        }
+
+        /* Back Button Container - Positioned at the very left top */
+        .back-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--text-main);
+        }
+
+        /* Header with the requested Grey Line */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border);
+            /* The grey line */
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+
+        /* --- Evidence Grid --- */
+        .evidence-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+        }
+
+        .evidence-sidebar {
+            text-align: center;
+        }
+
+        .evidence-icon-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 40px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .usb-icon {
+            font-size: 80px;
+            color: #64748b;
+        }
+
+        .case-id-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* Metadata Styling */
+        .metadata-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin: 30px 0 15px;
+        }
+
+        .metadata-section h3:first-child {
+            margin-top: 0;
+        }
+
+        .info-group {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            font-weight: 400;
+        }
+
+        /* Styling for Actions to match screenshot */
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--action-red);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 8px 0;
+            transition: opacity 0.2s;
+        }
+
+        .action-link:hover {
+            opacity: 0.8;
+        }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            /* Increased padding from 10px 20px to 14px 28px */
+            padding: 14px 28px;
+            border-radius: 8px;
+            /* Increased font-size to make text more prominent */
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            /* Increased gap between icon and text */
+            gap: 12px;
+            transition: 0.3s;
+            /* Added a slight shadow to make it pop against the dark background */
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary i {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="logo-section">
+            <span class="logo-symbol">§</span>
+            <span class="logo-text">ForenChain</span>
+        </div>
+        <a href="/analyst/dashboard" class="nav-link"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+        <a href="/analyst/incoming" class="nav-link active"><i class="fa-solid fa-file-import"></i> Incoming
+            Evidence</a>
+        <a href="/analyst/reports" class="nav-link"><i class="fa-solid fa-file-contract"></i> Forensic Reports</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="back-container">
+            <a href="/analyst/incoming" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> Back to Incoming List
+            </a>
+        </div>
+
+        <header class="header-top">
+            <h1 class="page-title">Evidence Details</h1>
+            <% if (!analysis || analysis.is_finalized===0) { %>
+                <form action="/analyst/finalize/<%= evidence.evidence_id %>" method="POST">
+                    <button class="btn-primary">
+                        <i class="fa-solid fa-file-pdf"></i> Finalize & Generate PDF
+                    </button>
+                </form>
+                <% } else { %>
+                    <span class="status-pill"><i class="fa-solid fa-lock"></i> Finalized</span>
+                    <% } %>
+        </header>
+
+        <div class="evidence-container">
+            <div class="evidence-sidebar">
+                <div class="evidence-icon-card">
+                    <i class="fa-solid fa-hard-drive usb-icon"></i>
+                </div>
+                <div class="case-id-display">
+                    <%= evidence.case_id %>
+                </div>
+                <div class="status-pill">
+                    <i class="fa-solid fa-arrows-left-right"></i>
+                    <%= evidence.current_status.replace('_', ' ' ) %>
+                </div>
+            </div>
+
+            <div class="metadata-section">
+                <h3>Metadata</h3>
+
+                <div class="info-group">
+                    <span class="info-label">Case ID:</span>
+                    <span class="info-value">
+                        <%= evidence.case_id %>
+                    </span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Description:</span>
+                    <span class="info-value">
+                        <%= evidence.description %>
+                    </span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Investigator:</span>
+                    <span class="info-value">
+                        <%= evidence.investigator %>
+                    </span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Collected:</span>
+                    <span class="info-value">
+                        <%= evidence.timestamp_collected %>
+                    </span>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 30px 0;">
+
+                <h3>Chain of Custody</h3>
+                <div class="info-group">
+                    <% if (evidence.photo_path) { %>
+                        <a href="/analyst/download/<%= evidence.evidence_id %>"
+                            style="color: var(--accent-blue); text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500;">
+                            <i class="fa-solid fa-folder-open"></i> Download Evidence File
+                        </a>
                         <% } %>
+                </div>
 
-                            <% if (analysis && analysis.is_finalized===1 && evidence.current_status==='report_uploaded'
-                                ) { %>
-                                <form action="/analyst/submit-review/<%= evidence.evidence_id %>" method="POST">
-                                    <button class="btn btn-warning">
-                                        📤 Submit for Supervisor Review
-                                    </button>
-                                </form>
-                                <% } %>
+                <div class="info-group" style="margin-top: 20px;">
+                    <a href="/analyst/analysis/<%= evidence.evidence_id %>" class="action-link">
+                        <i class="fa-solid fa-pen-to-square"></i> Add / Edit Forensic Analysis
+                    </a>
+                </div>
 
-                                    <% if (evidence.supervisor_video_path) { %>
-                                        <h3>Supervisor Verification Video</h3>
-                                        <video width="500" controls>
-                                            <source src="/<%= evidence.supervisor_video_path %>" type="video/mp4">
-                                        </video>
+            </div>
+        </div>
+    </main>
+</body>
 
-                                        <p><strong>Status:</strong> Approved by Supervisor</p>
-                                        <% } %>
+</html>

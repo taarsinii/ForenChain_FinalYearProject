@@ -1,39 +1,161 @@
-<h2>Cases Ready for Prosecutor</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Case ID</th>
-        <th>Description</th>
-        <th>Status</th>
-        <th>Action</th>
-    </tr>
+<head>
+    <meta charset="UTF-8">
+    <title>Ready for Prosecutor</title>
 
-    <% if (evidenceList.length===0) { %>
-        <tr>
-            <td colspan="4">No cases ready</td>
-        </tr>
-        <% } %>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #020617, #0f172a);
+            color: #e5e7eb;
+        }
 
-            <% evidenceList.forEach(e=> { %>
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            border-left: 5px solid #22c55e;
+            padding-left: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+        }
+
+        thead {
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        th {
+            font-size: 12px;
+            letter-spacing: 0.8px;
+            color: #bbf7d0;
+            text-transform: uppercase;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.25s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .desc {
+            color: #cbd5f5;
+        }
+
+        .status {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .transfer-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            color: #022c22;
+            padding: 8px 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .transfer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #86efac;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Cases Ready for Prosecutor</h2>
+
+        <table>
+            <thead>
                 <tr>
-                    <td>
-                        <%= e.case_id %>
-                    </td>
-                    <td>
-                        <%= e.description %>
-                    </td>
-                    <td>
-                        <%= e.current_status %>
-                    </td>
-                    <td>
-                        <form action="/analyst/transfer/<%= e.evidence_id %>" method="POST">
-                            <button style="background:green;color:white;">
-                                Transfer to Prosecutor
-                            </button>
-                        </form>
-                    </td>
+                    <th>Case ID</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
-                <% }) %>
-</table>
+            </thead>
+            <tbody>
+                <% if (evidenceList.length===0) { %>
+                    <tr>
+                        <td colspan="4" class="empty">No cases currently ready</td>
+                    </tr>
+                    <% } %>
 
-<a href="/analyst/dashboard">⬅ Back</a>
+                        <% evidenceList.forEach(e=> { %>
+                            <tr>
+                                <td>
+                                    <%= e.case_id %>
+                                </td>
+                                <td class="desc">
+                                    <%= e.description %>
+                                </td>
+                                <td><span class="status">
+                                        <%= e.current_status %>
+                                    </span></td>
+                                <td>
+                                    <form action="/analyst/transfer/<%= e.evidence_id %>" method="POST">
+                                        <button class="transfer-btn">
+                                            Transfer to Prosecutor
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }) %>
+            </tbody>
+        </table>
+
+        <a class="back" href="/analyst/dashboard">⬅ Back to Dashboard</a>
+    </div>
+</body>
+
+</html>
