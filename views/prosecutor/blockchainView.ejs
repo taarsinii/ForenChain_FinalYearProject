@@ -1,139 +1,299 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Blockchain Verification</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Verification | ForenChain</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        :root {
+            --bg-dark: #05080f;
+            --card-bg: #0c1220;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --border-soft: rgba(255, 255, 255, 0.08);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 45%),
+                radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.06), transparent 45%),
+                linear-gradient(180deg, #070b14, #05080f);
         }
 
-        table {
-            border-collapse: collapse;
-            width: 100%;
+        .container {
+            max-width: 1300px;
+            margin: auto;
+            padding: 45px 50px 60px;
         }
 
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
+        /* ===== HEADER ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
         }
 
-        th {
-            background-color: #f4f4f4;
+        .page-title {
+            font-size: 2.4rem;
+            font-weight: 600;
+            letter-spacing: -1px;
         }
 
-        a {
-            color: #2c7be5;
-            text-decoration: none;
+        .evidence-pill {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            color: var(--accent-blue);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
+        /* ===== CARDS ===== */
+        .card {
+            background: linear-gradient(180deg, rgba(12, 18, 32, 0.95), rgba(12, 18, 32, 0.85));
+            border: 1px solid var(--border-soft);
+            border-radius: 22px;
+            padding: 36px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* ===== STATUS BADGES ===== */
         .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: #fff;
-            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .verified {
-            background-color: #28a745;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--accent-green);
         }
 
-        /* green */
         .unverified {
-            background-color: #dc3545;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: var(--accent-red);
         }
 
-        /* red */
+        /* ===== TABLE ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-soft);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
         code {
-            background-color: #f9f9f9;
-            padding: 2px 4px;
-            font-size: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 4px 6px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            word-break: break-all;
+            color: #e5e7eb;
+        }
+
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            opacity: 0.7;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px;
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-decoration: none;
         }
     </style>
 </head>
 
 <body>
-    <h2>Blockchain Verification</h2>
-    <p><strong>Evidence ID:</strong>
-        <%= evidenceId %>
-    </p>
 
-    <!-----------------------
-    ✅ VERIFICATION SUMMARY 
-    ------------------------->
-    <div class="summary-box">
-        <h3>🔍 Verification Summary</h3>
-        <ul style="margin:0;">
-            <li>✔ All custody records verified</li>
-            <li>✔ No hash mismatch detected</li>
-            <li>✔ Evidence integrity preserved</li>
-            <li><strong>Blockchain Network:</strong> Ethereum Sepolia (Testnet)</li>
-            <li><strong>Verified At:</strong>
-                <%= new Date().toLocaleString() %>
-            </li>
-        </ul>
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="page-header">
+            <div class="page-title">Blockchain Verification</div>
+            <div class="evidence-pill">Evidence ID: <%= evidenceId %>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="card">
+            <h3><i class="fa-solid fa-shield-halved"></i> Verification Summary</h3>
+            <ul>
+                <li>All chain-of-custody records successfully verified</li>
+                <li>No database-to-blockchain hash mismatches detected</li>
+                <li>Evidence integrity preserved across lifecycle</li>
+                <li><strong>Blockchain Network:</strong> Ethereum Sepolia (Testnet)</li>
+                <li><strong>Verified At:</strong>
+                    <%= new Date().toLocaleString() %>
+                </li>
+            </ul>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card">
+            <h3><i class="fa-solid fa-cubes"></i> Blockchain Audit Records</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Action</th>
+                        <th>Actor</th>
+                        <th>Timestamp</th>
+                        <th>DB Hash</th>
+                        <th>Blockchain Hash</th>
+                        <th>Status</th>
+                        <th>Transaction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% chain.forEach((c, index)=> { %>
+                        <tr>
+                            <td>
+                                <%= index + 1 %>
+                            </td>
+                            <td>
+                                <%= c.action %>
+                            </td>
+                            <td>
+                                <%= c.actor %>
+                            </td>
+                            <td>
+                                <%= new Date(c.timestamp).toLocaleString() %>
+                            </td>
+                            <td><code><%= c.db_hash %></code></td>
+                            <td>
+                                <% if (c.blockchainHash) { %>
+                                    <code><%= c.blockchainHash %></code>
+                                    <% } else { %>
+                                        —
+                                        <% } %>
+                            </td>
+                            <td>
+                                <% if (c.verified) { %>
+                                    <span class="badge verified">
+                                        <i class="fa-solid fa-check"></i> Verified
+                                    </span>
+                                    <% } else { %>
+                                        <span class="badge unverified">
+                                            <i class="fa-solid fa-xmark"></i> Mismatch
+                                        </span>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <% if (c.tx_hash) { %>
+                                    <a href="https://sepolia.etherscan.io/tx/<%= c.tx_hash %>" target="_blank">
+                                        View TX
+                                    </a>
+                                    <% } else { %>
+                                        —
+                                        <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/prosecutor/dashboard" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+
+        <div class="footer">
+            ForenChain • Blockchain Evidence Verification • Read-Only Audit View
+        </div>
+
     </div>
 
-    <!-------------------------- 
-    🔗 BLOCKCHAIN RECORD TABLE 
-    ---------------------------->
-    <table>
-        <tr>
-            <th>#</th>
-            <th>Action</th>
-            <th>Actor</th>
-            <th>Timestamp</th>
-            <th>DB Hash</th>
-            <th>Blockchain Hash</th>
-            <th>Status</th>
-            <th>TX Link</th>
-        </tr>
-
-        <% chain.forEach((c, index)=> { %>
-            <tr>
-                <td>
-                    <%= index + 1 %>
-                </td>
-                <td>
-                    <%= c.action %>
-                </td>
-                <td>
-                    <%= c.actor %>
-                </td>
-                <td>
-                    <%= new Date(c.timestamp).toLocaleString() %>
-                </td>
-                <td><code><%= c.db_hash %></code></td>
-                <td>
-                    <% if (c.blockchainHash) { %>
-                        <code><%= c.blockchainHash %></code>
-                        <% } else { %>
-                            —
-                            <% } %>
-                </td>
-                <td>
-                    <% if (c.verified) { %>
-                        <span class="badge verified">✅ Verified</span>
-                        <% } else { %>
-                            <span class="badge unverified">❌ Mismatch</span>
-                            <% } %>
-                </td>
-                <td>
-                    <% if (c.tx_hash) { %>
-                        <a href="https://sepolia.etherscan.io/tx/<%= c.tx_hash %>" target="_blank">View TX</a>
-                        <% } else { %>
-                            —
-                            <% } %>
-                </td>
-            </tr>
-            <% }) %>
-    </table>
-
-    <br>
-    <a href="/prosecutor/dashboard">⬅ Back to Dashboard</a>
 </body>
 
 </html>

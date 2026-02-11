@@ -1,40 +1,367 @@
-<h2>Case: <%= evidence.case_id %>
-</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<h3>Evidence Details</h3>
-<p><strong>Description:</strong>
-    <%= evidence.description %>
-</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case View | ForenChain</title>
 
-<% if (evidence.supervisor_video_path) { %>
-    <h3>Supervisor Witness Video</h3>
-    <video width="500" controls>
-        <source src="/<%= evidence.supervisor_video_path %>" type="video/mp4">
-    </video>
-    <% } %>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        <h3>Forensic Report</h3>
-        <a href="/<%= report.report_file_path %>" target="_blank">Download Report</a>
+    <style>
+        :root {
+            --bg0: #050810;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-bg-hover: rgba(255, 255, 255, 0.07);
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border-soft: rgba(255, 255, 255, 0.12);
+        }
 
-        <h3>Chain of Custody</h3>
-        <ul>
-            <% chain.forEach(c=> { %>
-                <li>
-                    <strong>
-                        <%= c.action %>
-                    </strong>
-                    — <%= c.timestamp.toLocaleString() %>
-                </li>
-                <% }) %>
-        </ul>
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
 
-        <hr>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg0);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-        <a href="/prosecutor/export/<%= evidence.evidence_id %>">
-            📄 Export Chain of Custody PDF
-        </a>
+        /* --- DYNAMIC MESH BACKGROUND --- */
+        .bg-visuals {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: var(--bg0);
+            overflow: hidden;
+        }
 
-        <hr>
-        <a href="/prosecutor/blockchain/<%= evidence.evidence_id %>">
-            🔗 View Blockchain Verification
-        </a>
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            top: -150px;
+            left: -150px;
+            background: var(--accent-blue);
+        }
+
+        .blob-2 {
+            bottom: -150px;
+            right: -150px;
+            background: var(--accent-purple);
+            animation-delay: -7s;
+        }
+
+        .blob-3 {
+            top: 30%;
+            left: 40%;
+            background: #10B981;
+            animation-delay: -12s;
+            opacity: 0.1;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(120px, 80px) scale(1.15);
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 60px 25px;
+            position: relative;
+        }
+
+        /* ===== HEADER ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .case-pill {
+            background: rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: var(--accent-blue);
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ===== GLASS CARDS ===== */
+        .card {
+            background: linear-gradient(135deg, var(--card-bg), var(--card-bg-hover));
+            backdrop-filter: blur(14px) saturate(180%);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
+            border: 1px solid var(--border-soft);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ===== VIDEO ===== */
+        video {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border-soft);
+            background: #000;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: 1px solid var(--border-soft);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .btn:hover {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #fff;
+        }
+
+        /* ===== TIMELINE ===== */
+        .timeline {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), transparent);
+        }
+
+        .timeline li {
+            position: relative;
+            padding-left: 45px;
+            padding-bottom: 30px;
+        }
+
+        .timeline li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 16px;
+            height: 16px;
+            background: var(--bg0);
+            border: 2px solid var(--accent-blue);
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 12px var(--accent-blue);
+        }
+
+        .timeline strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .timestamp {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            font-family: monospace;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-visuals">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+
+        <header class="page-header">
+            <div class="page-title">Case Analysis</div>
+            <div class="case-pill">
+                <i class="fa-solid fa-shield-halved"></i> &nbsp; Case #<%= evidence.case_id %>
+            </div>
+        </header>
+
+        <section class="card">
+            <h3><i class="fa-solid fa-fingerprint"></i> Evidence Description</h3>
+            <p style="font-size: 1.1rem; font-weight: 300; color: var(--text-main);">
+                <%= evidence.description %>
+            </p>
+        </section>
+
+        <% if (evidence.supervisor_video_path) { %>
+            <section class="card">
+                <h3><i class="fa-solid fa-circle-play"></i> Supervisor Witness Video</h3>
+                <video controls>
+                    <source src="/<%= evidence.supervisor_video_path %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </section>
+            <% } %>
+
+                <section class="card">
+                    <h3><i class="fa-solid fa-file-shield"></i> Forensic Report</h3>
+                    <p style="margin-bottom: 25px; color: var(--text-dim);">
+                        Verified forensic analysis file containing SHA-256 hash validation and expert metadata.
+                    </p>
+                    <a href="/<%= report.report_file_path %>" target="_blank" class="btn btn-primary">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                        Download PDF Report
+                    </a>
+                </section>
+
+                <section class="card">
+                    <h3><i class="fa-solid fa-link"></i> Chain of Custody</h3>
+                    <ul class="timeline">
+                        <% chain.forEach(c=> { %>
+                            <li>
+                                <strong>
+                                    <%= c.action %>
+                                </strong>
+                                <span class="timestamp">
+                                    <i class="fa-regular fa-clock"></i>
+                                    <%= c.timestamp.toLocaleString() %>
+                                </span>
+                            </li>
+                            <% }) %>
+                    </ul>
+                </section>
+
+                <section class="card">
+                    <h3><i class="fa-solid fa-gears"></i> Case Verification</h3>
+                    <div class="btn-group">
+                        <a href="/prosecutor/export/<%= evidence.evidence_id %>" class="btn">
+                            <i class="fa-solid fa-file-export"></i>
+                            Export Full Chain
+                        </a>
+
+                        <a href="/prosecutor/blockchain/<%= evidence.evidence_id %>" class="btn"
+                            style="border-color: var(--accent-purple); color: var(--accent-purple); background: rgba(139, 92, 246, 0.1);">
+                            <i class="fa-solid fa-cube"></i>
+                            Verify on Blockchain
+                        </a>
+                    </div>
+                </section>
+
+                <div class="footer">
+                    ForenChain &bull; Secure Digital Evidence System &bull; 2026
+                </div>
+
+    </div>
+
+</body>
+
+</html>

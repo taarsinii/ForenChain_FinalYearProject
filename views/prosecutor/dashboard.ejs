@@ -4,203 +4,332 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Prosecutor Dashboard</title>
+    <title>Prosecutor Dashboard | Digital Forensic System</title>
 
     <style>
         :root {
-            --bg0: #070B14;
+            --bg0: #050810;
             --bg1: #0B1224;
-            --card: rgba(255, 255, 255, .06);
-            --card2: rgba(255, 255, 255, .085);
-            --border: rgba(255, 255, 255, .10);
-            --text: rgba(255, 255, 255, .92);
-            --muted: rgba(255, 255, 255, .62);
-            --shadow: 0 18px 50px rgba(0, 0, 0, .45);
+            --card: rgba(255, 255, 255, 0.04);
+            --card2: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: rgba(255, 255, 255, 0.95);
+            --muted: rgba(255, 255, 255, 0.55);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             --accent: #6EA8FE;
-            --good: #22C55E;
+            --good: #10B981;
             --warn: #F59E0B;
             --bad: #EF4444;
             --info: #38BDF8;
             --focus: 0 0 0 4px rgba(110, 168, 254, .22);
-            --r: 18px;
-            --r2: 22px;
+            --r2: 24px;
         }
 
         body.light {
-            --bg0: #f3f6ff;
-            --bg1: #f8fafc;
-            --card: #fff;
-            --card2: #fff;
-            --border: rgba(15, 23, 42, .10);
-            --text: #0f172a;
+            --bg0: #fafbff;
+            --bg1: #f3dede;
+            --card: rgba(255, 255, 255, 0.75);
+            --card2: rgba(255, 255, 255, 0.95);
+            --border: rgba(15, 23, 42, 0.1);
+            --text: #1e293b;
             --muted: #64748b;
-            --shadow: 0 18px 40px rgba(15, 23, 42, .10);
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
             --accent: #2563EB;
-            --focus: 0 0 0 4px rgba(37, 99, 235, .16);
         }
 
         * {
             box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
             margin: 0;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
             color: var(--text);
-            background:
-                radial-gradient(1200px 600px at 15% 10%, rgba(110, 168, 254, .22), transparent 60%),
-                radial-gradient(900px 500px at 85% 0%, rgba(34, 197, 94, .12), transparent 55%),
-                radial-gradient(900px 600px at 70% 95%, rgba(168, 85, 247, .14), transparent 55%),
-                linear-gradient(180deg, var(--bg0), var(--bg1));
+            background: var(--bg0);
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
+        /* --- DYNAMIC MESH BACKGROUND --- */
+        .bg-visuals {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: var(--bg0);
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            top: -150px;
+            left: -150px;
+            background: var(--accent);
+        }
+
+        .blob-2 {
+            bottom: -150px;
+            right: -150px;
+            background: var(--good);
+            animation-delay: -7s;
+        }
+
+        .blob-3 {
+            top: 30%;
+            left: 40%;
+            background: #A855F7;
+            animation-delay: -12s;
+            opacity: 0.1;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(120px, 80px) scale(1.15);
+            }
+        }
+
+        /* --- LAYOUT & GLASS --- */
         .container {
-            width: min(1150px, calc(100% - 32px));
+            width: min(1200px, calc(100% - 40px));
             margin: 0 auto;
-            padding: 28px 0 40px;
+            padding: 40px 0;
+            position: relative;
         }
 
         .glass {
-            background: linear-gradient(180deg, var(--card), var(--card2));
+            background: linear-gradient(135deg, var(--card), var(--card2));
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(14px) saturate(180%);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
         }
 
         .topbar {
             display: flex;
-            gap: 14px;
             justify-content: space-between;
             align-items: flex-start;
+            margin-bottom: 32px;
             flex-wrap: wrap;
-            margin-bottom: 18px;
+            gap: 20px;
         }
 
         .brand {
             display: inline-flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
-            padding: 10px 12px;
+            padding: 8px 16px;
             border-radius: 999px;
             border: 1px solid var(--border);
-            background: rgba(110, 168, 254, .10);
-            width: fit-content;
+            background: rgba(110, 168, 254, 0.08);
         }
 
         .brand .dot {
             width: 10px;
             height: 10px;
-            border-radius: 999px;
+            border-radius: 50%;
             background: var(--good);
-            box-shadow: 0 0 0 6px rgba(34, 197, 94, .12);
+            box-shadow: 0 0 12px var(--good);
         }
 
         h1 {
-            margin: 10px 0 4px;
-            font-size: 26px;
+            margin: 16px 0 8px;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
         }
 
-        .muted {
-            color: var(--muted);
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 8px;
-        }
-
-        .btn {
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .08);
-            color: var(--text);
-            padding: 10px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            gap: 8px;
-            align-items: center;
-            transition: transform .12s ease, background .12s ease, border-color .12s ease;
-            user-select: none;
-        }
-
-        .btn:hover {
-            background: rgba(110, 168, 254, .16);
-            border-color: rgba(110, 168, 254, .25);
-            transform: translateY(-1px);
-        }
-
-        .btn:focus {
-            outline: none;
-            box-shadow: var(--focus);
-        }
-
+        /* --- CARDS & STATS --- */
         .grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
-            gap: 12px;
-            margin: 14px 0;
+            gap: 20px;
+            margin: 24px 0;
         }
 
         .card {
             border-radius: var(--r2);
-            padding: 16px;
+            padding: 24px;
             position: relative;
             overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .card::after {
-            content: "";
-            position: absolute;
-            right: -80px;
-            top: -80px;
-            width: 220px;
-            height: 220px;
-            border-radius: 999px;
-            background: radial-gradient(circle, rgba(110, 168, 254, .22), transparent 60%);
-            transform: rotate(25deg);
-            pointer-events: none;
+        .card:hover {
+            transform: translateY(-6px);
         }
 
         .kpi {
             display: flex;
-            align-items: flex-start;
             justify-content: space-between;
-            gap: 12px;
+            align-items: flex-start;
         }
 
         .label {
-            font-size: 12px;
-            letter-spacing: .08em;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.1em;
             color: var(--muted);
         }
 
         .value {
-            font-size: 30px;
+            font-size: 36px;
             font-weight: 800;
-            margin-top: 6px;
+            margin: 8px 0;
         }
 
         .sub {
-            margin-top: 6px;
             font-size: 13px;
             color: var(--muted);
-            line-height: 1.35;
+            line-height: 1.4;
         }
 
         .pillIcon {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             border-radius: 16px;
             display: grid;
             place-items: center;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .08);
-            flex: 0 0 auto;
+        }
+
+        /* --- TABLE & CONTROLS --- */
+        .panel {
+            border-radius: var(--r2);
+            padding: 28px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 16px;
+            min-width: 280px;
+        }
+
+        .input input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        select {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .tableWrap {
+            margin-top: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: rgba(255, 255, 255, 0.03);
+            text-align: left;
+            padding: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: 0.2s;
+        }
+
+        tbody tr:hover {
+            background: rgba(110, 168, 254, 0.05);
+            cursor: pointer;
+        }
+
+        tbody td {
+            padding: 18px 16px;
+            vertical-align: middle;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .bDot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
         }
 
         .col-4 {
@@ -217,186 +346,22 @@
             }
         }
 
-        .panel {
-            border-radius: var(--r2);
-            padding: 16px;
-        }
-
-        .panelHead {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .panelHead h2 {
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .08);
-            border-radius: 14px;
-            padding: 10px 12px;
-            min-width: 260px;
-        }
-
-        .input input {
-            background: transparent;
-            border: 0;
-            color: var(--text);
-            outline: none;
-            width: 100%;
-            font-size: 14px;
-        }
-
-        .input input::placeholder {
-            color: rgba(255, 255, 255, .45);
-        }
-
-        body.light .input input::placeholder {
-            color: rgba(15, 23, 42, .45);
-        }
-
-        select {
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .08);
-            color: var(--text);
-            border-radius: 14px;
-            padding: 10px 12px;
-            outline: none;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        select:focus {
-            box-shadow: var(--focus);
-        }
-
-        .tableWrap {
-            overflow: auto;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 720px;
-        }
-
-        thead th {
-            text-align: left;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: var(--muted);
-            padding: 14px 14px;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, .02));
-            backdrop-filter: blur(10px);
-            cursor: pointer;
-            user-select: none;
-        }
-
-        body.light thead th {
-            background: linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .85));
-        }
-
-        tbody td {
-            padding: 14px 14px;
-            border-top: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        tbody tr:hover {
-            background: rgba(110, 168, 254, .10);
-            cursor: pointer;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .06);
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .bDot {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: var(--info);
-            box-shadow: 0 0 0 6px rgba(56, 189, 248, .12);
-        }
-
-        .right {
-            text-align: right;
-        }
-
-        .linkBtn {
-            display: inline-flex;
-            gap: 8px;
-            align-items: center;
-            padding: 8px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .08);
-            color: var(--text);
-        }
-
-        .linkBtn:hover {
-            background: rgba(110, 168, 254, .16);
-            transform: translateY(-1px);
-        }
-
-        .pager {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 2px 0;
-            flex-wrap: wrap;
-        }
-
-        .mini {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
         footer {
-            margin-top: 18px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
+            margin-top: 40px;
+            text-align: center;
             color: var(--muted);
             font-size: 13px;
-            padding: 0 2px;
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-visuals">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
     <% const safeCases=Array.isArray(cases) ? cases : []; %>
 
         <div class="container">
@@ -404,18 +369,15 @@
                 <div>
                     <div class="brand">
                         <span class="dot"></span>
-                        <div>
-                            <div style="font-weight:800; line-height:1;">Digital Forensic System</div>
-                            <div class="muted" style="font-size:12px;">Prosecutor Workspace</div>
-                        </div>
+                        <div style="font-weight:800; font-size: 14px;">Digital Forensic System</div>
                     </div>
                     <h1>Prosecutor Dashboard</h1>
-                    <div class="muted">Search, filter, sort, paginate — click any row to open the full chain.</div>
+                    <div class="muted">Monitor and manage evidence chains of custody in real-time.</div>
                 </div>
 
                 <div class="actions">
-                    <button class="btn" id="btnTheme" type="button">🌓 Theme</button>
-                    <button class="btn" id="btnRefresh" type="button">⟳ Refresh</button>
+                    <button class="btn" id="btnTheme">🌓 Theme</button>
+                    <button class="btn" id="btnRefresh">⟳ Refresh</button>
                 </div>
             </div>
 
@@ -424,10 +386,10 @@
                     <div class="kpi">
                         <div>
                             <div class="label">Total Cases</div>
-                            <div class="value" id="kpiTotal">
+                            <div class="value">
                                 <%= safeCases.length %>
                             </div>
-                            <div class="sub">Rendered dynamically from server results.</div>
+                            <div class="sub">Active forensic investigations.</div>
                         </div>
                         <div class="pillIcon">📁</div>
                     </div>
@@ -437,8 +399,8 @@
                     <div class="kpi">
                         <div>
                             <div class="label">Most Common Status</div>
-                            <div class="value" style="font-size:20px; margin-top:10px;" id="kpiCommon">—</div>
-                            <div class="sub">Calculated from rows currently in the table.</div>
+                            <div class="value" style="font-size:22px;" id="kpiCommon">—</div>
+                            <div class="sub">Current primary workflow stage.</div>
                         </div>
                         <div class="pillIcon">📊</div>
                     </div>
@@ -446,77 +408,64 @@
 
                 <div class="card glass col-4">
                     <div class="kpi">
-                        <div>
-                            <div class="label">Status Breakdown</div>
-                            <div class="sub">Generated from table rows</div>
+                        <div style="width: 100%;">
+                            <div class="label">Status Distribution</div>
+                            <div id="breakdown"
+                                style="display:flex; flex-direction: column; gap:10px; margin-top:12px;"></div>
                         </div>
-                        <div class="pillIcon">🧩</div>
                     </div>
-                    <div id="breakdown" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
                 </div>
 
                 <div class="panel glass col-12">
-                    <div class="panelHead">
-                        <div>
-                            <h2>Cases</h2>
-                            <div class="muted" style="font-size:13px; margin-top:4px;">No static JSON needed — EJS
-                                renders rows, JS reads them.</div>
-                        </div>
-
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <h2 style="margin:0; font-size: 20px;">Evidence Records</h2>
                         <div class="controls">
                             <div class="input">
-                                <span class="muted">🔎</span>
-                                <input id="searchInput" placeholder="Search case / status / evidence…">
+                                <span>🔎</span>
+                                <input id="searchInput" placeholder="Search case, status, or ID...">
                             </div>
-
                             <select id="statusSelect">
                                 <option value="">All Statuses</option>
                             </select>
-
                             <select id="pageSize">
-                                <option value="8">8 / page</option>
-                                <option value="12" selected>12 / page</option>
-                                <option value="20">20 / page</option>
+                                <option value="8">8 per page</option>
+                                <option value="12" selected>12 per page</option>
+                                <option value="20">20 per page</option>
                             </select>
-
-                            <button class="btn" id="btnClear" type="button">✕ Clear</button>
+                            <button class="btn" id="btnClear">✕</button>
                         </div>
                     </div>
 
                     <div class="tableWrap">
-                        <table id="casesTable">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th data-col="case">Case ID</th>
-                                    <th data-col="status">Status</th>
-                                    <th data-col="evidence">Evidence ID</th>
-                                    <th class="right">Action</th>
+                                    <th data-col="case" style="cursor:pointer">Case ID ↕</th>
+                                    <th data-col="status" style="cursor:pointer">Status ↕</th>
+                                    <th data-col="evidence" style="cursor:pointer">Evidence ID ↕</th>
+                                    <th style="text-align: right;">Action</th>
                                 </tr>
                             </thead>
-
                             <tbody id="tbody">
                                 <% safeCases.forEach(c=> { %>
-                                    <tr data-case="<%= String(c.case_id ?? '') %>"
-                                        data-status="<%= String(c.current_status ?? '') %>"
-                                        data-evidence="<%= String(c.evidence_id ?? '') %>"
-                                        data-href="/prosecutor/case/<%= encodeURIComponent(String(c.evidence_id ?? '')) %>">
-                                        <td style="font-weight:800;"># <%= c.case_id %>
+                                    <tr data-case="<%= c.case_id %>" data-status="<%= c.current_status %>"
+                                        data-evidence="<%= c.evidence_id %>"
+                                        data-href="/prosecutor/case/<%= encodeURIComponent(c.evidence_id) %>">
+                                        <td style="font-weight:700;">#<%= c.case_id %>
                                         </td>
                                         <td>
                                             <span class="badge">
                                                 <span class="bDot"></span>
-                                                <span class="statusText">
-                                                    <%= c.current_status %>
-                                                </span>
+                                                <%= c.current_status %>
                                             </span>
                                         </td>
                                         <td class="muted">
                                             <%= c.evidence_id %>
                                         </td>
-                                        <td class="right">
-                                            <a class="linkBtn"
-                                                href="/prosecutor/case/<%= encodeURIComponent(String(c.evidence_id ?? '')) %>">🔗
-                                                View Full Chain</a>
+                                        <td style="text-align: right;">
+                                            <a href="/prosecutor/case/<%= encodeURIComponent(c.evidence_id) %>"
+                                                class="btn" style="padding: 6px 12px; font-size: 12px;">View Chain</a>
                                         </td>
                                     </tr>
                                     <% }) %>
@@ -524,27 +473,31 @@
                         </table>
                     </div>
 
-                    <div class="pager">
-                        <div class="mini" id="pageInfo">—</div>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn" id="prevBtn" type="button">‹</button>
-                            <button class="btn" id="pageNum" type="button" disabled>1</button>
-                            <button class="btn" id="nextBtn" type="button">›</button>
+                    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <div class="muted" id="pageInfo" style="font-size: 13px;"></div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn" id="prevBtn">‹</button>
+                            <button class="btn" id="pageNum" disabled>1</button>
+                            <button class="btn" id="nextBtn">›</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <footer>
-                <div>Tip: Click headers to sort. Click a row to open the chain.</div>
-                <div>© <span id="year"></span> Digital Forensic System</div>
+                <p>&copy; <span id="year"></span> Digital Forensic System • Secured Ledger Technology</p>
             </footer>
         </div>
 
         <script>
-            // Theme toggle
-            const themeKey = "dfs_theme_dom_v1";
+            // --- Core Logic ---
+            const themeKey = "dfs_theme_v2";
             const body = document.body;
+            const tbody = document.getElementById("tbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr"));
+            document.getElementById("year").textContent = new Date().getFullYear();
+
+            // Theme Toggle
             if (localStorage.getItem(themeKey) === "light") body.classList.add("light");
             document.getElementById("btnTheme").addEventListener("click", () => {
                 body.classList.toggle("light");
@@ -552,170 +505,119 @@
             });
 
             document.getElementById("btnRefresh").addEventListener("click", () => location.reload());
-            document.getElementById("year").textContent = new Date().getFullYear();
 
-            // Read rows from DOM (no JSON)
-            const tbody = document.getElementById("tbody");
-            const allRows = Array.from(tbody.querySelectorAll("tr"));
-
-            // Click row navigation
+            // Row Navigation
             allRows.forEach(tr => {
                 tr.addEventListener("click", (e) => {
-                    if (e.target.closest("a")) return;
-                    window.location.href = tr.getAttribute("data-href");
+                    if (!e.target.closest("a")) window.location.href = tr.dataset.href;
                 });
             });
 
-            // Badge dot colors by status
-            function normalizeStatus(s) { return (s || "").trim() || "Unknown"; }
-            function dotColor(status) {
-                const s = normalizeStatus(status).toLowerCase();
-                if (s.includes("open") || s.includes("new")) return getVar("--info");
-                if (s.includes("progress") || s.includes("processing")) return getVar("--warn");
-                if (s.includes("pending") || s.includes("review")) return getVar("--accent");
-                if (s.includes("closed") || s.includes("complete") || s.includes("resolved")) return getVar("--good");
-                if (s.includes("reject") || s.includes("fail")) return getVar("--bad");
-                return getVar("--info");
+            // Status Colors
+            function getStatusColor(status) {
+                const s = status.toLowerCase();
+                if (s.includes("open") || s.includes("new")) return "#38BDF8";
+                if (s.includes("progress") || s.includes("processing")) return "#F59E0B";
+                if (s.includes("closed") || s.includes("complete")) return "#10B981";
+                if (s.includes("reject") || s.includes("fail")) return "#EF4444";
+                return "#6EA8FE";
             }
-            function getVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
             allRows.forEach(tr => {
-                const st = tr.getAttribute("data-status");
                 const dot = tr.querySelector(".bDot");
-                if (dot) dot.style.background = dotColor(st);
+                if (dot) dot.style.background = getStatusColor(tr.dataset.status);
             });
 
-            // Build status counts from DOM
-            const statusCounts = {};
+            // Data Aggregation
+            const counts = {};
             allRows.forEach(tr => {
-                const st = normalizeStatus(tr.getAttribute("data-status"));
-                statusCounts[st] = (statusCounts[st] || 0) + 1;
+                const s = tr.dataset.status;
+                counts[s] = (counts[s] || 0) + 1;
             });
-            const entries = Object.entries(statusCounts).sort((a, b) => b[1] - a[1]);
-            document.getElementById("kpiCommon").textContent = entries.length ? `${entries[0][0]} (${entries[0][1]})` : "—";
 
-            // Fill status select options
+            const sortedEntries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            document.getElementById("kpiCommon").textContent = sortedEntries[0] ? `${sortedEntries[0][0]} (${sortedEntries[0][1]})` : "—";
+
+            // Status Select Populate
             const statusSelect = document.getElementById("statusSelect");
-            entries.forEach(([st]) => {
+            sortedEntries.forEach(([st]) => {
                 const opt = document.createElement("option");
-                opt.value = st;
-                opt.textContent = st;
+                opt.value = st; opt.textContent = st;
                 statusSelect.appendChild(opt);
             });
 
-            // Breakdown chips
+            // Breakdown UI
             const breakdown = document.getElementById("breakdown");
-            const total = allRows.length || 1;
-            breakdown.innerHTML = entries.slice(0, 4).map(([st, n]) => {
-                const pct = Math.round((n / total) * 100);
+            const totalRows = allRows.length || 1;
+            breakdown.innerHTML = sortedEntries.slice(0, 3).map(([st, n]) => {
+                const pct = (n / totalRows) * 100;
                 return `
-      <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--border); background: rgba(255,255,255,.06); font-size:13px;">
-        <span style="font-weight:800;">${escapeHtml(st)}</span>
-        <span class="muted">(${n})</span>
-        <span style="width:80px;height:8px;border-radius:999px;background: rgba(255,255,255,.10); overflow:hidden; border:1px solid rgba(255,255,255,.08);">
-          <span style="display:block;height:100%;width:${pct}%;background: rgba(110,168,254,.75); border-radius:999px;"></span>
-        </span>
-      </div>
-    `;
+                <div style="font-size: 12px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span>${st}</span>
+                        <span class="muted">${Math.round(pct)}%</span>
+                    </div>
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
+                        <div style="width:${pct}%; height:100%; background:${getStatusColor(st)};"></div>
+                    </div>
+                </div>`;
             }).join("");
 
-            function escapeHtml(s) {
-                return String(s).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
-            }
-
-            // Interactions: filter/sort/pagination using rows
-            const searchInput = document.getElementById("searchInput");
-            const pageSizeSel = document.getElementById("pageSize");
-            const pageInfo = document.getElementById("pageInfo");
-            const prevBtn = document.getElementById("prevBtn");
-            const nextBtn = document.getElementById("nextBtn");
-            const pageNum = document.getElementById("pageNum");
-
-            let state = { q: "", status: "", page: 1, size: parseInt(pageSizeSel.value, 10), sortCol: "case", sortDir: "asc" };
-
-            function rowText(tr) {
-                return (
-                    (tr.getAttribute("data-case") || "") + " " +
-                    (tr.getAttribute("data-status") || "") + " " +
-                    (tr.getAttribute("data-evidence") || "")
-                ).toLowerCase();
-            }
-
-            function getVal(tr, col) {
-                return (tr.getAttribute("data-" + col) || "").trim();
-            }
-
-            function sortRows(rows) {
-                const col = state.sortCol;
-                const dir = state.sortDir;
-                rows.sort((a, b) => {
-                    const av = getVal(a, col);
-                    const bv = getVal(b, col);
-                    const an = Number(av), bn = Number(bv);
-                    const bothNum = !Number.isNaN(an) && !Number.isNaN(bn) && av !== "" && bv !== "";
-                    let res = bothNum ? (an - bn) : av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" });
-                    return dir === "asc" ? res : -res;
-                });
-                return rows;
-            }
+            // --- Filtering & Pagination ---
+            let state = { q: "", status: "", page: 1, size: 12, sortCol: "case", sortDir: "asc" };
 
             function apply() {
-                const q = state.q.toLowerCase();
-                let rows = allRows.filter(tr => {
-                    const st = normalizeStatus(tr.getAttribute("data-status"));
-                    const matchQ = !q || rowText(tr).includes(q);
-                    const matchS = !state.status || st === state.status;
+                const filtered = allRows.filter(tr => {
+                    const text = tr.innerText.toLowerCase();
+                    const matchQ = !state.q || text.includes(state.q.toLowerCase());
+                    const matchS = !state.status || tr.dataset.status === state.status;
                     return matchQ && matchS;
                 });
 
-                rows = sortRows(rows);
+                // Sorting
+                filtered.sort((a, b) => {
+                    let av = a.dataset[state.sortCol], bv = b.dataset[state.sortCol];
+                    if (!isNaN(av)) { av = Number(av); bv = Number(bv); }
+                    const res = av > bv ? 1 : -1;
+                    return state.sortDir === "asc" ? res : -res;
+                });
 
-                const total = rows.length;
-                const pages = Math.max(1, Math.ceil(total / state.size));
+                const total = filtered.length;
+                const pages = Math.ceil(total / state.size) || 1;
                 state.page = Math.min(state.page, pages);
 
                 const start = (state.page - 1) * state.size;
-                const slice = rows.slice(start, start + state.size);
-
-                // Hide all, show slice
                 allRows.forEach(r => r.style.display = "none");
-                slice.forEach(r => r.style.display = "");
+                filtered.slice(start, start + state.size).forEach(r => r.style.display = "");
 
-                const shownFrom = total === 0 ? 0 : start + 1;
-                const shownTo = Math.min(total, start + slice.length);
-                pageInfo.textContent = `Showing ${shownFrom}–${shownTo} of ${total} cases`;
-                pageNum.textContent = String(state.page);
-
-                prevBtn.disabled = state.page <= 1;
-                nextBtn.disabled = state.page >= pages;
+                document.getElementById("pageInfo").textContent = `Showing ${total ? start + 1 : 0} to ${Math.min(start + state.size, total)} of ${total} entries`;
+                document.getElementById("pageNum").textContent = state.page;
+                document.getElementById("prevBtn").disabled = state.page === 1;
+                document.getElementById("nextBtn").disabled = state.page === pages;
             }
 
-            searchInput.addEventListener("input", (e) => { state.q = e.target.value; state.page = 1; apply(); });
-            statusSelect.addEventListener("change", (e) => { state.status = e.target.value; state.page = 1; apply(); });
-            pageSizeSel.addEventListener("change", (e) => { state.size = parseInt(e.target.value, 10); state.page = 1; apply(); });
-
+            // Listeners
+            document.getElementById("searchInput").addEventListener("input", e => { state.q = e.target.value; state.page = 1; apply(); });
+            document.getElementById("statusSelect").addEventListener("change", e => { state.status = e.target.value; state.page = 1; apply(); });
+            document.getElementById("pageSize").addEventListener("change", e => { state.size = Number(e.target.value); state.page = 1; apply(); });
+            document.getElementById("prevBtn").addEventListener("click", () => { state.page--; apply(); });
+            document.getElementById("nextBtn").addEventListener("click", () => { state.page++; apply(); });
             document.getElementById("btnClear").addEventListener("click", () => {
-                searchInput.value = "";
-                statusSelect.value = "";
-                state.q = ""; state.status = ""; state.page = 1;
-                apply();
+                document.getElementById("searchInput").value = "";
+                document.getElementById("statusSelect").value = "";
+                state.q = ""; state.status = ""; apply();
             });
 
-            prevBtn.addEventListener("click", () => { state.page = Math.max(1, state.page - 1); apply(); });
-            nextBtn.addEventListener("click", () => { state.page = state.page + 1; apply(); });
-
-            // Sorting by clicking headers
             document.querySelectorAll("thead th[data-col]").forEach(th => {
                 th.addEventListener("click", () => {
-                    const col = th.getAttribute("data-col");
-                    if (state.sortCol === col) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
-                    else { state.sortCol = col; state.sortDir = "asc"; }
+                    const col = th.dataset.col;
+                    state.sortDir = (state.sortCol === col && state.sortDir === "asc") ? "desc" : "asc";
+                    state.sortCol = col;
                     apply();
                 });
             });
 
-            // Initial
-            apply();
+            apply(); // Init
         </script>
 </body>
 
