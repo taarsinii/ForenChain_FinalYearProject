@@ -26,7 +26,7 @@
         }
 
         body.light {
-            --bg0: #fafbff;
+            --bg0: #e9edf0;
             --bg1: #f3dede;
             --card: rgba(255, 255, 255, 0.75);
             --card2: rgba(255, 255, 255, 0.95);
@@ -130,6 +130,7 @@
             gap: 20px;
         }
 
+        /* --- DROPDOWN BRAND BUTTON --- */
         .brand {
             display: inline-flex;
             gap: 12px;
@@ -138,6 +139,15 @@
             border-radius: 999px;
             border: 1px solid var(--border);
             background: rgba(110, 168, 254, 0.08);
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            transition: 0.2s;
+        }
+
+        .brand:hover {
+            background: rgba(110, 168, 254, 0.15);
+            border-color: var(--accent);
         }
 
         .brand .dot {
@@ -146,6 +156,54 @@
             border-radius: 50%;
             background: var(--good);
             box-shadow: 0 0 12px var(--good);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            left: 0;
+            min-width: 180px;
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: dropdownFade 0.2s ease-out;
+        }
+
+        @keyframes dropdownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logout-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--bad);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .logout-item:hover {
+            background: rgba(239, 68, 68, 0.1);
         }
 
         h1 {
@@ -367,10 +425,18 @@
         <div class="container">
             <div class="topbar">
                 <div>
-                    <div class="brand">
+                    <div class="brand" id="userMenuBtn">
                         <span class="dot"></span>
-                        <div style="font-weight:800; font-size: 14px;">Digital Forensic System</div>
+                        <div style="font-weight:800; font-size: 14px;">Prosecutor <span
+                                style="margin-left:4px; opacity:0.6;">▾</span></div>
+
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="/logout" class="logout-item">
+                                <span>🚪</span> Sign Out
+                            </a>
+                        </div>
                     </div>
+
                     <h1>Prosecutor Dashboard</h1>
                     <div class="muted">Monitor and manage evidence chains of custody in real-time.</div>
                 </div>
@@ -497,6 +563,19 @@
             const allRows = Array.from(tbody.querySelectorAll("tr"));
             document.getElementById("year").textContent = new Date().getFullYear();
 
+            // Dropdown Toggle Logic
+            const userMenuBtn = document.getElementById("userMenuBtn");
+            const userDropdown = document.getElementById("userDropdown");
+
+            userMenuBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle("show");
+            });
+
+            window.addEventListener("click", () => {
+                userDropdown.classList.remove("show");
+            });
+
             // Theme Toggle
             if (localStorage.getItem(themeKey) === "light") body.classList.add("light");
             document.getElementById("btnTheme").addEventListener("click", () => {
@@ -552,15 +631,15 @@
             breakdown.innerHTML = sortedEntries.slice(0, 3).map(([st, n]) => {
                 const pct = (n / totalRows) * 100;
                 return `
-                <div style="font-size: 12px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                        <span>${st}</span>
-                        <span class="muted">${Math.round(pct)}%</span>
-                    </div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                        <div style="width:${pct}%; height:100%; background:${getStatusColor(st)};"></div>
-                    </div>
-                </div>`;
+            <div style="font-size: 12px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span>${st}</span>
+                    <span class="muted">${Math.round(pct)}%</span>
+                </div>
+                <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
+                    <div style="width:${pct}%; height:100%; background:${getStatusColor(st)};"></div>
+                </div>
+            </div>`;
             }).join("");
 
             // --- Filtering & Pagination ---

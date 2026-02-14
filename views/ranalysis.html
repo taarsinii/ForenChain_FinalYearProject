@@ -1,50 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case View | ForenChain</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prosecutor Dashboard | Digital Forensic System</title>
 
     <style>
         :root {
             --bg0: #050810;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --card-bg-hover: rgba(255, 255, 255, 0.07);
-            --accent-blue: #3b82f6;
-            --accent-purple: #8b5cf6;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --border-soft: rgba(255, 255, 255, 0.12);
+            --bg1: #0B1224;
+            --card: rgba(255, 255, 255, 0.04);
+            --card2: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: rgba(255, 255, 255, 0.95);
+            --muted: rgba(255, 255, 255, 0.55);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            --accent: #6EA8FE;
+            --good: #10B981;
+            --warn: #F59E0B;
+            --bad: #EF4444;
+            --info: #38BDF8;
+            --focus: 0 0 0 4px rgba(110, 168, 254, .22);
+            --r2: 24px;
+        }
+
+        body.light {
+            --bg0: #e2e6f1;
+            --bg1: #f3dede;
+            --card: rgba(255, 255, 255, 0.75);
+            --card2: rgba(255, 255, 255, 0.95);
+            --border: rgba(15, 23, 42, 0.1);
+            --text: #122036;
+            --muted: #64748b;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            --accent: #2563EB;
         }
 
         * {
             box-sizing: border-box;
-            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
             margin: 0;
-            padding: 0;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background: var(--bg0);
             min-height: 100vh;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-main);
-            background-color: var(--bg0);
-            line-height: 1.6;
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* --- DYNAMIC MESH BACKGROUND --- */
+        /* --- BACKGROUND & CANVAS --- */
+        #pentagonCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
         .bg-visuals {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            z-index: -1;
+            z-index: -2;
             background: var(--bg0);
             overflow: hidden;
         }
@@ -55,29 +80,21 @@
             height: 600px;
             border-radius: 50%;
             filter: blur(120px);
-            opacity: 0.15;
+            opacity: 0.12;
             animation: float 25s infinite alternate ease-in-out;
         }
 
         .blob-1 {
             top: -150px;
             left: -150px;
-            background: var(--accent-blue);
+            background: var(--accent);
         }
 
         .blob-2 {
             bottom: -150px;
             right: -150px;
-            background: var(--accent-purple);
+            background: var(--good);
             animation-delay: -7s;
-        }
-
-        .blob-3 {
-            top: 30%;
-            left: 40%;
-            background: #10B981;
-            animation-delay: -12s;
-            opacity: 0.1;
         }
 
         @keyframes float {
@@ -90,278 +107,589 @@
             }
         }
 
+        /* --- LAYOUT & GLASS --- */
         .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 60px 25px;
+            width: min(1200px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 40px 0;
             position: relative;
         }
 
-        /* ===== HEADER ===== */
-        .page-header {
+        .glass {
+            background: linear-gradient(135deg, var(--card), var(--card2));
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px) saturate(180%);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
+        }
+
+        .topbar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 50px;
+            align-items: flex-start;
+            margin-bottom: 32px;
             flex-wrap: wrap;
             gap: 20px;
         }
 
-        .page-title {
-            font-size: 2.6rem;
-            font-weight: 800;
-            letter-spacing: -1.5px;
-            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .case-pill {
-            background: rgba(59, 130, 246, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            color: var(--accent-blue);
-            padding: 12px 24px;
+        /* --- DROPDOWN BRAND BUTTON --- */
+        .brand {
+            display: inline-flex;
+            gap: 12px;
+            align-items: center;
+            padding: 8px 16px;
             border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            background: rgba(110, 168, 254, 0.08);
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            transition: 0.2s;
         }
 
-        /* ===== GLASS CARDS ===== */
+        .brand:hover {
+            background: rgba(110, 168, 254, 0.15);
+            border-color: var(--accent);
+        }
+
+        .brand .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--good);
+            box-shadow: 0 0 12px var(--good);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            left: 0;
+            min-width: 180px;
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: dropdownFade 0.2s ease-out;
+        }
+
+        @keyframes dropdownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logout-item {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--bad);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .logout-item:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        h1 {
+            margin: 16px 0 8px;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        /* --- GRID & COMPONENTS --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            margin: 24px 0;
+        }
+
         .card {
-            background: linear-gradient(135deg, var(--card-bg), var(--card-bg-hover));
-            backdrop-filter: blur(14px) saturate(180%);
-            -webkit-backdrop-filter: blur(14px) saturate(180%);
-            border: 1px solid var(--border-soft);
-            border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-radius: var(--r2);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .card:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-4px);
+            transform: translateY(-6px);
         }
 
-        .card h3 {
-            margin-top: 0;
-            margin-bottom: 25px;
-            font-size: 1rem;
+        .kpi {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .label {
+            font-size: 11px;
             font-weight: 700;
-            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        .value {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 8px 0;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .pillIcon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .panel {
+            border-radius: var(--r2);
+            padding: 28px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .input {
             display: flex;
             align-items: center;
             gap: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 16px;
+            min-width: 280px;
         }
 
-        /* ===== VIDEO ===== */
-        video {
+        .input input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            outline: none;
             width: 100%;
-            border-radius: 16px;
-            border: 1px solid var(--border-soft);
-            background: #000;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+            font-size: 14px;
         }
 
-        /* ===== BUTTONS ===== */
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+        select {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .tableWrap {
+            margin-top: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: rgba(255, 255, 255, 0.03);
+            text-align: left;
+            padding: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: 0.2s;
+        }
+
+        tbody tr:hover {
+            background: rgba(110, 168, 254, 0.05);
+            cursor: pointer;
+        }
+
+        tbody td {
+            padding: 18px 16px;
+            vertical-align: middle;
         }
 
         .btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 14px 28px;
-            border-radius: 14px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            border: 1px solid var(--border-soft);
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            gap: 8px;
+            transition: 0.2s;
         }
 
         .btn:hover {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.5);
+            background: var(--accent);
             color: #fff;
+            transform: translateY(-2px);
         }
 
-        /* ===== TIMELINE ===== */
-        .timeline {
-            list-style: none;
-            padding-left: 0;
-            margin: 0;
-            position: relative;
+        .badge {
+            padding: 6px 12px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
         }
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 7px;
-            top: 5px;
-            bottom: 5px;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), transparent);
-        }
-
-        .timeline li {
-            position: relative;
-            padding-left: 45px;
-            padding-bottom: 30px;
-        }
-
-        .timeline li::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 6px;
-            width: 16px;
-            height: 16px;
-            background: var(--bg0);
-            border: 2px solid var(--accent-blue);
+        .bDot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            z-index: 1;
-            box-shadow: 0 0 12px var(--accent-blue);
         }
 
-        .timeline strong {
-            display: block;
-            font-size: 1.1rem;
-            color: var(--text-main);
-            margin-bottom: 4px;
+        .col-4 {
+            grid-column: span 4;
         }
 
-        .timestamp {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            font-family: monospace;
+        .col-12 {
+            grid-column: span 12;
         }
 
-        /* ===== FOOTER ===== */
-        .footer {
+        @media (max-width: 900px) {
+            .col-4 {
+                grid-column: span 12;
+            }
+        }
+
+        footer {
+            margin-top: 40px;
             text-align: center;
-            margin-top: 80px;
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            opacity: 0.6;
-        }
-
-        @media (max-width: 768px) {
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .page-title {
-                font-size: 2rem;
-            }
+            color: var(--muted);
+            font-size: 13px;
         }
     </style>
 </head>
 
 <body>
-
+    <canvas id="pentagonCanvas"></canvas>
     <div class="bg-visuals">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
     </div>
 
-    <div class="container">
+    <% const safeCases=Array.isArray(cases) ? cases : []; %>
 
-        <header class="page-header">
-            <div class="page-title">Case Analysis</div>
-            <div class="case-pill">
-                <i class="fa-solid fa-shield-halved"></i> &nbsp; Case #<%= evidence.case_id %>
-            </div>
-        </header>
-
-        <section class="card">
-            <h3><i class="fa-solid fa-fingerprint"></i> Evidence Description</h3>
-            <p style="font-size: 1.1rem; font-weight: 300; color: var(--text-main);">
-                <%= evidence.description %>
-            </p>
-        </section>
-
-        <% if (evidence.supervisor_video_path) { %>
-            <section class="card">
-                <h3><i class="fa-solid fa-circle-play"></i> Supervisor Witness Video</h3>
-                <video controls>
-                    <source src="/<%= evidence.supervisor_video_path %>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </section>
-            <% } %>
-
-                <section class="card">
-                    <h3><i class="fa-solid fa-file-shield"></i> Forensic Report</h3>
-                    <p style="margin-bottom: 25px; color: var(--text-dim);">
-                        Verified forensic analysis file containing SHA-256 hash validation and expert metadata.
-                    </p>
-                    <a href="/<%= report.report_file_path %>" target="_blank" class="btn btn-primary">
-                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                        Download PDF Report
-                    </a>
-                </section>
-
-                <section class="card">
-                    <h3><i class="fa-solid fa-link"></i> Chain of Custody</h3>
-                    <ul class="timeline">
-                        <% chain.forEach(c=> { %>
-                            <li>
-                                <strong>
-                                    <%= c.action %>
-                                </strong>
-                                <span class="timestamp">
-                                    <i class="fa-regular fa-clock"></i>
-                                    <%= c.timestamp.toLocaleString() %>
-                                </span>
-                            </li>
-                            <% }) %>
-                    </ul>
-                </section>
-
-                <section class="card">
-                    <h3><i class="fa-solid fa-gears"></i> Case Verification</h3>
-                    <div class="btn-group">
-                        <a href="/prosecutor/export/<%= evidence.evidence_id %>" class="btn">
-                            <i class="fa-solid fa-file-export"></i>
-                            Export Full Chain
-                        </a>
-
-                        <a href="/prosecutor/blockchain/<%= evidence.evidence_id %>" class="btn"
-                            style="border-color: var(--accent-purple); color: var(--accent-purple); background: rgba(139, 92, 246, 0.1);">
-                            <i class="fa-solid fa-cube"></i>
-                            Verify on Blockchain
-                        </a>
+        <div class="container">
+            <div class="topbar">
+                <div>
+                    <div class="brand" id="userMenuBtn">
+                        <span class="dot"></span>
+                        <div style="font-weight:800; font-size: 14px;">Prosecutor <span
+                                style="opacity:0.5; margin-left:4px;">▾</span></div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="/logout" class="logout-item">🚪 Sign Out</a>
+                        </div>
                     </div>
-                </section>
-
-                <div class="footer">
-                    ForenChain &bull; Secure Digital Evidence System &bull; 2026
+                    <h1>Prosecutor Dashboard</h1>
+                    <div class="muted">Digital Forensic Evidence Monitoring System</div>
                 </div>
 
-    </div>
+                <div class="actions">
+                    <button class="btn" id="btnTheme">🌓 Theme</button>
+                    <button class="btn" id="btnRefresh">⟳ Refresh</button>
+                </div>
+            </div>
 
+            <div class="grid">
+                <div class="card glass col-4">
+                    <div class="kpi">
+                        <div>
+                            <div class="label">Total Cases</div>
+                            <div class="value">
+                                <%= safeCases.length %>
+                            </div>
+                            <div class="sub">Active forensic chains.</div>
+                        </div>
+                        <div class="pillIcon">📁</div>
+                    </div>
+                </div>
+
+                <div class="card glass col-4">
+                    <div class="kpi">
+                        <div>
+                            <div class="label">Most Common Status</div>
+                            <div class="value" style="font-size:22px;" id="kpiCommon">—</div>
+                            <div class="sub">Current workflow bottleneck.</div>
+                        </div>
+                        <div class="pillIcon">📊</div>
+                    </div>
+                </div>
+
+                <div class="card glass col-4">
+                    <div class="kpi">
+                        <div style="width: 100%;">
+                            <div class="label">Status Distribution</div>
+                            <div id="breakdown"
+                                style="display:flex; flex-direction: column; gap:10px; margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel glass col-12">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <h2 style="margin:0; font-size: 20px;">Evidence Records</h2>
+                        <div class="controls">
+                            <div class="input">
+                                <span>🔎</span>
+                                <input id="searchInput" placeholder="Search case, status, or ID...">
+                            </div>
+                            <select id="statusSelect">
+                                <option value="">All Statuses</option>
+                            </select>
+                            <button class="btn" id="btnClear">✕</button>
+                        </div>
+                    </div>
+
+                    <div class="tableWrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-col="case" style="cursor:pointer">Case ID ↕</th>
+                                    <th data-col="status" style="cursor:pointer">Status ↕</th>
+                                    <th data-col="evidence" style="cursor:pointer">Evidence ID ↕</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody">
+                                <% safeCases.forEach(c=> { %>
+                                    <tr data-case="<%= c.case_id %>" data-status="<%= c.current_status %>"
+                                        data-evidence="<%= c.evidence_id %>"
+                                        data-href="/prosecutor/case/<%= encodeURIComponent(c.evidence_id) %>">
+                                        <td style="font-weight:700;">#<%= c.case_id %>
+                                        </td>
+                                        <td><span class="badge"><span class="bDot"></span>
+                                                <%= c.current_status %>
+                                            </span></td>
+                                        <td class="muted">
+                                            <%= c.evidence_id %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="/prosecutor/case/<%= encodeURIComponent(c.evidence_id) %>"
+                                                class="btn" style="padding: 6px 12px; font-size: 12px;">View Chain</a>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <div class="muted" id="pageInfo" style="font-size: 13px;"></div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn" id="prevBtn">‹</button>
+                            <button class="btn" id="pageNum" disabled>1</button>
+                            <button class="btn" id="nextBtn">›</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <p>&copy; <span id="year"></span> Prosecutor Portal • Secure Ledger</p>
+            </footer>
+        </div>
+
+        <script>
+            // --- 1. THEME & DROPDOWN ---
+            const body = document.body;
+            const themeKey = "dfs_theme_v2";
+            if (localStorage.getItem(themeKey) === "light") body.classList.add("light");
+
+            document.getElementById("btnTheme").addEventListener("click", () => {
+                body.classList.toggle("light");
+                localStorage.setItem(themeKey, body.classList.contains("light") ? "light" : "dark");
+            });
+
+            const userMenuBtn = document.getElementById("userMenuBtn");
+            const userDropdown = document.getElementById("userDropdown");
+            userMenuBtn.addEventListener("click", (e) => { e.stopPropagation(); userDropdown.classList.toggle("show"); });
+            window.addEventListener("click", () => userDropdown.classList.remove("show"));
+            document.getElementById("year").textContent = new Date().getFullYear();
+            document.getElementById("btnRefresh").addEventListener("click", () => location.reload());
+
+            // --- 2. FLOATING PENTAGON CANVAS ---
+            const canvas = document.getElementById('pentagonCanvas');
+            const ctx = canvas.getContext('2d');
+            let pentagons = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            class Pentagon {
+                constructor() {
+                    this.init();
+                }
+                init() {
+                    this.size = Math.random() * 25 + 15;
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.vx = (Math.random() - 0.5) * 0.4;
+                    this.vy = (Math.random() - 0.5) * 0.4;
+                    this.rot = Math.random() * Math.PI * 2;
+                    this.rotS = (Math.random() - 0.5) * 0.01;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rot);
+                    // Dynamically get accent color from CSS variables
+                    ctx.strokeStyle = getComputedStyle(body).getPropertyValue('--accent');
+                    ctx.globalAlpha = body.classList.contains('light') ? 0.15 : 0.08;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const ang = (i * 2 * Math.PI) / 5;
+                        ctx.lineTo(this.size * Math.cos(ang), this.size * Math.sin(ang));
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy; this.rot += this.rotS;
+                    if (this.x < -50) this.x = canvas.width + 50;
+                    if (this.x > canvas.width + 50) this.x = -50;
+                    if (this.y < -50) this.y = canvas.height + 50;
+                    if (this.y > canvas.height + 50) this.y = -50;
+                }
+            }
+
+            function initCanvas() {
+                resize();
+                pentagons = Array.from({ length: 18 }, () => new Pentagon());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pentagons.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            initCanvas();
+            animate();
+
+            // --- 3. DATA & TABLE LOGIC ---
+            const tbody = document.getElementById("tbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr"));
+
+            function getStatusColor(status) {
+                const s = status.toLowerCase();
+                if (s.includes("open") || s.includes("new")) return "#38BDF8";
+                if (s.includes("progress") || s.includes("processing")) return "#F59E0B";
+                if (s.includes("closed") || s.includes("complete")) return "#10B981";
+                return "#6EA8FE";
+            }
+
+            allRows.forEach(tr => {
+                tr.querySelector(".bDot").style.background = getStatusColor(tr.dataset.status);
+                tr.addEventListener("click", (e) => { if (!e.target.closest("a")) window.location.href = tr.dataset.href; });
+            });
+
+            const counts = {};
+            allRows.forEach(tr => counts[tr.dataset.status] = (counts[tr.dataset.status] || 0) + 1);
+            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            if (sorted[0]) document.getElementById("kpiCommon").textContent = `${sorted[0][0]} (${sorted[0][1]})`;
+
+            const sSel = document.getElementById("statusSelect");
+            sorted.forEach(([st]) => {
+                const opt = document.createElement("option");
+                opt.value = st; opt.textContent = st;
+                sSel.appendChild(opt);
+            });
+
+            const bdown = document.getElementById("breakdown");
+            bdown.innerHTML = sorted.slice(0, 3).map(([st, n]) => {
+                const pct = (n / (allRows.length || 1)) * 100;
+                return `<div style="font-size: 11px;"><div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${st}</span><span class="muted">${Math.round(pct)}%</span></div><div style="height:5px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:${getStatusColor(st)};"></div></div></div>`;
+            }).join("");
+
+            // PAGINATION & FILTERING
+            let state = { q: "", status: "", page: 1, size: 12 };
+            function apply() {
+                const filtered = allRows.filter(tr => {
+                    const matchQ = !state.q || tr.innerText.toLowerCase().includes(state.q.toLowerCase());
+                    const matchS = !state.status || tr.dataset.status === state.status;
+                    return matchQ && matchS;
+                });
+                const start = (state.page - 1) * state.size;
+                allRows.forEach(r => r.style.display = "none");
+                filtered.slice(start, start + state.size).forEach(r => r.style.display = "");
+                document.getElementById("pageInfo").textContent = `Showing ${filtered.length ? start + 1 : 0} to ${Math.min(start + state.size, filtered.length)} of ${filtered.length}`;
+                document.getElementById("pageNum").textContent = state.page;
+                document.getElementById("prevBtn").disabled = state.page === 1;
+                document.getElementById("nextBtn").disabled = state.page >= Math.ceil(filtered.length / state.size);
+            }
+
+            document.getElementById("searchInput").addEventListener("input", e => { state.q = e.target.value; state.page = 1; apply(); });
+            document.getElementById("statusSelect").addEventListener("change", e => { state.status = e.target.value; state.page = 1; apply(); });
+            document.getElementById("prevBtn").addEventListener("click", () => { state.page--; apply(); });
+            document.getElementById("nextBtn").addEventListener("click", () => { state.page++; apply(); });
+            document.getElementById("btnClear").addEventListener("click", () => {
+                document.getElementById("searchInput").value = "";
+                document.getElementById("statusSelect").value = "";
+                state.q = ""; state.status = ""; apply();
+            });
+
+            apply();
+        </script>
 </body>
 
 </html>
