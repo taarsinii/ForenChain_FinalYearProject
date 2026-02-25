@@ -1,27 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Phone Verification</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Verification | ForenChain</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #05080f;
+            --card-bg: #0c1220;
+            --accent-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --border-soft: rgba(255, 255, 255, 0.08);
+            --error: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 45%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 45%),
+                linear-gradient(180deg, #070b14, #05080f);
+        }
+
+        /* ================= CARD (SIMPLE, SAFE GLOW) ================= */
+        .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 42px;
+            border-radius: 22px;
+            background: linear-gradient(180deg,
+                    rgba(12, 18, 32, 0.96),
+                    rgba(12, 18, 32, 0.88));
+            border: 1px solid var(--border-soft);
+
+            /* ✅ SIMPLE GLOW — NO MASK, NO WARNINGS */
+            box-shadow:
+                0 0 0 1px rgba(59, 130, 246, 0.25),
+                0 20px 60px rgba(0, 0, 0, 0.65),
+                0 0 50px rgba(59, 130, 246, 0.25);
+
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow:
+                0 0 0 1px rgba(59, 130, 246, 0.4),
+                0 25px 70px rgba(0, 0, 0, 0.75),
+                0 0 70px rgba(59, 130, 246, 0.35);
+        }
+
+        /* ================= TEXT ================= */
+        h2 {
+            margin: 0 0 12px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        /* ================= FORM ================= */
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: var(--text-dim);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border-soft);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        input::placeholder {
+            color: rgba(148, 163, 184, 0.6);
+        }
+
+        input:focus {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        }
+
+        /* ================= BUTTON ================= */
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            background: rgba(59, 130, 246, 0.18);
+            color: var(--accent-blue);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* ================= ERROR ================= */
+        .error {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: var(--error);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ================= FOOTER ================= */
+        .note {
+            margin-top: 22px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .brand {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            opacity: 0.6;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>Verify Phone Number</h2>
 
-    <p>Enter your registered phone number to receive OTP.</p>
+    <div class="card">
 
-    <form method="POST" action="/verify-phone">
-        <input type="text" name="phone" placeholder="Phone Number" required>
-        <button type="submit">Send OTP</button>
-    </form>
+        <h2>Phone Verification</h2>
+        <div class="subtitle">
+            To continue, please verify your registered phone number.
+            A one-time verification code (OTP) will be sent.
+        </div>
 
-    <p style="color:red">
-        <%= error %>
-    </p>
+        <form method="POST" action="/verify-phone">
 
-    <p style="font-size:12px;color:gray;">
-        * OTP delivery is simulated for prototype demonstration
-    </p>
+            <div class="input-group">
+                <label for="phone">Registered Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="+60 12 345 6789" required>
+            </div>
+
+            <button type="submit">
+                <i class="fa-solid fa-paper-plane"></i>
+                Send Verification Code
+            </button>
+        </form>
+
+        <% if (error) { %>
+            <div class="error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <%= error %>
+            </div>
+            <% } %>
+
+                <div class="note">
+                    * OTP delivery is simulated for prototype demonstration purposes only.
+                </div>
+
+                <div class="brand">
+                    ForenChain • Secure Identity Verification
+                </div>
+
+    </div>
+
 </body>
 
 </html>
