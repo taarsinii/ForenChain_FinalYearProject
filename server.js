@@ -52,6 +52,22 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const prosecutorRoutes = require("./routes/prosecutorRoutes");
 app.use("/prosecutor", prosecutorRoutes);
 
+app.get("/", (req, res) => {
+    res.render("home", { page: "home" })
+})
+
+app.get("/features", (req, res) => {
+    res.render("features", { page: "features" })
+})
+
+app.get("/sop", (req, res) => {
+    res.render("sop", { page: "sop" })
+})
+
+app.get("/about", (req, res) => {
+    res.render("about", { page: "about" })
+})
+
 // Default redirect
 app.get("/", (req, res) => res.redirect("/login"));
 

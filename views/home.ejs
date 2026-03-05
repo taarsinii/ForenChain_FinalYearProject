@@ -113,9 +113,26 @@
                 <span>ForenChain</span>
             </div>
             <div class="hidden md:flex space-x-8 text-lg font-medium text-gray-300">
-                <a href="#" class="nav-link">Features</a>
-                <a href="#" class="nav-link">SOP Standards</a>
-                <a href="#" class="nav-link">About Us</a>
+
+                <a href="/" class="nav-link <%= page === 'home' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Home
+                </a>
+
+                <a href="/features"
+                    class="nav-link <%= page === 'features' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Features
+                </a>
+
+                <a href="/sop"
+                    class="nav-link <%= page === 'sop' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    SOP Standards
+                </a>
+
+                <a href="/about"
+                    class="nav-link <%= page === 'about' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    About Us
+                </a>
+
             </div>
             <a href="/login"
                 class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-2 rounded-lg font-bold transition shadow-lg shadow-blue-900/20">

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ForenChain | Features</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617;
+            background-image: linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.8)), url('/public/images/homepage_background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            transition: color .3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background: #3b82f6;
+            transition: width .3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, .6);
+            backdrop-filter: blur(10px);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            transition: .3s;
+        }
+
+        .feature-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, .3);
+            transform: translateY(-5px);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+
+            100% {
+                opacity: 1
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center">
+
+    <div class="w-full flex justify-end px-12 py-4">
+        <div class="flex items-center space-x-2 text-xs text-gray-300">
+            <span class="status-dot"></span>
+            <span>Network Status: Secure / Blockchain Active</span>
+        </div>
+    </div>
+
+    <header class="w-full max-w-6xl px-6">
+
+        <nav class="glass-nav flex justify-between items-center px-8 py-4">
+
+            <div class="flex items-center space-x-2 text-2xl font-bold">
+                <span class="text-blue-500">§</span>
+                <span>ForenChain</span>
+            </div>
+
+
+            <div class="hidden md:flex space-x-8 text-lg font-medium text-gray-300">
+
+                <a href="/" class="nav-link <%= page === 'home' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Home
+                </a>
+
+                <a href="/features"
+                    class="nav-link <%= page === 'features' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Features
+                </a>
+
+                <a href="/sop"
+                    class="nav-link <%= page === 'sop' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    SOP Standards
+                </a>
+
+                <a href="/about"
+                    class="nav-link <%= page === 'about' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    About Us
+                </a>
+
+            </div>
+
+            <a href="/login" class="bg-blue-600 hover:bg-blue-500 px-8 py-2 rounded-lg font-bold">
+                Log In
+            </a>
+
+        </nav>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center text-center mt-16 px-4">
+
+        <h1 class="text-5xl font-bold mb-4">Platform Features</h1>
+
+        <p class="text-gray-400 max-w-xl mb-12">
+            Advanced blockchain-based digital forensic evidence management designed for law enforcement.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
+
+            <div class="feature-card p-8">
+                <i class="fas fa-database text-3xl text-blue-400 mb-4"></i>
+                <h3 class="text-xl font-bold mb-3">Evidence Registration</h3>
+                <p class="text-gray-400 text-sm">
+                    Securely upload and register digital evidence with metadata and case identifiers.
+                </p>
+            </div>
+
+            <div class="feature-card p-8">
+                <i class="fas fa-link text-3xl text-blue-400 mb-4"></i>
+                <h3 class="text-xl font-bold mb-3">Blockchain Hashing</h3>
+                <p class="text-gray-400 text-sm">
+                    Each evidence file is hashed and anchored to blockchain for tamper-proof verification.
+                </p>
+            </div>
+
+            <div class="feature-card p-8">
+                <i class="fas fa-user-shield text-3xl text-blue-400 mb-4"></i>
+                <h3 class="text-xl font-bold mb-3">Role-Based Access</h3>
+                <p class="text-gray-400 text-sm">
+                    Secure access control for investigators, forensic analysts, and prosecutors.
+                </p>
+            </div>
+
+            <div class="feature-card p-8">
+                <i class="fas fa-clock text-3xl text-blue-400 mb-4"></i>
+                <h3 class="text-xl font-bold mb-3">Evidence Timeline</h3>
+                <p class="text-gray-400 text-sm">
+                    Track complete chain of custody timeline for each piece of digital evidence.
+                </p>
+            </div>
+
+            <div class="feature-card p-8">
+                <i class="fas fa-shield text-3xl text-blue-400 mb-4"></i>
+                <h3 class="text-xl font-bold mb-3">Tamper Detection</h3>
+                <p class="text-gray-400 text-sm">
+                    Automatic detection of evidence modifications using cryptographic verification.
+                </p>
+            </div>
+
+            <div class="feature-card p-8">
+                <i class="fas fa-file-lines text-3xl text-blue-400 mb-4"></i>
+                <h3 class="text-xl font-bold mb-3">Court Reports</h3>
+                <p class="text-gray-400 text-sm">
+                    Generate court-ready forensic reports with full evidence chain documentation.
+                </p>
+            </div>
+
+        </div>
+
+    </main>
+</body>
+
+</html>

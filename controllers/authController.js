@@ -7,7 +7,7 @@ const AuditLog = require("../models/AuditLog");
    SHOW HOME
 ================================ */
 exports.showHome = (req, res) => {
-    res.render("home");
+    res.render("home", { page: "home" });
 };
 
 /* ================================

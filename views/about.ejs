@@ -110,10 +110,26 @@
             </a>
 
             <div class="hidden md:flex space-x-8 text-lg font-medium text-gray-300">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/features" class="nav-link">Features</a>
-                <a href="/sop" class="nav-link">SOP Standards</a>
-                <a href="/about" class="nav-link text-white">About Us</a>
+
+                <a href="/" class="nav-link <%= page === 'home' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Home
+                </a>
+
+                <a href="/features"
+                    class="nav-link <%= page === 'features' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Features
+                </a>
+
+                <a href="/sop"
+                    class="nav-link <%= page === 'sop' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    SOP Standards
+                </a>
+
+                <a href="/about"
+                    class="nav-link <%= page === 'about' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    About Us
+                </a>
+
             </div>
 
             <a href="/login"

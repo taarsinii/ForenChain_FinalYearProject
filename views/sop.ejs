@@ -5,14 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ForenChain | About</title>
+    <title>ForenChain | SOP Standards</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* SAME STYLE AS HOME */
-
         body {
             margin: 0;
             padding: 0;
@@ -66,10 +64,16 @@
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
 
+        .partner-bar {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
         .status-dot {
             width: 10px;
             height: 10px;
-            background: #22c55e;
+            background-color: #22c55e;
             border-radius: 50%;
             display: inline-block;
             animation: pulse-green 2s infinite;
@@ -77,15 +81,15 @@
 
         @keyframes pulse-green {
             0% {
-                opacity: 1
+                opacity: 1;
             }
 
             50% {
-                opacity: 0.5
+                opacity: 0.5;
             }
 
             100% {
-                opacity: 1
+                opacity: 1;
             }
         }
     </style>
@@ -110,10 +114,26 @@
             </a>
 
             <div class="hidden md:flex space-x-8 text-lg font-medium text-gray-300">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/features" class="nav-link">Features</a>
-                <a href="/sop" class="nav-link">SOP Standards</a>
-                <a href="/about" class="nav-link text-white">About Us</a>
+
+                <a href="/" class="nav-link <%= page === 'home' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Home
+                </a>
+
+                <a href="/features"
+                    class="nav-link <%= page === 'features' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    Features
+                </a>
+
+                <a href="/sop"
+                    class="nav-link <%= page === 'sop' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    SOP Standards
+                </a>
+
+                <a href="/about"
+                    class="nav-link <%= page === 'about' ? 'text-white border-b-2 border-blue-500 pb-1' : '' %>">
+                    About Us
+                </a>
+
             </div>
 
             <a href="/login"
@@ -126,57 +146,60 @@
 
     <main class="flex-grow flex flex-col items-center justify-center text-center px-4 mt-12">
 
-        <h1 class="text-5xl md:text-6xl font-bold mb-4">
-            About ForenChain
+        <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight">
+            Digital Forensic SOP Standards
         </h1>
 
         <p class="text-gray-400 max-w-2xl text-lg mb-10 leading-relaxed">
-            ForenChain is a blockchain-based digital forensic evidence management platform
-            designed to ensure secure, transparent and tamper-proof chain of custody tracking
-            for law enforcement investigations.
+            ForenChain complies with Malaysian Digital Forensic Investigation Procedures,
+            ensuring evidence integrity and proper chain of custody management.
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mb-16">
 
             <div class="feature-card p-8 text-center relative overflow-hidden">
-
                 <div class="absolute top-4 right-4 text-blue-500/20 text-4xl">
-                    <i class="fas fa-bullseye"></i>
+                    <i class="fas fa-database"></i>
                 </div>
 
-                <h3 class="text-xl font-bold mb-4">Mission</h3>
+                <h3 class="text-xl font-bold mb-4">Evidence Acquisition</h3>
 
                 <p class="text-gray-400 text-sm mb-4">
-                    Enhance digital forensic investigations through secure blockchain technology.
+                    Digital evidence must be collected using verified forensic imaging tools to prevent alteration of
+                    original data.
                 </p>
+
+                <div class="text-[10px] text-gray-500 font-mono italic">(Forensic Imaging Protocol)</div>
 
             </div>
 
             <div class="feature-card p-8 text-center relative overflow-hidden">
-
                 <div class="absolute top-4 right-4 text-blue-500/20 text-4xl">
-                    <i class="fas fa-microchip"></i>
+                    <i class="fas fa-hashtag"></i>
                 </div>
 
-                <h3 class="text-xl font-bold mb-4">Technology</h3>
+                <h3 class="text-xl font-bold mb-4">Hash Verification</h3>
 
                 <p class="text-gray-400 text-sm mb-4">
-                    Utilizes cryptographic hashing, distributed ledgers and secure access control.
+                    All evidence files must be hashed using SHA-256 to verify authenticity and integrity.
                 </p>
+
+                <div class="text-[10px] text-gray-500 font-mono italic">(Cryptographic Hashing)</div>
 
             </div>
 
             <div class="feature-card p-8 text-center relative overflow-hidden">
-
                 <div class="absolute top-4 right-4 text-blue-500/20 text-4xl">
-                    <i class="fas fa-scale-balanced"></i>
+                    <i class="fas fa-user-shield"></i>
                 </div>
 
-                <h3 class="text-xl font-bold mb-4">Purpose</h3>
+                <h3 class="text-xl font-bold mb-4">Chain of Custody</h3>
 
                 <p class="text-gray-400 text-sm mb-4">
-                    Support investigators and prosecutors in maintaining verifiable evidence integrity.
+                    All access, transfers and modifications of evidence must be logged and auditable.
                 </p>
+
+                <div class="text-[10px] text-gray-500 font-mono italic">(Evidence Transfer Logs)</div>
 
             </div>
 
