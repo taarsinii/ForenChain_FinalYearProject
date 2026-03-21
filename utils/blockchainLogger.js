@@ -6,7 +6,7 @@ const contract = require("./blockchain"); // your ethers contract instance
  * @param {string} action
  * @returns {string|null} txHash
  */
-async function logBlockchainEvent(evidenceId, action) {
+async function logBlockchainEvent(evidenceId, action, hash = "") {
     try {
         const tx = await contract.logEvent(evidenceId, action);
         await tx.wait(); // wait until mined
