@@ -410,6 +410,28 @@
             color: var(--muted);
             font-size: 13px;
         }
+
+        .logout-item {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--bad);
+            /* Uses your #EF4444 variable */
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .logout-item:hover {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ff5f5f;
+        }
+
+        .logout-item svg {
+            opacity: 0.8;
+        }
     </style>
 </head>
 
@@ -432,7 +454,7 @@
 
                         <div class="dropdown-menu" id="userDropdown">
                             <a href="/logout" class="logout-item">
-                                <span>🚪</span> Sign Out
+                                <span>🚪</span> Log Out
                             </a>
                         </div>
                     </div>
@@ -698,6 +720,7 @@
 
             apply(); // Init
         </script>
+
 </body>
 
 </html>
