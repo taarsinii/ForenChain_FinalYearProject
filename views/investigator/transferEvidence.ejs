@@ -1,20 +1,191 @@
-<h2>Transfer Evidence to Analyst</h2>
+<div class="evidence-container">
+    <header>
+        <h2>Transfer to Lab</h2>
+        <p class="subtitle">Handover to Laboratory Analyst</p>
+    </header>
 
-<div class="evidence-box">
-    <p><strong>Case ID:</strong>
-        <%= evidence.case_id %>
-    </p>
-    <p><strong>Description:</strong>
-        <%= evidence.description %>
-    </p>
-    <p><strong>Status:</strong> Approved by Supervisor</p>
+    <div class="evidence-card">
+        <div class="info-section">
+            <div class="case-meta">
+                <span class="label">CASE ID</span>
+                <span class="valueHighlight">
+                    <%= evidence.case_id %>
+                </span>
+            </div>
+            <div class="status-badge">
+                <span class="dot"></span> Approved by Supervisor
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="description-section">
+            <label>Evidence Description</label>
+            <p>
+                <%= evidence.description %>
+            </p>
+        </div>
+
+        <form action="/evidence/transfer-to-analyst/<%= evidence.evidence_id %>" method="POST">
+            <div class="action-footer">
+                <a href="/evidence/my-evidence" class="back-link">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to List
+                </a>
+
+                <button type="submit" class="submit-btn transfer">
+                    Confirm Lab Transfer
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 3 21 3 21 8"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                        <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<form action="/evidence/transfer-to-analyst/<%= evidence.evidence_id %>" method="POST">
-    <button type="submit" class="btn btn-primary">
-        🔁 Transfer to Analyst
-    </button>
-</form>
+<style>
+    body {
+        background-color: #091222;
+        color: white;
+        font-family: 'Inter', sans-serif;
+    }
 
-<br>
-<a href="/evidence/my-evidence">⬅ Back</a>
+    .evidence-container {
+        max-width: 650px;
+        margin: 60px auto;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+        letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+        color: #4a90e2;
+        margin-bottom: 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    /* Glassmorphism Card */
+    .evidence-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .info-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .label {
+        display: block;
+        font-size: 0.7rem;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .valueHighlight {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #4a90e2;
+    }
+
+    .status-badge {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #10b981;
+    }
+
+    .divider {
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        margin: 20px 0;
+    }
+
+    .description-section label {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .description-section p {
+        line-height: 1.6;
+        color: #cbd5e1;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .action-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+    }
+
+    .back-link {
+        color: #64748b;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+
+    .back-link:hover {
+        color: white;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+</style>
