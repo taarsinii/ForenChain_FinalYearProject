@@ -41,6 +41,26 @@
     </form>
 </div>
 
+<script>
+    const fileInput = document.getElementById('photo');
+    const dropZoneText = document.querySelector('.drop-zone p');
+    const dropZoneSmall = document.querySelector('.drop-zone small');
+
+    fileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const fileName = this.files[0].name;
+            const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2); // MB
+
+            // Update the UI to show the file is attached
+            dropZoneText.innerHTML = `Selected: <span style="color: #10b981;">${fileName}</span>`;
+            dropZoneSmall.innerText = `Size: ${fileSize} MB - Ready to submit`;
+
+            // Optional: Add a highlight border
+            document.querySelector('.drop-zone').style.borderColor = '#10b981';
+        }
+    });
+</script>
+
 <style>
     body {
         background-color: #050a12;

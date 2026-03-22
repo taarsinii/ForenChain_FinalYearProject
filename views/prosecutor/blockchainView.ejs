@@ -251,22 +251,29 @@
                             </td>
                             <td><code><%= c.db_hash %></code></td>
                             <td>
-                                <% if (c.blockchainHash) { %>
-                                    <code><%= c.blockchainHash %></code>
+                                <% if (c.tx_hash) { %>
+                                    <code><%= c.tx_hash %></code>
                                     <% } else { %>
                                         —
                                         <% } %>
                             </td>
                             <td>
-                                <% if (c.verified) { %>
+                                <% if (c.status==="Verified" ) { %>
                                     <span class="badge verified">
                                         <i class="fa-solid fa-check"></i> Verified
                                     </span>
-                                    <% } else { %>
+
+                                    <% } else if (c.status==="Tampered" ) { %>
                                         <span class="badge unverified">
-                                            <i class="fa-solid fa-xmark"></i> Mismatch
+                                            <i class="fa-solid fa-xmark"></i> Tampered
                                         </span>
-                                        <% } %>
+
+                                        <% } else { %>
+                                            <span class="badge"
+                                                style="background: rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#f59e0b;">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> Not Anchored
+                                            </span>
+                                            <% } %>
                             </td>
                             <td>
                                 <% if (c.tx_hash) { %>

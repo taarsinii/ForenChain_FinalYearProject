@@ -205,6 +205,8 @@ exports.exportChainPDF = async (req, res) => {
     }
 };
 
+const { generateChainHash } = require("../utils/hashChain");
+
 // ================================
 // View Blockchain Page 
 // ================================
@@ -212,13 +214,16 @@ exports.viewBlockchain = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // 1️⃣ Fetch custody chain
+        // 1️⃣ Fetch custody chain 
         const [chain] = await db.execute(`
             SELECT 
                 ec.block_id,
+                ec.evidence_id,
+                ec.actor_id,
                 ec.action,
                 ec.timestamp,
                 ec.data_hash AS db_hash,
+                ec.previous_hash,
                 ec.tx_hash,
                 u.username AS actor
             FROM evidence_chain ec
@@ -227,21 +232,57 @@ exports.viewBlockchain = async (req, res) => {
             ORDER BY ec.block_id ASC
         `, [id]);
 
-        if (chain.length === 0) return res.send("No blockchain records found");
+        if (chain.length === 0) {
+            return res.send("No blockchain records found");
+        }
 
-        // 2️⃣ Fetch blockchain hashes for comparison
-        // Simulate call to blockchain: in real system, fetch tx_hash content
-        // For simplicity, let's assume we can compare db_hash with stored blockchain hash
-        // In your DB, you can store blockchain hash in evidence_chain.tx_hash for comparison
-        const chainWithStatus = chain.map(c => {
-            // If tx_hash exists, assume blockchain hash = tx_hash (placeholder)
-            const blockchainHash = c.tx_hash ? c.tx_hash : null;
+        // 2️⃣ Verify each block (REAL VERIFICATION)
+        const chainWithStatus = chain.map((c, index) => {
 
-            // Compare DB hash vs blockchain hash (for demo, we just check if tx_hash exists)
-            const verified = blockchainHash ? true : false; // green if exists
-            return { ...c, verified, blockchainHash };
+            // 🔗 Determine previous hash
+            let previousHash = null;
+            if (index > 0) {
+                previousHash = chain[index - 1].db_hash;
+            }
+
+            // 🔐 Recalculate hash
+            let recalculatedHash;
+            try {
+                recalculatedHash = generateChainHash({
+                    previousHash: previousHash,
+                    evidenceId: c.evidence_id,
+                    action: c.action,
+                    actorId: c.actor_id,
+                    timestamp: new Date(c.timestamp).toISOString(),
+                    extraData: ""
+                });
+            } catch (err) {
+                console.error("Hash recalculation error:", err);
+                recalculatedHash = null;
+            }
+
+            // ✅ Compare hashes
+            const hashMatch = (recalculatedHash === c.db_hash);
+
+            // 🔗 Check blockchain anchoring
+            const blockchainExists = c.tx_hash ? true : false;
+
+            // 🎯 Final status logic
+            let status = "Verified";
+            if (!hashMatch) {
+                status = "Tampered";
+            } else if (!blockchainExists) {
+                status = "Not Anchored";
+            }
+
+            return {
+                ...c,
+                recalculatedHash,
+                status
+            };
         });
 
+        // 3️⃣ Send to frontend
         res.render("prosecutor/blockchainView", {
             evidenceId: id,
             chain: chainWithStatus
@@ -249,6 +290,6 @@ exports.viewBlockchain = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).send("Blockchain view failed");
+        res.status(500).send("Blockchain verification failed");
     }
 };
