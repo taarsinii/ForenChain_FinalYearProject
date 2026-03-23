@@ -143,13 +143,14 @@ if (!fs.existsSync(reportsDir)) {
 // ================================
 // Finalize & Generate PDF
 // ================================
+// Helper for Watermarking
 function addWatermark(doc, text) {
     doc.save();
     doc.rotate(-45, { origin: [300, 400] });
-    doc.fontSize(50)
-        .fillColor('gray')
-        .opacity(0.15)
-        .text(text, 100, 300, { align: 'center' });
+    doc.fontSize(45)
+        .fillColor('#cbd5e1')
+        .opacity(0.1)
+        .text(text, 50, 300, { align: 'center', width: 500 });
     doc.restore();
 }
 
@@ -157,196 +158,152 @@ exports.finalizeReport = async (req, res) => {
     const analystId = req.session.user.user_id;
     const { id } = req.params;
 
-    // Ensure reports directory exists
-    const reportsDir = path.join(__dirname, "..", "uploads", "reports");
-    if (!fs.existsSync(reportsDir)) {
-        fs.mkdirSync(reportsDir, { recursive: true });
-    }
+    try {
+        const reportsDir = path.join(__dirname, "..", "uploads", "reports");
+        if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
 
-    const [[evidence]] = await db.execute(`
-        SELECT e.*, u.full_name AS analyst_name
-        FROM evidence e
-        JOIN users u ON u.user_id = ?
-    WHERE e.evidence_id = ?
-        `, [analystId, id]);
+        // Fetch Data
+        const [[evidence]] = await db.execute(`
+            SELECT e.*, u.full_name AS analyst_name 
+            FROM evidence e 
+            JOIN users u ON u.user_id = ? 
+            WHERE e.evidence_id = ?`,
+            [analystId, id]);
 
-    const [[analysis]] = await db.execute(
-        "SELECT * FROM forensic_analysis WHERE evidence_id=? AND analyst_id=?",
-        [id, analystId]
-    );
+        const [[analysis]] = await db.execute(
+            "SELECT * FROM forensic_analysis WHERE evidence_id=? AND analyst_id=?",
+            [id, analystId]
+        );
 
-    if (!analysis) {
-        return res.send("No analysis found. Please save analysis before finalizing.");
-    }
-
-    if (analysis.is_finalized === 1) {
-        return res.send("This forensic report has already been finalized.");
-    }
-
-    // Lock analysis
-    await db.execute(
-        "UPDATE forensic_analysis SET is_finalized=1 WHERE analysis_id=?",
-        [analysis.analysis_id]
-    );
-
-    const pdfPath = path.join(reportsDir, `report_${id}.pdf`);
-    const doc = new PDFDocument({
-        size: "A4",
-        margins: {
-            top: 72,
-            bottom: 72,
-            left: 72,
-            right: 72
+        if (!analysis || analysis.is_finalized === 1) {
+            return res.status(400).send("Report cannot be finalized (missing data or already locked).");
         }
-    });
-    const stream = fs.createWriteStream(pdfPath);
 
-    doc.pipe(stream);
+        // Lock Record
+        await db.execute("UPDATE forensic_analysis SET is_finalized=1 WHERE analysis_id=?", [analysis.analysis_id]);
 
-    // Watermark
-    addWatermark(doc, "FORENSIC REPORT - CONFIDENTIAL");
+        const pdfPath = path.join(reportsDir, `report_${id}.pdf`);
 
-    // ================================
-    // TITLE
-    // ================================
-    doc
-        .font("Helvetica-Bold")
-        .fontSize(20)
-        .text("FORENSIC ANALYSIS REPORT", { align: "center" });
-
-    doc.moveDown(1.5);
-
-    // ================================
-    // CASE METADATA
-    // ================================
-    doc.font("Helvetica").fontSize(11);
-
-    doc.text(`Case ID: ${evidence.case_id} `);
-    doc.text(`Analyst: ${evidence.analyst_name} `);
-    doc.text(`Generated On: ${new Date().toLocaleString()} `);
-    doc.text(`System: ForenChain – Blockchain Chain of Custody`);
-
-    doc.moveDown(1);
-
-    // ================================
-    // EVIDENCE DETAILS
-    // ================================
-    doc
-        .font("Helvetica-Bold")
-        .fontSize(14)
-        .text("1. Evidence Details", { underline: true });
-
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica").fontSize(11);
-    doc.text(`Description: ${evidence.description} `);
-    doc.text(`Current Status: ${evidence.current_status} `);
-
-    doc.moveDown(1);
-
-    // ================================
-    // FORENSIC ANALYSIS
-    // ================================
-    doc
-        .font("Helvetica-Bold")
-        .fontSize(14)
-        .text("2. Forensic Analysis", { underline: true });
-
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica-Bold").fontSize(11).text("Tools Used:");
-    doc.font("Helvetica").text(analysis.tools_used || "-");
-
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica-Bold").fontSize(11).text("Methodology:");
-    doc.font("Helvetica").text(analysis.methodology || "-");
-
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica-Bold").fontSize(11).text("Observations:");
-    doc.font("Helvetica").text(analysis.observations || "-");
-
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica-Bold").fontSize(11).text("Conclusion:");
-    doc.font("Helvetica").text(analysis.conclusion || "-");
-
-    doc.moveDown(2);
-
-    // ================================
-    // FOOTER
-    // ================================
-    doc
-        .font("Helvetica-Oblique")
-        .fontSize(9)
-        .fillColor("gray")
-        .text(
-            "This forensic report is system-generated and digitally preserved. Any modification invalidates evidentiary integrity.",
-            { align: "center" }
-        );
-
-    doc.end();
-
-    // ✅ WAIT UNTIL FILE IS FULLY CLOSED
-    stream.on("close", async () => {
-        const fileBuffer = fs.readFileSync(pdfPath);
-        const reportHash = crypto
-            .createHash("sha256")
-            .update(fileBuffer)
-            .digest("hex");
-
-        await db.execute(`
-    INSERT INTO forensic_reports
-    (evidence_id, analyst_id, report_file_path, report_hash, uploaded_at)
-    VALUES (?, ?, ?, ?, NOW())
-`, [
-            id,
-            analystId,
-            `uploads/reports/report_${id}.pdf`,
-            reportHash
-        ]);
-
-        // Update evidence status
-        await db.execute(
-            "UPDATE evidence SET current_status='analysis_pending_supervisor' WHERE evidence_id=?",
-            [id]
-        );
-
-        // get last hash
-        const [[last]] = await db.execute(
-            "SELECT data_hash FROM evidence_chain WHERE evidence_id=? ORDER BY block_id DESC LIMIT 1",
-            [id]
-        );
-
-        const timestamp = new Date().toISOString();
-
-        const chainHash = generateChainHash({
-            previousHash: last.data_hash,
-            evidenceId: id,
-            action: "Forensic Report Finalized",
-            actorId: analystId,
-            timestamp,
-            extraData: reportHash
+        // --- PDF GENERATION START ---
+        // Setting top margin to 30 to start as high as possible
+        const doc = new PDFDocument({
+            size: "A4",
+            margins: { top: 30, bottom: 50, left: 50, right: 50 }
         });
 
-        // 🔗 BLOCKCHAIN ANCHOR (MISSING PART FIXED)
-        const txHash = await logBlockchainEvent(
-            id,
-            "Forensic Report Finalized",
-            chainHash
+        const stream = fs.createWriteStream(pdfPath);
+        doc.pipe(stream);
+
+        // 1. Confidential Watermark
+        addWatermark(doc, "CONFIDENTIAL FORENSIC RECORD");
+
+        // 2. Visual Header (Top Accent)
+        doc.rect(0, 0, 612, 40).fill('#0f172a'); // Dark Navy Header bar
+        doc.fillColor('#ffffff').font("Helvetica-Bold").fontSize(14).text("FORENCHAIN DIGITAL LEDGER SYSTEM", 50, 15);
+
+        doc.moveDown(2);
+
+        // 3. Main Title
+        doc.fillColor('#1e293b').font("Helvetica-Bold").fontSize(24).text("FORENSIC ANALYSIS REPORT", { align: "left" });
+        doc.rect(50, doc.y + 2, 120, 3).fill('#3b82f6'); // Blue accent underline
+        doc.moveDown(1.5);
+
+        // 4. Metadata Grid (Start of Page Content)
+        const metaTop = doc.y;
+        doc.fillColor('#64748b').font("Helvetica-Bold").fontSize(9);
+
+        // Column 1 Labels
+        doc.text("CASE IDENTIFIER", 50, metaTop);
+        doc.text("LEAD ANALYST", 50, metaTop + 18);
+        doc.text("CURRENT STATUS", 50, metaTop + 36);
+
+        // Column 1 Values
+        doc.fillColor('#0f172a').font("Helvetica").fontSize(10);
+        doc.text(`:  ${evidence.case_id}`, 150, metaTop);
+        doc.text(`:  ${evidence.analyst_name}`, 150, metaTop + 18);
+        doc.text(`:  ${evidence.current_status.toUpperCase()}`, 150, metaTop + 36);
+
+        // Column 2 Labels
+        doc.fillColor('#64748b').font("Helvetica-Bold").text("GENERATION DATE", 320, metaTop);
+        doc.text("PROTOCOL VER.", 320, metaTop + 18);
+        doc.text("LEDGER ANCHOR", 320, metaTop + 36);
+
+        // Column 2 Values
+        doc.fillColor('#0f172a').font("Helvetica").text(`:  ${new Date().toLocaleString()}`, 430, metaTop);
+        doc.text(":  v2.0.4-SECURE", 430, metaTop + 18);
+        doc.text(":  ACTIVE", 430, metaTop + 36);
+
+        doc.moveDown(4);
+
+        // 5. Section Helper Function
+        const addSection = (title, body) => {
+            doc.fillColor('#3b82f6').font("Helvetica-Bold").fontSize(11).text(title);
+            doc.moveTo(50, doc.y + 2).lineTo(545, doc.y + 2).strokeColor('#e2e8f0').lineWidth(0.5).stroke();
+            doc.moveDown(0.8);
+            doc.fillColor('#334155').font("Helvetica").fontSize(10).text(body || "Not Documented.", {
+                align: 'justify',
+                lineGap: 3
+            });
+            doc.moveDown(1.8);
+        };
+
+        // 6. Report Content
+        addSection("I. EVIDENCE DESCRIPTION", evidence.description);
+        addSection("II. FORENSIC TOOLS & ENVIRONMENT", analysis.tools_used);
+        addSection("III. ANALYSIS METHODOLOGY", analysis.methodology);
+        addSection("IV. OBSERVATIONS & LOGS", analysis.observations);
+        addSection("V. FINAL DETERMINATION", analysis.conclusion);
+
+        // 7. Footer Seal
+        const footerY = 750;
+        doc.rect(50, footerY, 495, 1).fill('#e2e8f0');
+        doc.fillColor('#94a3b8').font("Helvetica-Oblique").fontSize(8).text(
+            "This report is cryptographically hashed and stored within the ForenChain blockchain environment. Any tampering with the bitstream of this document renders it legally void.",
+            50, footerY + 10, { align: 'center', width: 495 }
         );
 
-        // 🔒 SAVE TO CHAIN
-        await db.execute(`
-    INSERT INTO evidence_chain
-    (evidence_id, action, actor_id, data_hash, previous_hash, tx_hash)
-VALUES(?, ?, ?, ?, ?, ?)
-    `, [id, "Forensic Report Finalized", analystId, chainHash, last.data_hash, txHash]);
+        doc.end();
 
+        // --- DATABASE & BLOCKCHAIN UPDATES ---
+        stream.on("close", async () => {
+            const fileBuffer = fs.readFileSync(pdfPath);
+            const reportHash = crypto.createHash("sha256").update(fileBuffer).digest("hex");
 
-        res.redirect("/analyst/reports");
-    });
+            // Save report link
+            await db.execute(`
+                INSERT INTO forensic_reports (evidence_id, analyst_id, report_file_path, report_hash, uploaded_at)
+                VALUES (?, ?, ?, ?, NOW())`,
+                [id, analystId, `uploads/reports/report_${id}.pdf`, reportHash]);
+
+            // Status Update
+            await db.execute("UPDATE evidence SET current_status='analysis_pending_supervisor' WHERE evidence_id=?", [id]);
+
+            // Chain of Custody Logic
+            const [[last]] = await db.execute("SELECT data_hash FROM evidence_chain WHERE evidence_id=? ORDER BY block_id DESC LIMIT 1", [id]);
+            const timestamp = new Date().toISOString();
+            const chainHash = generateChainHash({
+                previousHash: last.data_hash,
+                evidenceId: id,
+                action: "Forensic Report Finalized",
+                actorId: analystId,
+                timestamp,
+                extraData: reportHash
+            });
+
+            const txHash = await logBlockchainEvent(id, "Forensic Report Finalized", chainHash);
+
+            await db.execute(`
+                INSERT INTO evidence_chain (evidence_id, action, actor_id, data_hash, previous_hash, tx_hash)
+                VALUES(?, ?, ?, ?, ?, ?)`,
+                [id, "Forensic Report Finalized", analystId, chainHash, last.data_hash, txHash]);
+
+            res.redirect("/analyst/reports");
+        });
+
+    } catch (err) {
+        console.error("PDF Finalize Error:", err);
+        res.status(500).send("Critical error during PDF generation.");
+    }
 };
 
 // ================================
@@ -403,9 +360,6 @@ exports.readyForProsecutor = async (req, res) => {
 
 // ================================
 // Transfer Evidence to Prosecutor
-// ================================
-// ================================
-// Transfer Evidence to Prosecutor (FIXED BLOCKCHAIN LINKING)
 // ================================
 exports.transferToProsecutor = async (req, res) => {
     try {

@@ -321,7 +321,8 @@
         <div class="section"
             style="background: rgba(14, 165, 233, 0.03); border-radius: 12px; padding: 25px; border: 1px solid rgba(14, 165, 233, 0.2);">
             <h3><i data-lucide="shield-check"></i> Final Verification</h3>
-            <form action="/approve" method="POST" enctype="multipart/form-data">
+            <form action="/supervisor/analysis/approve/<%= evidence.evidence_id %>" method="POST"
+                enctype="multipart/form-data" id="approvalForm">
                 <label>Supervision Proof (Video Recording)</label>
                 <div class="file-drop-zone" onclick="document.getElementById('videoFile').click()">
                     <i data-lucide="video"
@@ -344,7 +345,7 @@
 
         <div class="section">
             <h3><i data-lucide="alert-octagon"></i> Rejection</h3>
-            <form action="/reject" method="POST">
+            <form action="/supervisor/reject/<%= evidence.evidence_id %>" method="POST">
                 <label>Reason for Rejection</label>
                 <textarea name="reason" rows="2" placeholder="Detail errors..."></textarea>
                 <div style="margin-top: 15px;">
@@ -361,6 +362,29 @@
 
     <script>
         lucide.createIcons();
+
+        const videoInput = document.getElementById('videoFile');
+        const dropZone = document.querySelector('.file-drop-zone');
+        const dropZoneText = dropZone.querySelector('p');
+        const dropZoneIcon = dropZone.querySelector('i');
+
+        videoInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const fileName = this.files[0].name;
+                const fileSize = (this.files[0].size / (1024 * 1024)).toFixed(2);
+
+                dropZone.style.borderColor = "#10b981";
+                dropZone.style.background = "rgba(16, 185, 129, 0.1)";
+
+
+                dropZoneText.innerHTML = `<strong style="color: #10b981;">✔ Selected:</strong> ${fileName} (${fileSize} MB)`;
+
+                dropZoneIcon.setAttribute('data-lucide', 'check-circle');
+                dropZoneIcon.style.color = "#10b981";
+
+                lucide.createIcons();
+            }
+        });
     </script>
 </body>
 

@@ -19,6 +19,7 @@ router.post("/approve/:id", supervisorController.approveEvidence);
 // Reject evidence (with reason)
 router.post("/reject/:id", supervisorController.rejectEvidence);
 
+
 // 🔍 Analysis review
 router.get("/analysis/pending", supervisorController.listPendingAnalysis);
 router.get("/analysis/review/:id", supervisorController.reviewAnalysis);

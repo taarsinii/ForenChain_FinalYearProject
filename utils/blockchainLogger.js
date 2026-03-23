@@ -1,4 +1,4 @@
-const contract = require("./blockchain"); // your ethers contract instance
+const contract = require("./blockchain");
 
 /**
  * Logs custody action to blockchain
