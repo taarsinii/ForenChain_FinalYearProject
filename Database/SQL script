@@ -1,0 +1,126 @@
+=========================================
+FORENCHAIN SYSTEM DATABASE SETUP
+=========================================
+
+Create Database
+CREATE DATABASE forenchain_system;
+USE forenchain_system;
+
+
+TABLE: users
+
+CREATE TABLE IF NOT EXISTS users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50),
+    password_hash VARCHAR(255),
+    role ENUM('administrator','investigator','supervisor','analyst','prosecutor'),
+    full_name VARCHAR(100),
+    created_at TIMESTAMP,
+    phone_number VARCHAR(11)
+);
+
+
+TABLE: evidence
+
+CREATE TABLE IF NOT EXISTS evidence (
+    evidence_id INT AUTO_INCREMENT PRIMARY KEY,
+    case_id VARCHAR(50),
+    description TEXT,
+    timestamp_collected DATETIME,
+    collected_by INT,
+    photo_path VARCHAR(255),
+
+    current_status ENUM(
+        'pending_supervisor',
+        'approved_supervisor',
+        'rejected_supervisor',
+        'transferred_to_lab',
+        'analysis_pending_supervisor',
+        'analysis_approved_supervisor',
+        'report_uploaded',
+        'completed'
+    ),
+
+    initial_hash VARCHAR(64),
+    final_hash VARCHAR(64),
+    supervisor_reason TEXT,
+    supervisor_notes TEXT,
+    supervisor_video_path VARCHAR(255),
+    analysis_supervisor_notes TEXT
+);
+
+TABLE: evidence_chain
+
+CREATE TABLE IF NOT EXISTS evidence_chain (
+    block_id INT AUTO_INCREMENT PRIMARY KEY,
+    evidence_id INT,
+    action VARCHAR(100),
+    actor_id INT,
+    timestamp TIMESTAMP,
+    data_hash VARCHAR(64),
+    previous_hash VARCHAR(64),
+    tx_hash VARCHAR(100)
+);
+
+
+TABLE: forensic_analysis
+
+CREATE TABLE IF NOT EXISTS forensic_analysis (
+    analysis_id INT AUTO_INCREMENT PRIMARY KEY,
+    evidence_id INT,
+    analyst_id INT,
+    tools_used TEXT,
+    methodology TEXT,
+    observations TEXT,
+    conclusion TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    is_finalized TINYINT
+);
+
+
+TABLE: forensic_reports
+
+CREATE TABLE IF NOT EXISTS forensic_reports (
+    report_id INT AUTO_INCREMENT PRIMARY KEY,
+    evidence_id INT,
+    analyst_id INT,
+    report_file_path VARCHAR(255),
+    report_hash VARCHAR(64),
+    uploaded_at TIMESTAMP
+);
+
+
+TABLE: transfers
+
+CREATE TABLE IF NOT EXISTS transfers (
+    transfer_id INT AUTO_INCREMENT PRIMARY KEY,
+    evidence_id INT,
+    sender_id INT,
+    receiver_id INT,
+    transfer_type ENUM('to_supervisor','to_lab','to_prosecutor'),
+    transfer_time TIMESTAMP,
+    signature_hash VARCHAR(64)
+);
+
+
+TABLE: audit_logs
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(255),
+    timestamp TIMESTAMP,
+    user_ip_address VARCHAR(50),
+    details TEXT
+);
+
+
+TABLE: backup_logs
+
+CREATE TABLE IF NOT EXISTS backup_logs (
+    backup_id INT AUTO_INCREMENT PRIMARY KEY,
+    backup_file_path VARCHAR(255),
+    created_at TIMESTAMP,
+    created_by INT
+);
