@@ -166,6 +166,23 @@ The system uses the following main database tables:
 
 ---
 
+## Installation & Running
+
+### 1. Clone Repository
+git clone https://github.com/your-username/forenchain.git
+cd forenchain
+
+### 2. Install Dependencies
+npm install
+
+### 3. Run Server
+node server.js
+
+### 4. Access System
+http://localhost:3000
+
+---
+
 ## How the Verification Works
 
 ### 1. File Integrity
