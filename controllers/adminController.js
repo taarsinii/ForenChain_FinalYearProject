@@ -342,3 +342,36 @@ exports.viewAuditLogs = async (req, res) => {
         res.status(500).send("Error fetching audit logs");
     }
 };
+// ================================
+// Download Backup File
+// ================================
+exports.downloadBackup = (req, res) => {
+    try {
+        const fileName = req.params.filename;
+
+        // 🔒 Security: allow only .sql files
+        if (!fileName || !fileName.endsWith(".sql")) {
+            return res.status(400).send("Invalid file type");
+        }
+
+        // 🔒 Prevent path traversal
+        if (fileName.includes("..")) {
+            return res.status(400).send("Invalid file path");
+        }
+
+        const filePath = path.join(__dirname, "../backups", fileName);
+
+        console.log("Download request for:", filePath); // DEBUG
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).send("Backup file not found");
+        }
+
+        // ✅ Trigger download
+        res.download(filePath);
+
+    } catch (err) {
+        console.error("Download error:", err);
+        res.status(500).send("Download failed");
+    }
+};

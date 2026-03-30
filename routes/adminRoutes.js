@@ -28,5 +28,6 @@ router.get("/audit-logs", adminController.viewAuditLogs);
 router.get("/backups", adminController.viewBackups);
 router.post("/backup/create", adminController.createBackup);
 router.post("/backup/restore", adminController.restoreBackup);
+router.get("/backup/download/:filename", adminController.downloadBackup);
 
 module.exports = router;
