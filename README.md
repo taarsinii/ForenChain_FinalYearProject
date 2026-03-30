@@ -211,6 +211,18 @@ During prosecutor review, the system:
 - marks the record as `Verified`, `Tampered`, or `Not Anchored`
 
 ---
+# Author
+
+Taarsinii Partheepan
+BSc (Hons) Computer Science (Cybersecurity)
+
+---
+
+# License
+
+This project is developed for academic purposes only.
+
+---
 
 ## Project Structure
 
