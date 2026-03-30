@@ -52,8 +52,12 @@ exports.addEvidence = async (req, res) => {
             timestamp,
             extraData: fileHash
         });
-
-        const txHash = await logBlockchainEvent(evidenceId, "Evidence Collected");
+        // i have add new updated (hash)
+        const txHash = await logBlockchainEvent(
+            evidenceId,
+            "Evidence Collected",
+            chainHash
+        );
 
         await db.execute(`
             INSERT INTO evidence_chain
@@ -157,8 +161,12 @@ exports.transferToAnalyst = async (req, res) => {
             timestamp,
             extraData: signature
         });
-
-        const txHash = await logBlockchainEvent(evidence_id, "Transferred to Analyst");
+        // i added hash 
+        const txHash = await logBlockchainEvent(
+            evidence_id,
+            "Transferred to Analyst",
+            chainHash
+        );
 
         await db.execute(`
             INSERT INTO evidence_chain

@@ -83,8 +83,12 @@ exports.approveEvidence = async (req, res) => {
         timestamp,
         extraData: supervisor_notes || ""
     });
-
-    const txHash = await logBlockchainEvent(id, "Approved by Supervisor");
+    // i have added the hash
+    const txHash = await logBlockchainEvent(
+        id,
+        "Approved by Supervisor",
+        newHash
+    );
 
     await db.execute(`
         INSERT INTO evidence_chain

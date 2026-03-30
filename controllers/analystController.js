@@ -185,82 +185,169 @@ exports.finalizeReport = async (req, res) => {
         const pdfPath = path.join(reportsDir, `report_${id}.pdf`);
 
         // --- PDF GENERATION START ---
-        // Setting top margin to 30 to start as high as possible
         const doc = new PDFDocument({
             size: "A4",
-            margins: { top: 30, bottom: 50, left: 50, right: 50 }
+            margins: { top: 50, bottom: 60, left: 50, right: 50 }
         });
 
         const stream = fs.createWriteStream(pdfPath);
         doc.pipe(stream);
 
-        // 1. Confidential Watermark
-        addWatermark(doc, "CONFIDENTIAL FORENSIC RECORD");
+        // ===============================
+        // 🎨 HEADER
+        // ===============================
+        doc
+            .rect(0, 0, 612, 60)
+            .fill("#0f172a");
 
-        // 2. Visual Header (Top Accent)
-        doc.rect(0, 0, 612, 40).fill('#0f172a'); // Dark Navy Header bar
-        doc.fillColor('#ffffff').font("Helvetica-Bold").fontSize(14).text("FORENCHAIN DIGITAL LEDGER SYSTEM", 50, 15);
+        doc
+            .fillColor("#ffffff")
+            .font("Helvetica-Bold")
+            .fontSize(14)
+            .text("FORENCHAIN DIGITAL LEDGER SYSTEM", 50, 22);
 
+        // Title
         doc.moveDown(2);
 
-        // 3. Main Title
-        doc.fillColor('#1e293b').font("Helvetica-Bold").fontSize(24).text("FORENSIC ANALYSIS REPORT", { align: "left" });
-        doc.rect(50, doc.y + 2, 120, 3).fill('#3b82f6'); // Blue accent underline
+        doc
+            .fillColor("#1e293b")
+            .font("Helvetica-Bold")
+            .fontSize(22)
+            .text("FORENSIC ANALYSIS REPORT");
+
+        doc
+            .moveTo(50, doc.y + 5)
+            .lineTo(200, doc.y + 5)
+            .lineWidth(3)
+            .strokeColor("#3b82f6")
+            .stroke();
+
         doc.moveDown(1.5);
 
-        // 4. Metadata Grid (Start of Page Content)
-        const metaTop = doc.y;
-        doc.fillColor('#64748b').font("Helvetica-Bold").fontSize(9);
+        // ===============================
+        // 📌 CASE INFORMATION (Clean Block)
+        // ===============================
+        const labelStyle = () =>
+            doc.fillColor("#64748b").font("Helvetica-Bold").fontSize(10);
 
-        // Column 1 Labels
-        doc.text("CASE IDENTIFIER", 50, metaTop);
-        doc.text("LEAD ANALYST", 50, metaTop + 18);
-        doc.text("CURRENT STATUS", 50, metaTop + 36);
+        const valueStyle = () =>
+            doc.fillColor("#0f172a").font("Helvetica").fontSize(10);
 
-        // Column 1 Values
-        doc.fillColor('#0f172a').font("Helvetica").fontSize(10);
-        doc.text(`:  ${evidence.case_id}`, 150, metaTop);
-        doc.text(`:  ${evidence.analyst_name}`, 150, metaTop + 18);
-        doc.text(`:  ${evidence.current_status.toUpperCase()}`, 150, metaTop + 36);
+        function addField(label, value) {
+            labelStyle();
+            doc.text(label);
 
-        // Column 2 Labels
-        doc.fillColor('#64748b').font("Helvetica-Bold").text("GENERATION DATE", 320, metaTop);
-        doc.text("PROTOCOL VER.", 320, metaTop + 18);
-        doc.text("LEDGER ANCHOR", 320, metaTop + 36);
+            valueStyle();
+            doc.text(value);
 
-        // Column 2 Values
-        doc.fillColor('#0f172a').font("Helvetica").text(`:  ${new Date().toLocaleString()}`, 430, metaTop);
-        doc.text(":  v2.0.4-SECURE", 430, metaTop + 18);
-        doc.text(":  ACTIVE", 430, metaTop + 36);
+            doc.moveDown(0.6);
+        }
 
-        doc.moveDown(4);
+        addField("Case Identifier", evidence.case_id);
+        addField("Lead Analyst", evidence.analyst_name);
+        addField("Current Status", evidence.current_status.toUpperCase());
+        addField("Generation Date", new Date().toLocaleString());
+        addField("Protocol Version", "v2.0.4-SECURE");
+        addField("Ledger Anchor", "ACTIVE");
 
-        // 5. Section Helper Function
-        const addSection = (title, body) => {
-            doc.fillColor('#3b82f6').font("Helvetica-Bold").fontSize(11).text(title);
-            doc.moveTo(50, doc.y + 2).lineTo(545, doc.y + 2).strokeColor('#e2e8f0').lineWidth(0.5).stroke();
-            doc.moveDown(0.8);
-            doc.fillColor('#334155').font("Helvetica").fontSize(10).text(body || "Not Documented.", {
-                align: 'justify',
-                lineGap: 3
-            });
-            doc.moveDown(1.8);
-        };
+        doc.moveDown(1);
 
-        // 6. Report Content
+        // Divider
+        doc
+            .moveTo(50, doc.y)
+            .lineTo(545, doc.y)
+            .lineWidth(1)
+            .strokeColor("#e2e8f0")
+            .stroke();
+
+        doc.moveDown(1);
+
+        // ===============================
+        // 📄 SECTION HELPER
+        // ===============================
+        function addSection(title, content) {
+            // Section Title
+            doc
+                .fillColor("#3b82f6")
+                .font("Helvetica-Bold")
+                .fontSize(12)
+                .text(title);
+
+            doc.moveDown(0.3);
+
+            // Underline
+            doc
+                .moveTo(50, doc.y)
+                .lineTo(545, doc.y)
+                .lineWidth(0.5)
+                .strokeColor("#cbd5e1")
+                .stroke();
+
+            doc.moveDown(0.6);
+
+            // Content
+            doc
+                .fillColor("#334155")
+                .font("Helvetica")
+                .fontSize(10)
+                .text(content || "Not Documented.", {
+                    width: 495,
+                    align: "left",
+                    lineGap: 4
+                });
+
+            doc.moveDown(1.5);
+        }
+
+        // ===============================
+        // 📑 REPORT CONTENT
+        // ===============================
         addSection("I. EVIDENCE DESCRIPTION", evidence.description);
         addSection("II. FORENSIC TOOLS & ENVIRONMENT", analysis.tools_used);
         addSection("III. ANALYSIS METHODOLOGY", analysis.methodology);
         addSection("IV. OBSERVATIONS & LOGS", analysis.observations);
         addSection("V. FINAL DETERMINATION", analysis.conclusion);
 
-        // 7. Footer Seal
-        const footerY = 750;
-        doc.rect(50, footerY, 495, 1).fill('#e2e8f0');
-        doc.fillColor('#94a3b8').font("Helvetica-Oblique").fontSize(8).text(
-            "This report is cryptographically hashed and stored within the ForenChain blockchain environment. Any tampering with the bitstream of this document renders it legally void.",
-            50, footerY + 10, { align: 'center', width: 495 }
-        );
+        // ===============================
+        // 🔒 WATERMARK (LIGHT + CLEAN)
+        // ===============================
+        doc.save();
+        doc.rotate(-45, { origin: [300, 400] });
+        doc
+            .fontSize(40)
+            .fillColor("#94a3b8")
+            .opacity(0.08)
+            .text("CONFIDENTIAL", 100, 300, {
+                width: 400,
+                align: "center"
+            });
+        doc.restore();
+
+        // ===============================
+        // 📎 FOOTER
+        // ===============================
+        const footerY = doc.page.height - 50;
+
+        doc
+            .moveTo(50, footerY - 10)
+            .lineTo(545, footerY - 10)
+            .lineWidth(0.5)
+            .strokeColor("#e2e8f0")
+            .stroke();
+
+        doc
+            .fillColor("#64748b")
+            .font("Helvetica-Oblique")
+            .fontSize(8)
+            .text(
+                "This report is cryptographically hashed and securely anchored within the ForenChain blockchain system. Any unauthorized modification invalidates its integrity and legal admissibility.",
+                50,
+                footerY,
+                {
+                    align: "center",
+                    width: 495
+                }
+            );
 
         doc.end();
 
@@ -470,3 +557,4 @@ exports.submitForSupervisorReview = async (req, res) => {
 
     res.redirect("/analyst/dashboard");
 };
+

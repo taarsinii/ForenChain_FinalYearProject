@@ -2,13 +2,13 @@ const db = require("../config/db");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
+const contract = require("../utils/blockchain");
 
 // ================================
 // FUNCTION ADD FOOTER (FOR REPORT)
 // ================================
 function addFooter(doc) {
-    const range = doc.bufferedPageRange(); // { start, count }
+    const range = doc.bufferedPageRange();
 
     for (let i = range.start; i < range.start + range.count; i++) {
         doc.switchToPage(i);
@@ -45,7 +45,7 @@ exports.dashboard = async (req, res) => {
 };
 
 // ================================
-// View Case 
+// View Case
 // ================================
 exports.viewCase = async (req, res) => {
     const { id } = req.params;
@@ -72,101 +72,119 @@ exports.viewCase = async (req, res) => {
     });
 };
 
+// ================================
+// Export Chain of Custody PDF
+// ================================
 exports.exportChainPDF = async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.session.user.user_id;
 
-        // ================================
-        // 1️. Fetch evidence
-        // ================================
         const [evidenceRows] = await db.execute(
             "SELECT * FROM evidence WHERE evidence_id=?",
             [id]
         );
         const evidence = evidenceRows[0];
 
-        // ================================
-        // 2️. Fetch chain of custody
-        // ================================
+        if (!evidence) {
+            return res.status(404).send("Evidence not found");
+        }
+
         const [chain] = await db.execute(
-            "SELECT ec.*, u.username FROM evidence_chain ec JOIN users u ON ec.actor_id=u.user_id WHERE evidence_id=? ORDER BY block_id ASC",
+            `SELECT ec.*, u.username
+             FROM evidence_chain ec
+             JOIN users u ON ec.actor_id = u.user_id
+             WHERE ec.evidence_id = ?
+             ORDER BY ec.block_id ASC`,
             [id]
         );
 
-        // ================================
-        // 3️. Fetch forensic report
-        // ================================
         const [reportRows] = await db.execute(
             "SELECT * FROM forensic_reports WHERE evidence_id=?",
             [id]
         );
         const report = reportRows[0];
 
-        // ================================
-        // 4️. Create PDF
-        // ================================
+        const fileName = `Chain_of_Custody_${evidence.case_id}.pdf`;
+        const filePath = path.join(__dirname, "../public/reports", fileName);
+
         const doc = new PDFDocument({
             size: "A4",
             margin: 50,
             bufferPages: true
         });
 
-        const fileName = `Chain_of_Custody_${evidence.case_id}.pdf`;
-        const filePath = path.join(__dirname, "../public/reports", fileName);
-        doc.pipe(fs.createWriteStream(filePath));
+        const stream = fs.createWriteStream(filePath);
+        doc.pipe(stream);
 
-        // --- HEADER SECTION ---
-        doc.font("Helvetica-Bold").fontSize(18).text("CHAIN OF CUSTODY REPORT", { align: "center" });
+        // Header
+        doc.font("Helvetica-Bold")
+            .fontSize(18)
+            .text("CHAIN OF CUSTODY REPORT", { align: "center" });
         doc.moveDown(1);
 
-        // Horizontal Rule
-        doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor("#cccccc").stroke();
+        doc.moveTo(50, doc.y)
+            .lineTo(545, doc.y)
+            .strokeColor("#cccccc")
+            .stroke();
         doc.moveDown(1);
 
-        // --- METADATA SECTION ---
+        // Metadata
         doc.font("Helvetica-Bold").fontSize(11).text("Case Details:");
         doc.font("Helvetica").fontSize(10);
+
         const metadata = [
             ["Case ID:", evidence.case_id],
             ["Description:", evidence.description],
             ["Current Status:", evidence.current_status],
-            ["Initial Hash:", evidence.initial_hash],
+            ["Initial Hash:", evidence.initial_hash || "N/A"],
             ["Final Hash:", evidence.final_hash || "N/A"],
             ["Network:", "Ethereum Sepolia Testnet"]
         ];
 
         metadata.forEach(([label, value]) => {
-            doc.text(`${label} `, { continued: true }).font("Helvetica-Bold").text(value).font("Helvetica");
+            doc.font("Helvetica-Bold").text(label, { continued: true });
+            doc.font("Helvetica").text(` ${value}`);
         });
 
         doc.moveDown(2);
 
-        // --- LOG SECTION ---
-        doc.font("Helvetica-Bold").fontSize(14).text("Chain of Custody Log", { underline: true });
+        // Chain log
+        doc.font("Helvetica-Bold")
+            .fontSize(14)
+            .text("Chain of Custody Log", { underline: true });
+
         doc.moveDown(0.5);
 
         chain.forEach((c, index) => {
-            // Check if we are near the bottom of the page to prevent "orphaned" headers
             if (doc.y > 700) doc.addPage();
 
-            doc.font("Helvetica-Bold").fontSize(11).fillColor("#2c3e50")
+            doc.font("Helvetica-Bold")
+                .fontSize(11)
+                .fillColor("#2c3e50")
                 .text(`Step ${index + 1}: ${c.action}`);
 
-            doc.font("Helvetica").fontSize(10).fillColor("black");
+            doc.font("Helvetica")
+                .fontSize(10)
+                .fillColor("black");
+
             doc.text(`Actor: ${c.username}`);
             doc.text(`Timestamp: ${new Date(c.timestamp).toLocaleString()}`);
-            doc.text(`Database Hash: `, { continued: true }).fontSize(9).text(c.data_hash);
-            doc.fontSize(10).text(`Blockchain TX: `, { continued: true }).fontSize(9).text(c.tx_hash || "N/A");
+            doc.text(`Database Hash: ${c.data_hash}`);
+            doc.text(`Previous Hash: ${c.previous_hash || "GENESIS"}`);
+            doc.text(`Blockchain TX: ${c.tx_hash || "N/A"}`);
             doc.moveDown(0.8);
         });
 
-        // --- FORENSIC SUMMARY (Only add page if there's no room) ---
+        // Report summary
         if (report) {
-            if (doc.y > 600) doc.addPage(); // Smart page break
+            if (doc.y > 600) doc.addPage();
             else doc.moveDown(2);
 
-            doc.font("Helvetica-Bold").fontSize(14).text("Forensic Report Summary", { underline: true });
+            doc.font("Helvetica-Bold")
+                .fontSize(14)
+                .text("Forensic Report Summary", { underline: true });
+
             doc.moveDown(0.5);
             doc.font("Helvetica").fontSize(11);
             doc.text(`Report File: ${report.report_file_path}`);
@@ -174,34 +192,33 @@ exports.exportChainPDF = async (req, res) => {
             doc.text(`Uploaded At: ${new Date(report.uploaded_at).toLocaleString()}`);
         }
 
-        // --- LEGAL NOTICE ---
-        // Move to bottom of the current page or next page
+        // Legal notice
         if (doc.y > 650) doc.addPage();
         else doc.moveDown(3);
 
-        doc.rect(50, doc.y, 495, 60).fill("#f9f9f9"); // Light gray box for notice
-        doc.fillColor("#444444").fontSize(9).text(
-            "This document is generated by a Blockchain-Based Chain of Custody Management System. " +
-            "All custody records are protected using cryptographic hashing and blockchain anchoring " +
-            "to ensure evidence integrity and compliance with the Evidence Act 1950.",
-            55, doc.y + 10, { width: 485, align: "justify" }
-        );
+        const legalY = doc.y;
+        doc.rect(50, legalY, 495, 60).fill("#f9f9f9");
+
+        doc.fillColor("#444444")
+            .fontSize(9)
+            .text(
+                "This document is generated by a Blockchain-Based Chain of Custody Management System. All custody records are protected using cryptographic hashing and blockchain anchoring to ensure evidence integrity and compliance with the Evidence Act 1950.",
+                55,
+                legalY + 10,
+                { width: 485, align: "justify" }
+            );
 
         addFooter(doc);
         doc.end();
 
-        // ================================
-        // 5. Audit log
-        // ================================
-        await db.execute(
-            "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
-            [userId, "Exported Chain of Custody PDF", req.ip, `Evidence ID ${id}`]
-        );
+        stream.on("finish", async () => {
+            await db.execute(
+                "INSERT INTO audit_logs (user_id, action, user_ip_address, details) VALUES (?, ?, ?, ?)",
+                [userId, "Exported Chain of Custody PDF", req.ip, `Evidence ID ${id}`]
+            );
 
-        // ================================
-        // 6. Download
-        // ================================
-        res.download(filePath);
+            res.download(filePath);
+        });
 
     } catch (err) {
         console.error(err);
@@ -209,16 +226,13 @@ exports.exportChainPDF = async (req, res) => {
     }
 };
 
-const { generateChainHash } = require("../utils/hashChain");
-
 // ================================
-// View Blockchain Page 
+// View Blockchain Page
 // ================================
 exports.viewBlockchain = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // 1️⃣ Fetch custody chain 
         const [chain] = await db.execute(`
             SELECT 
                 ec.block_id,
@@ -240,53 +254,55 @@ exports.viewBlockchain = async (req, res) => {
             return res.send("No blockchain records found");
         }
 
-        // 2️⃣ Verify each block (REAL VERIFICATION)
+        // Fetch on-chain events for this evidence ID
+        let onChainEvents = [];
+        try {
+            onChainEvents = await contract.getEvents(Number(id));
+        } catch (err) {
+            console.error("Failed to fetch blockchain events:", err.message);
+        }
+
         const chainWithStatus = chain.map((c, index) => {
+            const previousDbHash = index === 0 ? null : chain[index - 1].db_hash;
 
-            // 🔗 Determine previous hash
-            let previousHash = null;
-            if (index > 0) {
-                previousHash = chain[index - 1].db_hash;
+            // 1. Internal chain check
+            let internalMatch = false;
+            if (index === 0) {
+                internalMatch = (c.previous_hash === null || c.previous_hash === "" || c.previous_hash === undefined);
+            } else {
+                internalMatch = (c.previous_hash === previousDbHash);
             }
 
-            // 🔐 Recalculate hash
-            let recalculatedHash;
-            try {
-                recalculatedHash = generateChainHash({
-                    previousHash: previousHash,
-                    evidenceId: c.evidence_id,
-                    action: c.action,
-                    actorId: c.actor_id,
-                    timestamp: new Date(c.timestamp).toISOString(),
-                    extraData: ""
-                });
-            } catch (err) {
-                console.error("Hash recalculation error:", err);
-                recalculatedHash = null;
+            // 2. Blockchain dataHash check
+            let blockchainHash = null;
+            let blockchainMatch = false;
+
+            const matchingEvent = onChainEvents.find(e => e.dataHash === c.db_hash);
+
+            if (matchingEvent) {
+                blockchainHash = matchingEvent.dataHash;
+                blockchainMatch = true;
             }
-
-            // ✅ Compare hashes
-            const hashMatch = (recalculatedHash === c.db_hash);
-
-            // 🔗 Check blockchain anchoring
-            const blockchainExists = c.tx_hash ? true : false;
-
-            // 🎯 Final status logic
+            // 3. Final status
             let status = "Verified";
-            if (!hashMatch) {
+
+            if (!internalMatch) {
                 status = "Tampered";
-            } else if (!blockchainExists) {
+            } else if (!c.tx_hash) {
                 status = "Not Anchored";
+            } else if (!blockchainMatch) {
+                status = "Tampered";
             }
 
             return {
                 ...c,
-                recalculatedHash,
+                blockchain_hash: blockchainHash,
+                internalMatch,
+                blockchainMatch,
                 status
             };
         });
 
-        // 3️⃣ Send to frontend
         res.render("prosecutor/blockchainView", {
             evidenceId: id,
             chain: chainWithStatus
