@@ -233,6 +233,7 @@ exports.viewBlockchain = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // 🔹 Get chain from database
         const [chain] = await db.execute(`
             SELECT 
                 ec.block_id,
@@ -254,7 +255,7 @@ exports.viewBlockchain = async (req, res) => {
             return res.send("No blockchain records found");
         }
 
-        // Fetch on-chain events for this evidence ID
+        // 🔹 Fetch blockchain (on-chain events)
         let onChainEvents = [];
         try {
             onChainEvents = await contract.getEvents(Number(id));
@@ -262,31 +263,52 @@ exports.viewBlockchain = async (req, res) => {
             console.error("Failed to fetch blockchain events:", err.message);
         }
 
+        // 🔥 NEW: CHAIN TAMPER PROPAGATION LOGIC
+        let chainBroken = false;
+
         const chainWithStatus = chain.map((c, index) => {
             const previousDbHash = index === 0 ? null : chain[index - 1].db_hash;
 
-            // 1. Internal chain check
+            // ============================
+            // 1. Internal Chain Check
+            // ============================
             let internalMatch = false;
+
             if (index === 0) {
-                internalMatch = (c.previous_hash === null || c.previous_hash === "" || c.previous_hash === undefined);
+                internalMatch =
+                    c.previous_hash === null ||
+                    c.previous_hash === "" ||
+                    c.previous_hash === undefined;
             } else {
-                internalMatch = (c.previous_hash === previousDbHash);
+                internalMatch = c.previous_hash === previousDbHash;
             }
 
-            // 2. Blockchain dataHash check
+            // 🔥 CRITICAL FIX: propagate tampering forward
+            if (!internalMatch || chainBroken) {
+                chainBroken = true;
+            }
+
+            // ============================
+            // 2. Blockchain Verification
+            // ============================
             let blockchainHash = null;
             let blockchainMatch = false;
 
-            const matchingEvent = onChainEvents.find(e => e.dataHash === c.db_hash);
+            const matchingEvent = onChainEvents.find(
+                (e) => e.dataHash === c.db_hash
+            );
 
             if (matchingEvent) {
                 blockchainHash = matchingEvent.dataHash;
                 blockchainMatch = true;
             }
-            // 3. Final status
+
+            // ============================
+            // 3. Final Status Decision
+            // ============================
             let status = "Verified";
 
-            if (!internalMatch) {
+            if (chainBroken) {
                 status = "Tampered";
             } else if (!c.tx_hash) {
                 status = "Not Anchored";
@@ -303,6 +325,7 @@ exports.viewBlockchain = async (req, res) => {
             };
         });
 
+        // 🔹 Render to UI
         res.render("prosecutor/blockchainView", {
             evidenceId: id,
             chain: chainWithStatus
